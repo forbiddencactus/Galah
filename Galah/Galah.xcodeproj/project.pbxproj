@@ -1,0 +1,384 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 50;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		B7F569EC23B78D040019EFD2 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7F569EB23B78D040019EFD2 /* AppDelegate.swift */; };
+		B7F569EE23B78D040019EFD2 /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7F569ED23B78D040019EFD2 /* GameViewController.swift */; };
+		B7F569F023B78D040019EFD2 /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7F569EF23B78D040019EFD2 /* Renderer.swift */; };
+		B7F569F223B78D040019EFD2 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = B7F569F123B78D040019EFD2 /* Shaders.metal */; };
+		B7F569F523B78D050019EFD2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B7F569F423B78D050019EFD2 /* Assets.xcassets */; };
+		B7F569F823B78D050019EFD2 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B7F569F623B78D050019EFD2 /* Main.storyboard */; };
+		B7F56A0323B78F470019EFD2 /* Mat3x3.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7F56A0223B78F470019EFD2 /* Mat3x3.swift */; };
+		B7F56A0523B7A1010019EFD2 /* Vec2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7F56A0423B7A1010019EFD2 /* Vec2.swift */; };
+		B7F56A0B23B7A7580019EFD2 /* Mat3x3Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7F56A0A23B7A7580019EFD2 /* Mat3x3Helpers.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		B7F569E823B78D040019EFD2 /* Galah.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Galah.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B7F569EB23B78D040019EFD2 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		B7F569ED23B78D040019EFD2 /* GameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
+		B7F569EF23B78D040019EFD2 /* Renderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Renderer.swift; sourceTree = "<group>"; };
+		B7F569F123B78D040019EFD2 /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
+		B7F569F323B78D040019EFD2 /* ShaderTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShaderTypes.h; sourceTree = "<group>"; };
+		B7F569F423B78D050019EFD2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		B7F569F723B78D050019EFD2 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		B7F569F923B78D050019EFD2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B7F569FA23B78D050019EFD2 /* Galah.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Galah.entitlements; sourceTree = "<group>"; };
+		B7F56A0223B78F470019EFD2 /* Mat3x3.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mat3x3.swift; sourceTree = "<group>"; };
+		B7F56A0423B7A1010019EFD2 /* Vec2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Vec2.swift; sourceTree = "<group>"; };
+		B7F56A0A23B7A7580019EFD2 /* Mat3x3Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mat3x3Helpers.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		B7F569E523B78D040019EFD2 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		B7F569DF23B78D040019EFD2 = {
+			isa = PBXGroup;
+			children = (
+				B7F569EA23B78D040019EFD2 /* Galah */,
+				B7F569E923B78D040019EFD2 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		B7F569E923B78D040019EFD2 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B7F569E823B78D040019EFD2 /* Galah.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		B7F569EA23B78D040019EFD2 /* Galah */ = {
+			isa = PBXGroup;
+			children = (
+				B7F56A0023B78DD70019EFD2 /* Classes */,
+				B7F569EF23B78D040019EFD2 /* Renderer.swift */,
+				B7F569F123B78D040019EFD2 /* Shaders.metal */,
+				B7F569F323B78D040019EFD2 /* ShaderTypes.h */,
+				B7F569F423B78D050019EFD2 /* Assets.xcassets */,
+				B7F569F623B78D050019EFD2 /* Main.storyboard */,
+				B7F569F923B78D050019EFD2 /* Info.plist */,
+				B7F569FA23B78D050019EFD2 /* Galah.entitlements */,
+			);
+			path = Galah;
+			sourceTree = "<group>";
+		};
+		B7F56A0023B78DD70019EFD2 /* Classes */ = {
+			isa = PBXGroup;
+			children = (
+				B7F56A0C23B7B07E0019EFD2 /* Platform */,
+				B7F56A0123B78DDD0019EFD2 /* Utilities */,
+			);
+			path = Classes;
+			sourceTree = "<group>";
+		};
+		B7F56A0123B78DDD0019EFD2 /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				B7F56A0223B78F470019EFD2 /* Mat3x3.swift */,
+				B7F56A0423B7A1010019EFD2 /* Vec2.swift */,
+				B7F56A0A23B7A7580019EFD2 /* Mat3x3Helpers.swift */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
+		B7F56A0C23B7B07E0019EFD2 /* Platform */ = {
+			isa = PBXGroup;
+			children = (
+				B7F56A0D23B7B0890019EFD2 /* macOS */,
+			);
+			path = Platform;
+			sourceTree = "<group>";
+		};
+		B7F56A0D23B7B0890019EFD2 /* macOS */ = {
+			isa = PBXGroup;
+			children = (
+				B7F569EB23B78D040019EFD2 /* AppDelegate.swift */,
+				B7F569ED23B78D040019EFD2 /* GameViewController.swift */,
+			);
+			path = macOS;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		B7F569E723B78D040019EFD2 /* Galah */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B7F569FD23B78D050019EFD2 /* Build configuration list for PBXNativeTarget "Galah" */;
+			buildPhases = (
+				B7F569E423B78D040019EFD2 /* Sources */,
+				B7F569E523B78D040019EFD2 /* Frameworks */,
+				B7F569E623B78D040019EFD2 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Galah;
+			productName = Galah;
+			productReference = B7F569E823B78D040019EFD2 /* Galah.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		B7F569E023B78D040019EFD2 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 1100;
+				LastUpgradeCheck = 1100;
+				ORGANIZATIONNAME = "Forbidden Cactus";
+				TargetAttributes = {
+					B7F569E723B78D040019EFD2 = {
+						CreatedOnToolsVersion = 11.0;
+					};
+				};
+			};
+			buildConfigurationList = B7F569E323B78D040019EFD2 /* Build configuration list for PBXProject "Galah" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = B7F569DF23B78D040019EFD2;
+			productRefGroup = B7F569E923B78D040019EFD2 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				B7F569E723B78D040019EFD2 /* Galah */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		B7F569E623B78D040019EFD2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B7F569F523B78D050019EFD2 /* Assets.xcassets in Resources */,
+				B7F569F823B78D050019EFD2 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		B7F569E423B78D040019EFD2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B7F56A0B23B7A7580019EFD2 /* Mat3x3Helpers.swift in Sources */,
+				B7F569F223B78D040019EFD2 /* Shaders.metal in Sources */,
+				B7F56A0523B7A1010019EFD2 /* Vec2.swift in Sources */,
+				B7F56A0323B78F470019EFD2 /* Mat3x3.swift in Sources */,
+				B7F569EE23B78D040019EFD2 /* GameViewController.swift in Sources */,
+				B7F569F023B78D040019EFD2 /* Renderer.swift in Sources */,
+				B7F569EC23B78D040019EFD2 /* AppDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		B7F569F623B78D050019EFD2 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				B7F569F723B78D050019EFD2 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		B7F569FB23B78D050019EFD2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		B7F569FC23B78D050019EFD2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		B7F569FE23B78D050019EFD2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Galah/Galah.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = Galah/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.forbiddencactus.Galah;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "$(TARGET_NAME)/ShaderTypes.h";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		B7F569FF23B78D050019EFD2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Galah/Galah.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = Galah/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.forbiddencactus.Galah;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "$(TARGET_NAME)/ShaderTypes.h";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		B7F569E323B78D040019EFD2 /* Build configuration list for PBXProject "Galah" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B7F569FB23B78D050019EFD2 /* Debug */,
+				B7F569FC23B78D050019EFD2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B7F569FD23B78D050019EFD2 /* Build configuration list for PBXNativeTarget "Galah" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B7F569FE23B78D050019EFD2 /* Debug */,
+				B7F569FF23B78D050019EFD2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = B7F569E023B78D040019EFD2 /* Project object */;
+}
