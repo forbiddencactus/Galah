@@ -8,13 +8,13 @@
 
 public class Node
 {
-    private var _transform: Transform = Transform(self);
+    private var _transform: Transform!;
     private var _components: Array<Component>
     
     public init()
     {
         _components = Array<Component>();
-        _components.append(_transform);
+        _transform = AddComponent();
     }
     
     public func AddComponent<T>() -> T where T: Component
