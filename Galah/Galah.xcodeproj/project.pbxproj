@@ -13,9 +13,6 @@
 		B7F569F223B78D040019EFD2 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = B7F569F123B78D040019EFD2 /* Shaders.metal */; };
 		B7F569F523B78D050019EFD2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B7F569F423B78D050019EFD2 /* Assets.xcassets */; };
 		B7F569F823B78D050019EFD2 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B7F569F623B78D050019EFD2 /* Main.storyboard */; };
-		B7F56A0323B78F470019EFD2 /* Mat3x3.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7F56A0223B78F470019EFD2 /* Mat3x3.swift */; };
-		B7F56A0523B7A1010019EFD2 /* Vec2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7F56A0423B7A1010019EFD2 /* Vec2.swift */; };
-		B7F56A0B23B7A7580019EFD2 /* Mat3x3Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7F56A0A23B7A7580019EFD2 /* Mat3x3Helpers.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -29,9 +26,6 @@
 		B7F569F723B78D050019EFD2 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		B7F569F923B78D050019EFD2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B7F569FA23B78D050019EFD2 /* Galah.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Galah.entitlements; sourceTree = "<group>"; };
-		B7F56A0223B78F470019EFD2 /* Mat3x3.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mat3x3.swift; sourceTree = "<group>"; };
-		B7F56A0423B7A1010019EFD2 /* Vec2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Vec2.swift; sourceTree = "<group>"; };
-		B7F56A0A23B7A7580019EFD2 /* Mat3x3Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mat3x3Helpers.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -80,19 +74,8 @@
 			isa = PBXGroup;
 			children = (
 				B7F56A0C23B7B07E0019EFD2 /* Platform */,
-				B7F56A0123B78DDD0019EFD2 /* Utilities */,
 			);
 			path = Classes;
-			sourceTree = "<group>";
-		};
-		B7F56A0123B78DDD0019EFD2 /* Utilities */ = {
-			isa = PBXGroup;
-			children = (
-				B7F56A0223B78F470019EFD2 /* Mat3x3.swift */,
-				B7F56A0423B7A1010019EFD2 /* Vec2.swift */,
-				B7F56A0A23B7A7580019EFD2 /* Mat3x3Helpers.swift */,
-			);
-			path = Utilities;
 			sourceTree = "<group>";
 		};
 		B7F56A0C23B7B07E0019EFD2 /* Platform */ = {
@@ -182,10 +165,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B7F56A0B23B7A7580019EFD2 /* Mat3x3Helpers.swift in Sources */,
 				B7F569F223B78D040019EFD2 /* Shaders.metal in Sources */,
-				B7F56A0523B7A1010019EFD2 /* Vec2.swift in Sources */,
-				B7F56A0323B78F470019EFD2 /* Mat3x3.swift in Sources */,
 				B7F569EE23B78D040019EFD2 /* GameViewController.swift in Sources */,
 				B7F569F023B78D040019EFD2 /* Renderer.swift in Sources */,
 				B7F569EC23B78D040019EFD2 /* AppDelegate.swift in Sources */,
