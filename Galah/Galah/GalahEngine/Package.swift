@@ -4,11 +4,11 @@
 import PackageDescription
 
 let package = Package(
-    name: "GalahEngine",
+    name: "Galah2D",
     products: [
         // Products define the executables and libraries produced by a package, and make them visible to other packages.
         .library(
-            name: "GalahEngine",
+            name: "Galah2D",
             targets: ["GalahEngine"]),
     ],
     dependencies: [
@@ -22,8 +22,5 @@ let package = Package(
         .target(
             name: "GalahEngine",
             dependencies: []),
-        .testTarget(
-            name: "GalahEngineTests",
-            dependencies: ["GalahEngine"]),
     ]
 )

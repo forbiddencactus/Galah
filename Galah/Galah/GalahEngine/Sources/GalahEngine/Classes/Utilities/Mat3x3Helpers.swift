@@ -27,8 +27,8 @@ public struct Mat3x3Helpers
 
     public static func CreateRotation(rotationInRad: Float) -> Mat3x3
     {
-        let cosVal = cos(rotationInRad);
-        let sinVal = sin(rotationInRad);
+        let cosVal = cosf(rotationInRad);
+        let sinVal = sinf(rotationInRad);
 
         return Mat3x3(
             m00: cosVal,
@@ -48,8 +48,8 @@ public struct Mat3x3Helpers
 
     public static func CreateTRS(translation: Vec2, rotationInRad: Float, scale: Vec2) -> Mat3x3
     {
-        let cosVal = cos(rotationInRad);
-        let sinVal = sin(rotationInRad);
+        let cosVal = cosf(rotationInRad);
+        let sinVal = sinf(rotationInRad);
 
         return Mat3x3(
             m00: scale.x * cosVal,
@@ -78,11 +78,11 @@ public struct Mat3x3Helpers
 
     public static func RotationFromTRS(m: Mat3x3) -> Float
     {
-        return atan(-m.m01 / m.m11);
+        return atanf(-m.m01 / m.m11);
     }
 
     public static func ScaleFromTRS(m: Mat3x3) -> Vec2
     {
-        return Vec2(x: sqrt(pow(m.m00, 2) + pow(m.m10, 2)),y: sqrt(pow(m.m01, 2) + pow(m.m11, 2)));
+        return Vec2(x: sqrtf(powf(m.m00, 2) + powf(m.m10, 2)),y: sqrtf(powf(m.m01, 2) + powf(m.m11, 2)));
     }
 }

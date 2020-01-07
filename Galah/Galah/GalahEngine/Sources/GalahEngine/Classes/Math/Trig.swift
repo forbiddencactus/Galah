@@ -11,43 +11,43 @@
 #if os(macOS) || os(iOS) //Darwin
 import Darwin;
 
-public func sin(angleInRad: Double) -> Double
+public func sin(_ angleInRad: Double) -> Double
 {
     return Darwin.sin(angleInRad);
 }
 
-public func sinf(angleInRad: Float) -> Float
+public func sinf(_ angleInRad: Float) -> Float
 {
     return Darwin.sinf(angleInRad);
 }
 
-public func cos(angleInRad: Double) -> Double
+public func cos(_ angleInRad: Double) -> Double
 {
     return Darwin.cos(angleInRad);
 }
 
-public func cosf(angleInRad: Float) -> Float
+public func cosf(_ angleInRad: Float) -> Float
 {
     return Darwin.cosf(angleInRad);
 }
 
-public func tan(angleInRad: Double) -> Double
+public func tan(_ angleInRad: Double) -> Double
 {
     return Darwin.tan(angleInRad);
 }
 
-public func tanf(angleInRad: Float) -> Float
+public func tanf(_ angleInRad: Float) -> Float
 {
     return Darwin.tanf(angleInRad);
 }
 
 //Inverse trig
-public func atan(angleInRad: Double) -> Double
+public func atan(_ angleInRad: Double) -> Double
 {
     return Darwin.atan(angleInRad);
 }
 
-public func atanf(angleInRad: Float) -> Float
+public func atanf(_ angleInRad: Float) -> Float
 {
     return Darwin.atanf(angleInRad);
 }

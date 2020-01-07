@@ -33,7 +33,7 @@ public class Transform: Component
     private var _localShear: Vec2 = Vec2.Zero;
     private var _worldShear: Vec2 = Vec2.Zero;
     
-    private var _cachedMatrix: Mat3x3;
+    private var _cachedMatrix: Mat3x3 = Mat3x3.Identity;
     private var WorldTRSS: Mat3x3 { get { _cachedMatrix; } }
     private var LocalTRSS: Mat3x3
     {
@@ -54,27 +54,43 @@ public class Transform: Component
     {
         super.init(node);
         
-        self.InternalRefresh();
+        self.InternalWorldRefresh();
     }
     
     public func SetParent(parent: Transform?, keepWorldPosition: Bool = true)
     {
+        _parent = parent;
         //update local positions...
+        if (keepWorldPosition)
+        {
+            if (_parent != nil)
+            {
+                _localPosition = Mat3x3.MultiplyVec2(m: _parent!._cachedMatrix.Invert(), vec: _worldPosition);
+                
+                _localRotation = _worldRotation - parent!._worldRotation;
+                _localScale = _worldScale - parent!._worldScale;
+            }
+        }
         
+        //Refresh
         self.InternalRefresh();
         
     }
     
     private func SetLocalPosition(position: Vec2)
     {
-        
+        _localPosition = position;
+        self.InternalWorldRefresh();
     }
     
     private func SetWorldPosition(position: Vec2)
     {
+        _worldPosition = position;
+        self.InternalLocalRefresh();
     }
     
-    private func InternalRefresh()
+    //New local values were provided and we need to refresh world values.
+    private func InternalWorldRefresh()
     {
         //Assuming the local values are accurate, refresh the world matrix.
         if (_parent != nil)
@@ -83,7 +99,7 @@ public class Transform: Component
             _cachedMatrix = self.LocalTRSS * _parent!.WorldTRSS;
             
             //Set new world data based on local data.
-            _worldPosition = _parent!._worldPosition + _localPosition;
+            _worldPosition = Mat3x3.MultiplyVec2(m: _parent?.WorldTRSS, vec: _localPosition);
             _worldRotation = _parent!._worldRotation + _localRotation;
             _worldScale = Vec2.Scale(_parent!._worldScale, _localScale);
             _worldShear = _parent!._worldShear + _localShear;
@@ -93,11 +109,23 @@ public class Transform: Component
         {
             _cachedMatrix = self.LocalTRSS;
             
-            _worldPosition
+            //_worldPosition
         }
         
+        for child in _children
+        {
+            child.InternalWorldRefresh();
+        }
+    }
+    
+    //New world values were provided and we need to refresh local values.
+    private func InternalLocalRefresh()
+    {
         
-        
+        for child in _children
+        {
+            child.InternalWorldRefresh();
+        }
     }
     
 }

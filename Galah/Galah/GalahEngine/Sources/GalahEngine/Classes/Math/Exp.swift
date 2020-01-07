@@ -11,22 +11,22 @@
 #if os(macOS) || os(iOS) //Darwin
 import Darwin;
 
-public func sqrt(x: Double) -> Double
+public func sqrt(_ x: Double) -> Double
 {
     return Darwin.sqrt(x);
 }
 
-public func sqrtf(x: Float) -> Float
+public func sqrtf(_ x: Float) -> Float
 {
     return Darwin.sqrtf(x);
 }
 
-public func pow(base: Double, power: Double) -> Double
+public func pow(_ base: Double, _ power: Double) -> Double
 {
     return Darwin.pow(base, power);
 }
 
-public func powf(base: Float, power: Float) -> Float
+public func powf(_ base: Float, _ power: Float) -> Float
 {
     return Darwin.powf(base, power);
 }

@@ -26,6 +26,8 @@
 		B7F569F723B78D050019EFD2 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		B7F569F923B78D050019EFD2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B7F569FA23B78D050019EFD2 /* Galah.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Galah.entitlements; sourceTree = "<group>"; };
+		B7F56A2323BA613E0019EFD2 /* GalahEngine */ = {isa = PBXFileReference; lastKnownFileType = text; name = GalahEngine; path = Galah/GalahEngine; sourceTree = SOURCE_ROOT; };
+		B7F56A2723BA62AF0019EFD2 /* GalahEngine.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; name = GalahEngine.o; path = Galah/GalahEngine/DerivedData/GalahEngine/Build/Products/Debug/GalahEngine.o; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -44,6 +46,7 @@
 			children = (
 				B7F569EA23B78D040019EFD2 /* Galah */,
 				B7F569E923B78D040019EFD2 /* Products */,
+				B7F56A2423BA61910019EFD2 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -73,6 +76,7 @@
 		B7F56A0023B78DD70019EFD2 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				B7F56A1E23BA604E0019EFD2 /* Galah */,
 				B7F56A0C23B7B07E0019EFD2 /* Platform */,
 			);
 			path = Classes;
@@ -93,6 +97,22 @@
 				B7F569ED23B78D040019EFD2 /* GameViewController.swift */,
 			);
 			path = macOS;
+			sourceTree = "<group>";
+		};
+		B7F56A1E23BA604E0019EFD2 /* Galah */ = {
+			isa = PBXGroup;
+			children = (
+				B7F56A2323BA613E0019EFD2 /* GalahEngine */,
+			);
+			path = Galah;
+			sourceTree = "<group>";
+		};
+		B7F56A2423BA61910019EFD2 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				B7F56A2723BA62AF0019EFD2 /* GalahEngine.o */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
