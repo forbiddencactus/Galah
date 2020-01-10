@@ -33,6 +33,12 @@ public class Transform: Component
     private var _localShear: Vec2 = Vec2.Zero;
     private var _worldShear: Vec2 = Vec2.Zero;
     
+    public var LocalPosition: Vec2 { get { return _localPosition; } set { self.SetLocalPosition(position: newValue); } }
+    public var WorldPosition: Vec2 { get { return _worldPosition; } set { self.SetWorldPosition(position: newValue); } }
+    public var LocalRotation: Float { get { return _localRotation; } set { self.SetLocalRotation(rotation: newValue); } }
+    public var WorldRotation: Float { get { return _worldRotation; } set { self.SetWorldRotation(rotation: newValue); } }
+    
+    
     private var _cachedMatrix: Mat3x3 = Mat3x3.Identity;
     private var WorldTRSS: Mat3x3 { get { _cachedMatrix; } }
     private var LocalTRSS: Mat3x3
@@ -66,9 +72,16 @@ public class Transform: Component
             if (_parent != nil)
             {
                 _localPosition = Mat3x3.MultiplyVec2(m: try! _parent!._cachedMatrix.Invert(), vec: _worldPosition);
-                
-                _localRotation = _worldRotation - parent!._worldRotation;
-                _localScale = _worldScale - parent!._worldScale;
+                _localRotation = _worldRotation - _parent!._worldRotation;
+                _localScale = _worldScale - _parent!._worldScale;
+                _localShear = _worldShear - _parent!._worldShear;
+            }
+            else
+            {
+                _localPosition = _worldPosition
+                _localRotation = _worldRotation;
+                _localScale = _worldScale;
+                _localShear = _worldShear;
             }
         }
         
@@ -87,6 +100,36 @@ public class Transform: Component
     {
         _worldPosition = position;
         self.InternalLocalRefresh();
+    }
+    
+    private func SetLocalRotation(rotation: Float)
+    {
+        
+    }
+    
+    private func SetWorldRotation(rotation: Float)
+    {
+        
+    }
+    
+    private func SetLocalScale(scale: Vec2)
+    {
+        
+    }
+    
+    private func SetWorldScale(scale: Vec2)
+    {
+        
+    }
+    
+    private func SetLocalShear(shear: Vec2)
+    {
+        
+    }
+    
+    private func SetWorldShear(shear: Vec2)
+    {
+        
     }
     
     //New local values were provided and we need to refresh world values.
@@ -109,7 +152,10 @@ public class Transform: Component
         {
             _cachedMatrix = self.LocalTRSS;
             
-            //_worldPosition
+            _worldPosition = _localPosition;
+            _worldRotation = _localRotation;
+            _worldScale = _localScale;
+            _worldShear = _localShear;
         }
         
         for child in _children
@@ -121,6 +167,20 @@ public class Transform: Component
     //New world values were provided and we need to refresh local values.
     private func InternalLocalRefresh()
     {
+        if (_parent != nil)
+        {
+            _localPosition = Mat3x3.MultiplyVec2(m: try! _parent!._cachedMatrix.Invert(), vec: _worldPosition);
+            _localRotation = _worldRotation - _parent!._worldRotation;
+            _localScale = _worldScale - _parent!._worldScale;
+            _localShear = _worldShear - _parent!._worldShear;
+        }
+        else
+        {
+            _localPosition = _worldPosition;
+            _localRotation = _worldRotation;
+            _localScale = _worldScale;
+            _localShear = _worldShear;
+        }
         
         for child in _children
         {
