@@ -29,7 +29,12 @@ public struct Vec2
     
     public static func +(lhs: Vec2, rhs: Vec2) -> Vec2
     {
-        return Vec2(rhs.x + lhs.x, rhs.y + lhs.y);
+        return Vec2(lhs.x + rhs.x, lhs.y + rhs.y);
+    }
+    
+    public static func -(lhs: Vec2, rhs: Vec2) -> Vec2
+    {
+        return Vec2(lhs.x - rhs.x, lhs.y - rhs.y);
     }
     
     public static func Scale(_ a: Vec2, _ b: Vec2) -> Vec2

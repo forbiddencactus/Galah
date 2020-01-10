@@ -7,7 +7,7 @@
 //
 
 import Cocoa
-
+import Galah2D
 
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {

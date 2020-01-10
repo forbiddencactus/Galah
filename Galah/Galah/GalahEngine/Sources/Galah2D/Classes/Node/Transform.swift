@@ -65,7 +65,7 @@ public class Transform: Component
         {
             if (_parent != nil)
             {
-                _localPosition = Mat3x3.MultiplyVec2(m: _parent!._cachedMatrix.Invert(), vec: _worldPosition);
+                _localPosition = Mat3x3.MultiplyVec2(m: try! _parent!._cachedMatrix.Invert(), vec: _worldPosition);
                 
                 _localRotation = _worldRotation - parent!._worldRotation;
                 _localScale = _worldScale - parent!._worldScale;
@@ -73,7 +73,7 @@ public class Transform: Component
         }
         
         //Refresh
-        self.InternalRefresh();
+        self.InternalWorldRefresh();
         
     }
     
@@ -99,7 +99,7 @@ public class Transform: Component
             _cachedMatrix = self.LocalTRSS * _parent!.WorldTRSS;
             
             //Set new world data based on local data.
-            _worldPosition = Mat3x3.MultiplyVec2(m: _parent?.WorldTRSS, vec: _localPosition);
+            _worldPosition = Mat3x3.MultiplyVec2(m: _parent!.WorldTRSS, vec: _localPosition);
             _worldRotation = _parent!._worldRotation + _localRotation;
             _worldScale = Vec2.Scale(_parent!._worldScale, _localScale);
             _worldShear = _parent!._worldShear + _localShear;
