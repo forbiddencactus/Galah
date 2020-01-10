@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		B77258EF23C826AE00F8AB6E /* Galah2D in Frameworks */ = {isa = PBXBuildFile; productRef = B77258EE23C826AE00F8AB6E /* Galah2D */; };
-		B77258F123C8275800F8AB6E /* GalahEngine.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B77258F023C8275800F8AB6E /* GalahEngine.framework */; };
 		B7F569EC23B78D040019EFD2 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7F569EB23B78D040019EFD2 /* AppDelegate.swift */; };
 		B7F569EE23B78D040019EFD2 /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7F569ED23B78D040019EFD2 /* GameViewController.swift */; };
 		B7F569F023B78D040019EFD2 /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7F569EF23B78D040019EFD2 /* Renderer.swift */; };
@@ -19,7 +18,6 @@
 
 /* Begin PBXFileReference section */
 		B77258E923C8224200F8AB6E /* GalahEngine */ = {isa = PBXFileReference; lastKnownFileType = text; name = GalahEngine; path = Galah/GalahEngine; sourceTree = SOURCE_ROOT; };
-		B77258F023C8275800F8AB6E /* GalahEngine.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = GalahEngine.framework; sourceTree = "<group>"; };
 		B7F569E823B78D040019EFD2 /* Galah.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Galah.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B7F569EB23B78D040019EFD2 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		B7F569ED23B78D040019EFD2 /* GameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
@@ -37,7 +35,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B77258F123C8275800F8AB6E /* GalahEngine.framework in Frameworks */,
 				B77258EF23C826AE00F8AB6E /* Galah2D in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -106,7 +103,6 @@
 		B7F56A1E23BA604E0019EFD2 /* Galah */ = {
 			isa = PBXGroup;
 			children = (
-				B77258F023C8275800F8AB6E /* GalahEngine.framework */,
 				B77258E923C8224200F8AB6E /* GalahEngine */,
 			);
 			path = Galah;
