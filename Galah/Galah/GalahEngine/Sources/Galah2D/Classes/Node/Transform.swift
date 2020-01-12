@@ -37,6 +37,9 @@ public class Transform: Component
     public var WorldPosition: Vec2 { get { return _worldPosition; } set { self.SetWorldPosition(position: newValue); } }
     public var LocalRotation: Float { get { return _localRotation; } set { self.SetLocalRotation(rotation: newValue); } }
     public var WorldRotation: Float { get { return _worldRotation; } set { self.SetWorldRotation(rotation: newValue); } }
+    public var LocalScale: Vec2 { get { return _localScale; } set { self.SetLocalScale(scale: newValue); } }
+    public var WorldScale: Vec2 { get { return _worldScale; } set { self.SetWorldScale(scale: newValue); } }
+    public var LocalShear: Vec2 { get { return _localShear; } set { self.SetLocalShear(shear: newValue); } }
     
     
     private var _cachedMatrix: Mat3x3 = Mat3x3.Identity;
@@ -56,10 +59,8 @@ public class Transform: Component
         set(newDepth) {_depth = newDepth;}
     }
     
-    required init(_ node: Node)
-    {
-        super.init(node);
-        
+    public func Construct()
+    {        
         self.InternalWorldRefresh();
     }
     
@@ -104,32 +105,38 @@ public class Transform: Component
     
     private func SetLocalRotation(rotation: Float)
     {
-        
+        _localRotation = rotation;
+        self.InternalWorldRefresh();
     }
     
     private func SetWorldRotation(rotation: Float)
     {
-        
+        _worldRotation = rotation;
+        self.InternalLocalRefresh();
     }
     
     private func SetLocalScale(scale: Vec2)
     {
-        
+        _localScale = scale;
+        self.InternalWorldRefresh();
     }
     
     private func SetWorldScale(scale: Vec2)
     {
-        
+        _worldScale = scale;
+        self.InternalLocalRefresh();
     }
     
     private func SetLocalShear(shear: Vec2)
     {
-        
+        _localShear = shear;
+        self.InternalWorldRefresh();
     }
     
     private func SetWorldShear(shear: Vec2)
     {
-        
+        _worldShear = shear;
+        self.InternalLocalRefresh();
     }
     
     //New local values were provided and we need to refresh world values.
@@ -187,5 +194,5 @@ public class Transform: Component
             child.InternalWorldRefresh();
         }
     }
-    
 }
+

@@ -1,0 +1,6 @@
+
+module Galah2DC {
+    umbrella header "Galah2DC.h"
+    exclude header "MetalImpl.h"
+    export *
+}
