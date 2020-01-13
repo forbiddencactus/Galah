@@ -8,7 +8,14 @@
 public protocol RenderDelegate
 {
     var RenderTarget: RenderTarget { get };
-    func SetRenderTarget(_ newRenderTarget: RenderTarget) throws;
+    init(_ newRenderTarget: RenderTarget);
     func Draw();
-    
+}
+
+public extension RenderDelegate
+{
+    func ViewSizeWillChange(width: Float, height: Float)
+    {
+        ///
+    }
 }

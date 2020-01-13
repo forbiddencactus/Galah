@@ -7,8 +7,8 @@
 
 public class Renderer
 {
-    private var _instance: Renderer! = nil;
-    public var Instance: Renderer
+    private static var _instance: Renderer! = nil;
+    public static var Instance: Renderer
     {
         get
         {
