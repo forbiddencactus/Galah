@@ -9,7 +9,7 @@ public class RenderTarget
 {
     public var TargetPointer: UnsafeMutableRawPointer;
     
-    init(targetPointer: UnsafeMutableRawPointer)
+    public init(_ targetPointer: UnsafeMutableRawPointer)
     {
         TargetPointer = targetPointer;
     }

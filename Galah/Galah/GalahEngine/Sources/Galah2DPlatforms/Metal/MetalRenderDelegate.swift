@@ -9,7 +9,9 @@
 
 import Galah2D
 import Galah2DC
+import MetalKit
 
+@available(OSX 10.11, *)
 public class MetalRenderDelegate: RenderDelegate
 {
     private var metalRenderer: UnsafeMutablePointer<MetalRenderer>
@@ -18,12 +20,19 @@ public class MetalRenderDelegate: RenderDelegate
     
     public var RenderTarget: RenderTarget { get { return _renderTarget; } }
     
+    public static func CreateMetalRenderDelegate(metalKitView: MTKView) -> MetalRenderDelegate
+    {
+        let renderTarget = Galah2D.RenderTarget(GetPointerFromObject(metalKitView));
+        return MetalRenderDelegate(renderTarget);
+    }
     
     public required init(_ newRenderTarget: RenderTarget)
     {
+        _renderTarget = newRenderTarget;
+        
         metalRenderer = .allocate(capacity: 1)
         metalRenderer.initialize(to:  construct_renderer())
-        set_mtkview(metalRenderer, newRenderTarget.TargetPointer)
+        set_mtkview(metalRenderer, _renderTarget.TargetPointer)
         
         self.SetUpSizeChangedCallback();
     }

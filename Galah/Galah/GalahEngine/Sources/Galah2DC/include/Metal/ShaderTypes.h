@@ -1,3 +1,7 @@
+/*
+ https://developer.apple.com/documentation/metal/creating_and_sampling_textures
+ */
+
 #ifndef ShaderTypes_h
 #define ShaderTypes_h
 

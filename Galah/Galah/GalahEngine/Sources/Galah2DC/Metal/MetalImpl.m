@@ -1,3 +1,7 @@
+/*
+ https://developer.apple.com/documentation/metal/creating_and_sampling_textures
+ https://donaldpinckney.com/metal/2018/07/05/metal-intro-1.html
+ */
 #import "Metal/MetalImpl.h"
 #import "Metal/ShaderTypes.h"
 #import "Common/Callback.h"
@@ -17,7 +21,6 @@ static const size_t kAlignedUniformsSize = (sizeof(Uniforms) & ~0xFF) + 0x100;
     id <MTLBuffer> _dynamicUniformBuffer;
     id <MTLRenderPipelineState> _pipelineState;
     id <MTLDepthStencilState> _depthState;
-    id <MTLTexture> _colorMap;
     MTLVertexDescriptor* _mtlVertexDescriptor;
 
     uint32_t _uniformBufferOffset;

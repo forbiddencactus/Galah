@@ -24,6 +24,9 @@ public class Renderer
     private var _renderDelegate: RenderDelegate! = nil;
     public var RenderDelegate: RenderDelegate { get { return _renderDelegate; } }
     
+    private var _targetResolution: Rect<Int> = Constants.TargetResolution;
+    public var TargetResolution: Rect<Int> { get { return _targetResolution; } set { self.UpdateTargetResolution(newValue); } }
+    
     internal init()
     {
         
@@ -32,5 +35,12 @@ public class Renderer
     public func Render()
     {
         
+    }
+    
+    private func UpdateTargetResolution(_ newTarget: Rect<Int>)
+    {
+        _targetResolution = newTarget;
+        
+        //Update matrices here?
     }
 }
