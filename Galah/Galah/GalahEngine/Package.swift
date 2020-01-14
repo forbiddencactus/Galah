@@ -9,7 +9,7 @@ let package = Package(
         // Products define the executables and libraries produced by a package, and make them visible to other packages.
         .library(
             name: "Galah2D",
-            targets: ["Galah2D", "Galah2DPlatforms"]),
+            targets: ["Galah2D", "Galah2DC", "Galah2DPlatforms"]),
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -22,14 +22,14 @@ let package = Package(
         .target(
             name: "Galah2D",
             dependencies: []),
-        /*.target(
+        .target(
             name: "Galah2DC",
             dependencies: ["Galah2D"],
             path: "Sources/Galah2DPlatforms/Galah2DC"
-            ),*/
+            ),
         .target(
               name: "Galah2DPlatforms",
-              dependencies: ["Galah2D",],
+              dependencies: ["Galah2D","Galah2DC"],
               path: "Sources/Galah2DPlatforms/Swift"
             ),
               //exclude: [

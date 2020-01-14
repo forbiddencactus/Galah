@@ -1,0 +1,5 @@
+framework module Galah2D {
+    header "Galah2D.h"
+    
+    private header "Galah2DC.h"
+}

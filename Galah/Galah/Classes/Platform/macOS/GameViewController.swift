@@ -8,6 +8,7 @@
 
 import Cocoa
 import MetalKit
+import Galah2DC
 import Galah2DPlatforms
 
 // Our macOS specific view controller
