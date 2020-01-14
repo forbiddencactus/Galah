@@ -1,0 +1,15 @@
+module Galah2DPlatforms
+{
+    header "Galah2DPlatforms.h"
+    export *
+    module * { export * }
+
+    // C library
+    explicit module Galah2DPlatforms_Private
+    {
+        umbrella header "/Galah2DC/include/Galah2DC.h"
+        exclude header "MetalImpl.h"
+        export *
+        
+    }
+}

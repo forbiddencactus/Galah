@@ -6,7 +6,7 @@
 //
 
 
-public func GetPointerFromObject<T: AnyObject>(_ object: T) -> UnsafeMutableRawPointer
+public func GetPointerFromObject(_ object: AnyObject) -> UnsafeMutableRawPointer
 {
     return UnsafeMutableRawPointer(Unmanaged.passRetained(object).toOpaque());
 }

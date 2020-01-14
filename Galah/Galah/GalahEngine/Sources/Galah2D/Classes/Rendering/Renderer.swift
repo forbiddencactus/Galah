@@ -27,7 +27,7 @@ public class Renderer
     private var _targetResolution: Rect<Int> = Constants.TargetResolution;
     public var TargetResolution: Rect<Int> { get { return _targetResolution; } set { self.UpdateTargetResolution(newValue); } }
     
-    internal init()
+    private init()
     {
         
     }
