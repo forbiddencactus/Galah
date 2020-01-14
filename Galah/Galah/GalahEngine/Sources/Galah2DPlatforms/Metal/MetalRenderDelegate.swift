@@ -42,6 +42,10 @@ public class MetalRenderDelegate: RenderDelegate
         renderer_draw(metalRenderer);
     }
     
+    public func SetBackgroundColour(_ colour: Colour)
+    {
+        renderer_setclearcolour(metalRenderer, colour.r, colour.g, colour.b, colour.a);
+    }
     
     private func SetUpSizeChangedCallback()
     {

@@ -13,6 +13,7 @@ static const size_t kAlignedUniformsSize = (sizeof(Uniforms) & ~0xFF) + 0x100;
 @implementation MetalImpl
 {
     MTKView* view;
+    MTLClearColor clearColour;
     
     dispatch_semaphore_t _inFlightSemaphore;
     id <MTLDevice> _device;
@@ -33,6 +34,8 @@ static const size_t kAlignedUniformsSize = (sizeof(Uniforms) & ~0xFF) + 0x100;
 -(void) SetMetalKitView:(MTKView *)theView
 {
     view = theView;
+    
+    clearColour = MTLClearColorMake(0, 0, 0, 1);
     
     view.delegate = self;
     [view setPaused: true];
@@ -137,11 +140,12 @@ static const size_t kAlignedUniformsSize = (sizeof(Uniforms) & ~0xFF) + 0x100;
        /// Delay getting the currentRenderPassDescriptor until we absolutely need it to avoid
        ///   holding onto the drawable and blocking the display pipeline any longer than necessary
        MTLRenderPassDescriptor* renderPassDescriptor = view.currentRenderPassDescriptor;
-
+    
        if(renderPassDescriptor != nil) {
 
            /// Final pass rendering code here
 
+           [renderPassDescriptor.colorAttachments objectAtIndexedSubscript:0].clearColor = clearColour;
            id <MTLRenderCommandEncoder> renderEncoder =
            [commandBuffer renderCommandEncoderWithDescriptor:renderPassDescriptor];
            renderEncoder.label = @"GalahRenderMetalEncoder";
@@ -160,7 +164,7 @@ static const size_t kAlignedUniformsSize = (sizeof(Uniforms) & ~0xFF) + 0x100;
            [renderEncoder setFragmentBuffer:_dynamicUniformBuffer
                                      offset:_uniformBufferOffset
                                     atIndex:BufferIndexUniforms];
-
+           
            /*
            for (NSUInteger bufferIndex = 0; bufferIndex < _mesh.vertexBuffers.count; bufferIndex++)
            {
@@ -203,6 +207,11 @@ static const size_t kAlignedUniformsSize = (sizeof(Uniforms) & ~0xFF) + 0x100;
     cSize.height = size.height;
     
     viewSizeChangedCallback(cSize);
+}
+
+- (void) SetClearColour:(float)r green:(float)g blue:(float)b alpha:(float)a
+{
+    clearColour = MTLClearColorMake(r, g, b, a);
 }
 
 @end

@@ -8,12 +8,12 @@
 
 import Cocoa
 import MetalKit
-import Galah2DPlatforms
+import Galah2D;
+import Galah2DPlatforms;
 
 // Our macOS specific view controller
 class GameViewController: NSViewController {
 
-    var renderer: Renderer!
     var mtkView: MTKView!
 
     override func viewDidLoad() {
@@ -32,7 +32,9 @@ class GameViewController: NSViewController {
 
         mtkView.device = defaultDevice
         
-        MetalRenderDelegate.CreateMetalRenderDelegate(metalKitView: mtkView);
+        let renderDelegate = MetalRenderDelegate.CreateMetalRenderDelegate(metalKitView: mtkView);
+        renderDelegate.SetBackgroundColour(Colour(0,1,1,0.5))
+        renderDelegate.Draw();
 
 
        /* guard let newRenderer = Renderer(metalKitView: mtkView) else {

@@ -1,5 +1,7 @@
 framework module Galah2D {
-    header "Galah2D.h"
+    umbrella header "Galah2D.h"
     private header "Galah2DC.h"
-    header "Galah2DPlatforms.h"
+    umbrella header "Galah2DPlatforms.h"
+    
+      module * { export * }
 }

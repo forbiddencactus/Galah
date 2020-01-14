@@ -25,12 +25,12 @@ let package = Package(
         .target(
             name: "Galah2DC",
             dependencies: ["Galah2D"],
-            path: "Sources/Galah2DPlatforms/Galah2DC"
+            path: "Sources/Galah2DC"
             ),
         .target(
               name: "Galah2DPlatforms",
               dependencies: ["Galah2D","Galah2DC"],
-              path: "Sources/Galah2DPlatforms/Swift"
+              path: "Sources/Galah2DPlatforms"
             ),
               //exclude: [
               //"Galah2DC",

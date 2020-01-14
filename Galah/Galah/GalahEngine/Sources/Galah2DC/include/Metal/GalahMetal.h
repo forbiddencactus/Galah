@@ -12,5 +12,5 @@ typedef struct MetalRenderer {
 void set_mtkview(MetalRenderer* renderer, metalview* view);
 MetalRenderer construct_renderer();
 void renderer_draw(MetalRenderer* renderer);
-
+void renderer_setclearcolour(MetalRenderer* renderer, float r, float g, float b, float a);
 #endif 

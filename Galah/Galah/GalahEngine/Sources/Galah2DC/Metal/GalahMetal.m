@@ -20,3 +20,9 @@ void renderer_draw(MetalRenderer* renderer)
     MetalImpl* render = (__bridge MetalImpl*) renderer->renderer;
     [render Draw];
 }
+
+void renderer_setclearcolour(MetalRenderer* renderer, float r, float g, float b, float a)
+{
+    MetalImpl* render = (__bridge MetalImpl*) renderer->renderer;
+    [render SetClearColour:r green:g blue:b alpha:a];
+}
