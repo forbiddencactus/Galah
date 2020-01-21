@@ -8,8 +8,10 @@
 #if os(macOS) || os(iOS)
 
 import Galah2D
-import Galah2DC
 import MetalKit
+#if SWIFT_PACKAGE
+import Galah2DPlatformsC
+#endif
 
 @available(OSX 10.11, *)
 public class MetalRenderDelegate: RenderDelegate
