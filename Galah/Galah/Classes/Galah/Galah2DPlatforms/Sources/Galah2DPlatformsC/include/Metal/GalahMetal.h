@@ -3,14 +3,8 @@
 
 #include "MetalImpl.h"
 
-typedef void renderer, metalview;
-
-typedef struct MetalRenderer {
-    renderer* renderer;
-} MetalRenderer;
-
-void set_mtkview(MetalRenderer* renderer, metalview* view);
-MetalRenderer construct_renderer();
-void renderer_draw(MetalRenderer* renderer);
-void renderer_setclearcolour(MetalRenderer* renderer, float r, float g, float b, float a);
+void set_mtkview(MetalImpl* renderer, MTKView* view);
+MetalImpl* construct_renderer();
+void renderer_draw(MetalImpl* renderer);
+void renderer_setclearcolour(MetalImpl* renderer, float r, float g, float b, float a);
 #endif 

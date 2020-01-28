@@ -37,8 +37,7 @@ let package = Package(
             name: "Galah2DPlatforms",
             targets: ["Galah2DPlatformsC", "Galah2DPlatforms"]),
     ],
-    dependencies: [
-    ],
+    dependencies: [],
     targets: [
         .target(
             name: "Galah2DPlatformsC",

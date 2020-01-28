@@ -1,28 +1,23 @@
 #include "Metal/GalahMetal.h"
 
-void set_mtkview(MetalRenderer* renderer, metalview* view)
+void set_mtkview(MetalImpl* renderer, MTKView* view)
 {
-    MetalImpl* render = (__bridge MetalImpl*) renderer->renderer;
-    [render SetMetalKitView:(__bridge MTKView *)(view)];
+    [renderer SetMetalKitView:view];
 }
 
-MetalRenderer construct_renderer()
+MetalImpl* construct_renderer()
 {
     MetalImpl* renderer = [[MetalImpl alloc] init];
-    MetalRenderer returnRender;
-    returnRender.renderer = CFBridgingRetain(renderer);
     
-    return returnRender;
+    return renderer;
 }
 
-void renderer_draw(MetalRenderer* renderer)
+void renderer_draw(MetalImpl* renderer)
 {
-    MetalImpl* render = (__bridge MetalImpl*) renderer->renderer;
-    [render Draw];
+    [renderer Draw];
 }
 
-void renderer_setclearcolour(MetalRenderer* renderer, float r, float g, float b, float a)
+void renderer_setclearcolour(MetalImpl* renderer, float r, float g, float b, float a)
 {
-    MetalImpl* render = (__bridge MetalImpl*) renderer->renderer;
-    [render SetClearColour:r green:g blue:b alpha:a];
+    [renderer SetClearColour:r green:g blue:b alpha:a];
 }

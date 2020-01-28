@@ -16,7 +16,7 @@ import Galah2DPlatformsC
 @available(OSX 10.11, *)
 public class MetalRenderDelegate: RenderDelegate
 {
-    private var metalRenderer: UnsafeMutablePointer<MetalRenderer>
+    private var metalRenderer: MetalImpl!//UnsafeMutablePointer<MetalImpl>
     
     private var _renderTarget: RenderTarget! = nil;
     
@@ -32,9 +32,9 @@ public class MetalRenderDelegate: RenderDelegate
     {
         _renderTarget = newRenderTarget;
         
-        metalRenderer = .allocate(capacity: 1)
-        metalRenderer.initialize(to:  construct_renderer())
-        set_mtkview(metalRenderer, _renderTarget.TargetPointer)
+        let point = Unmanaged<MTKView>.fromOpaque(_renderTarget.TargetPointer).takeUnretainedValue()
+        metalRenderer = construct_renderer();
+        set_mtkview(metalRenderer, point);
         
         self.SetUpSizeChangedCallback();
     }
