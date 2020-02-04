@@ -11,6 +11,7 @@ public protocol RenderDelegate
     init(_ newRenderTarget: RenderTarget);
     func Draw();
     func SetBackgroundColour(_ colour: Colour);
+    func SetTargetResolution(_ resolution: Rect<Int>);
 }
 
 public extension RenderDelegate

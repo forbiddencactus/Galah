@@ -11,7 +11,6 @@
 		B7A3394D23D6A1B900E7212D /* Galah2DPlatforms in Frameworks */ = {isa = PBXBuildFile; productRef = B7A3394C23D6A1B900E7212D /* Galah2DPlatforms */; };
 		B7F569EC23B78D040019EFD2 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7F569EB23B78D040019EFD2 /* AppDelegate.swift */; };
 		B7F569EE23B78D040019EFD2 /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7F569ED23B78D040019EFD2 /* GameViewController.swift */; };
-		B7F569F223B78D040019EFD2 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = B7F569F123B78D040019EFD2 /* Shaders.metal */; };
 		B7F569F523B78D050019EFD2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B7F569F423B78D050019EFD2 /* Assets.xcassets */; };
 		B7F569F823B78D050019EFD2 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B7F569F623B78D050019EFD2 /* Main.storyboard */; };
 /* End PBXBuildFile section */
@@ -22,8 +21,6 @@
 		B7F569E823B78D040019EFD2 /* Galah.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Galah.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B7F569EB23B78D040019EFD2 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		B7F569ED23B78D040019EFD2 /* GameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
-		B7F569F123B78D040019EFD2 /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
-		B7F569F323B78D040019EFD2 /* ShaderTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShaderTypes.h; sourceTree = "<group>"; };
 		B7F569F423B78D050019EFD2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B7F569F723B78D050019EFD2 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		B7F569F923B78D050019EFD2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -64,9 +61,7 @@
 			isa = PBXGroup;
 			children = (
 				B7F56A0023B78DD70019EFD2 /* Classes */,
-				B7F569F123B78D040019EFD2 /* Shaders.metal */,
 				B7F569F423B78D050019EFD2 /* Assets.xcassets */,
-				B7F569F323B78D040019EFD2 /* ShaderTypes.h */,
 				B7F569F623B78D050019EFD2 /* Main.storyboard */,
 				B7F569F923B78D050019EFD2 /* Info.plist */,
 				B7F569FA23B78D050019EFD2 /* Galah.entitlements */,
@@ -103,8 +98,8 @@
 		B7F56A1E23BA604E0019EFD2 /* Galah */ = {
 			isa = PBXGroup;
 			children = (
-				B7A3394B23D69DD900E7212D /* Galah2DPlatforms */,
 				B77258E923C8224200F8AB6E /* Galah2D */,
+				B7A3394B23D69DD900E7212D /* Galah2DPlatforms */,
 			);
 			path = Galah;
 			sourceTree = "<group>";
@@ -191,7 +186,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B7F569F223B78D040019EFD2 /* Shaders.metal in Sources */,
 				B7F569EE23B78D040019EFD2 /* GameViewController.swift in Sources */,
 				B7F569EC23B78D040019EFD2 /* AppDelegate.swift in Sources */,
 			);
@@ -353,7 +347,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.forbiddencactus.Galah;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = "$(TARGET_NAME)/ShaderTypes.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -376,7 +370,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.forbiddencactus.Galah;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = "$(TARGET_NAME)/ShaderTypes.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;

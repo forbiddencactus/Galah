@@ -32,9 +32,9 @@ public class MetalRenderDelegate: RenderDelegate
     {
         _renderTarget = newRenderTarget;
         
-        let point = Unmanaged<MTKView>.fromOpaque(_renderTarget.TargetPointer).takeUnretainedValue()
+        let pointer = Unmanaged<MTKView>.fromOpaque(_renderTarget.TargetPointer).takeUnretainedValue()
         metalRenderer = construct_renderer();
-        set_mtkview(metalRenderer, point);
+        set_mtkview(metalRenderer, pointer);
         
         self.SetUpSizeChangedCallback();
     }
@@ -61,6 +61,12 @@ public class MetalRenderDelegate: RenderDelegate
         createViewSizeChangedCallback(callback)
         
     }
+    
+    public func SetTargetResolution(_ resolution: Rect<Int>)
+    {
+        renderer_setviewportsize(metalRenderer, Int32(resolution.Width), Int32(resolution.Height));
+    }
+
     
     
 }

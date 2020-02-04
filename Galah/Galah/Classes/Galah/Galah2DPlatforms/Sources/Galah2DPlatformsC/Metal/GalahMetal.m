@@ -21,3 +21,8 @@ void renderer_setclearcolour(MetalImpl* renderer, float r, float g, float b, flo
 {
     [renderer SetClearColour:r green:g blue:b alpha:a];
 }
+
+void renderer_setviewportsize(MetalImpl* renderer, int width, int height)
+{
+    [renderer SetViewportSize:width height:height];
+}

@@ -5,10 +5,9 @@
 #import "Metal/MetalImpl.h"
 #import "Metal/ShaderTypes.h"
 #import "Common/Callback.h"
+#import "Metal/MetalShaders.h"
 
 static const NSUInteger kMaxBuffersInFlight = 3;
-
-static const size_t kAlignedUniformsSize = (sizeof(Uniforms) & ~0xFF) + 0x100;
 
 @implementation MetalImpl
 {
@@ -19,7 +18,6 @@ static const size_t kAlignedUniformsSize = (sizeof(Uniforms) & ~0xFF) + 0x100;
     id <MTLDevice> _device;
     id <MTLCommandQueue> _commandQueue;
 
-    id <MTLBuffer> _dynamicUniformBuffer;
     id <MTLRenderPipelineState> _pipelineState;
     id <MTLDepthStencilState> _depthState;
     MTLVertexDescriptor* _mtlVertexDescriptor;
@@ -29,11 +27,17 @@ static const size_t kAlignedUniformsSize = (sizeof(Uniforms) & ~0xFF) + 0x100;
     uint8_t _uniformBufferIndex;
 
     void* _uniformBufferAddress;
+    
+    vector_uint2 _viewportSize;
+    
+    id<MTLBuffer> textureBuffer;
 }
 
--(void) SetMetalKitView:(MTKView *)theView
+-(void) SetMetalKitView:(MTKView *)theView;
 {
     view = theView;
+    _viewportSize.y = 1080;
+    _viewportSize.x = 1920;
     
     clearColour = MTLClearColorMake(0, 0, 0, 1);
     
@@ -47,6 +51,7 @@ static const size_t kAlignedUniformsSize = (sizeof(Uniforms) & ~0xFF) + 0x100;
     view.depthStencilPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
     view.colorPixelFormat = MTLPixelFormatBGRA8Unorm_sRGB;
     view.sampleCount = 1;
+    
 
     [self SetUpVertexDescriptor];
     [self SetUpPipelineState];
@@ -56,12 +61,10 @@ static const size_t kAlignedUniformsSize = (sizeof(Uniforms) & ~0xFF) + 0x100;
     depthStateDesc.depthWriteEnabled = YES;
     _depthState = [_device newDepthStencilStateWithDescriptor:depthStateDesc];
 
-    NSUInteger uniformBufferSize = kAlignedUniformsSize * kMaxBuffersInFlight;
-
-    _dynamicUniformBuffer = [_device newBufferWithLength:uniformBufferSize
-                                                options:MTLResourceStorageModeShared];
-
-    _dynamicUniformBuffer.label = @"UniformBuffer";
+    textureBuffer = [_device newBufferWithLength:sizeof(AAPLVertex[6])
+                                    options:MTLResourceStorageModeShared];
+    
+    textureBuffer.label = "TextureBuffer";
 
     _commandQueue = [_device newCommandQueue];
     
@@ -72,7 +75,7 @@ static const size_t kAlignedUniformsSize = (sizeof(Uniforms) & ~0xFF) + 0x100;
 {
     _mtlVertexDescriptor = [[MTLVertexDescriptor alloc] init];
 
-    _mtlVertexDescriptor.attributes[VertexAttributePosition].format = MTLVertexFormatFloat3;
+    /*_mtlVertexDescriptor.attributes[VertexAttributePosition].format = MTLVertexFormatFloat3;
     _mtlVertexDescriptor.attributes[VertexAttributePosition].offset = 0;
     _mtlVertexDescriptor.attributes[VertexAttributePosition].bufferIndex = BufferIndexMeshPositions;
 
@@ -86,12 +89,17 @@ static const size_t kAlignedUniformsSize = (sizeof(Uniforms) & ~0xFF) + 0x100;
 
     _mtlVertexDescriptor.layouts[BufferIndexMeshGenerics].stride = 8;
     _mtlVertexDescriptor.layouts[BufferIndexMeshGenerics].stepRate = 1;
-    _mtlVertexDescriptor.layouts[BufferIndexMeshGenerics].stepFunction = MTLVertexStepFunctionPerVertex;
+    _mtlVertexDescriptor.layouts[BufferIndexMeshGenerics].stepFunction = MTLVertexStepFunctionPerVertex;*/
 }
 
 -(void) SetUpPipelineState
 {
-    id<MTLLibrary> defaultLibrary = [_device newDefaultLibrary];
+    NSError* shaderError = nil;
+    id<MTLLibrary> defaultLibrary = [_device newLibraryWithSource:shader() options:nil error:&shaderError];
+    
+    if(!defaultLibrary) {
+        [NSException raise:@"Failed to compile shaders" format:@"%@", [shaderError localizedDescription]];
+    }
 
     id <MTLFunction> vertexFunction = [defaultLibrary newFunctionWithName:@"vertexShader"];
 
@@ -141,6 +149,8 @@ static const size_t kAlignedUniformsSize = (sizeof(Uniforms) & ~0xFF) + 0x100;
        ///   holding onto the drawable and blocking the display pipeline any longer than necessary
        MTLRenderPassDescriptor* renderPassDescriptor = view.currentRenderPassDescriptor;
     
+        //https://gamedev.stackexchange.com/questions/69835/batching-and-z-order-with-alpha-blending-in-a-3d-world
+    
        if(renderPassDescriptor != nil) {
 
            /// Final pass rendering code here
@@ -152,18 +162,55 @@ static const size_t kAlignedUniformsSize = (sizeof(Uniforms) & ~0xFF) + 0x100;
 
            [renderEncoder pushDebugGroup:@"GalahRenderMetal2D"];
 
-           [renderEncoder setFrontFacingWinding:MTLWindingCounterClockwise];
-           [renderEncoder setCullMode:MTLCullModeBack];
+           [renderEncoder setViewport:(MTLViewport){0.0, 0.0, _viewportSize.x, _viewportSize.y, -1.0, 1.0 }];
            [renderEncoder setRenderPipelineState:_pipelineState];
            [renderEncoder setDepthStencilState:_depthState];
 
-           [renderEncoder setVertexBuffer:_dynamicUniformBuffer
-                                   offset:_uniformBufferOffset
-                                  atIndex:BufferIndexUniforms];
+           [renderEncoder setRenderPipelineState:_pipelineState];
+           
+           //Render textures
+           for(int i = 0; i < 0; i++)
+           {
+               void* test;
+               id<MTLTexture> texture = (__bridge id<MTLTexture>)test;
+               
+               AAPLVertex verts[6] =
+               {
+                          // Pixel positions, Texture coordinates
+                          { {  250,  -250 },  { 1.f, 1.f } },
+                          { { -250,  -250 },  { 0.f, 1.f } },
+                          { { -250,   250 },  { 0.f, 0.f } },
 
-           [renderEncoder setFragmentBuffer:_dynamicUniformBuffer
-                                     offset:_uniformBufferOffset
-                                    atIndex:BufferIndexUniforms];
+                          { {  250,  -250 },  { 1.f, 1.f } },
+                          { { -250,   250 },  { 0.f, 0.f } },
+                          { {  250,   250 },  { 1.f, 0.f } },
+               };
+               
+               textureBuffer.contents * = verts;
+               
+               [renderEncoder setVertexBuffer:textureBuffer
+                                       offset:0
+                                     atIndex:AAPLVertexInputIndexVertices];
+
+               [renderEncoder setVertexBytes:&_viewportSize
+                                      length:sizeof(_viewportSize)
+                                     atIndex:AAPLVertexInputIndexViewportSize];
+
+               // Set the texture object.  The AAPLTextureIndexBaseColor enum value corresponds
+               ///  to the 'colorMap' argument in the 'samplingShader' function because its
+               //   texture attribute qualifier also uses AAPLTextureIndexBaseColor for its index.
+               [renderEncoder setFragmentTexture:texture
+                                         atIndex:AAPLTextureIndexBaseColor];
+
+               // Draw the triangles.
+               [renderEncoder drawPrimitives:MTLPrimitiveTypeTriangle
+                                 vertexStart:0
+                                 vertexCount:6];
+               
+           }
+
+                  
+
            
            /*
            for (NSUInteger bufferIndex = 0; bufferIndex < _mesh.vertexBuffers.count; bufferIndex++)
@@ -212,6 +259,12 @@ static const size_t kAlignedUniformsSize = (sizeof(Uniforms) & ~0xFF) + 0x100;
 - (void) SetClearColour:(float)r green:(float)g blue:(float)b alpha:(float)a
 {
     clearColour = MTLClearColorMake(r, g, b, a);
+}
+
+-(void) SetViewportSize:(int) width height:(int) height
+{
+    _viewportSize.x = width;
+    _viewportSize.y = height;
 }
 
 @end

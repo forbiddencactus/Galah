@@ -14,15 +14,30 @@
 
 #include <simd/simd.h>
 
-struct Vertex {
-    vector_float4 color;
-    vector_float2 pos;
-};
-
-
 //This is just boilerplate from the Apple documentation. Will (should) replace with something better at some point.
 // https://developer.apple.com/documentation/metal/using_a_render_pipeline_to_render_primitives
 // https://developer.apple.com/documentation/metal/creating_and_sampling_textures
+
+
+// Buffer index values shared between shader and C code to ensure Metal shader buffer inputs match
+//   Metal API buffer set calls
+typedef enum AAPLVertexInputIndex
+{
+    AAPLVertexInputIndexVertices     = 0,
+    AAPLVertexInputIndexViewportSize = 1,
+} AAPLVertexInputIndex;
+
+// Texture index values shared between shader and C code to ensure Metal shader buffer inputs match
+//   Metal API texture set calls
+typedef enum AAPLTextureIndex
+{
+    AAPLTextureIndexBaseColor = 0,
+} AAPLTextureIndex;
+
+//  This structure defines the layout of each vertex in the array of vertices set as an input to the
+//    Metal vertex shader.  Since this header is shared between the .metal shader and C code,
+//    you can be sure that the layout of the vertex array in the code matches the layout that
+//    the vertex shader expects
 
 typedef struct
 {
@@ -31,47 +46,7 @@ typedef struct
 
     // 2D texture coordinate
     vector_float2 textureCoordinate;
-} TexturedVertex;
-
-typedef struct
-{
-    // The [[position]] attribute qualifier of this member indicates this value is
-    // the clip space position of the vertex when this structure is returned from
-    // the vertex shader
-    float4 position [[position]];
-
-    // Since this member does not have a special attribute qualifier, the rasterizer
-    // will interpolate its value with values of other vertices making up the triangle
-    // and pass that interpolated value to the fragment shader for each fragment in
-    // that triangle.
-    float2 textureCoordinate;
-
-} RasterizerData;
-
-
-typedef NS_ENUM(NSInteger, BufferIndex)
-{
-    BufferIndexMeshPositions = 0,
-    BufferIndexMeshGenerics  = 1,
-    BufferIndexUniforms      = 2
-};
-
-typedef NS_ENUM(NSInteger, VertexAttribute)
-{
-    VertexAttributePosition  = 0,
-    VertexAttributeTexcoord  = 1,
-};
-
-typedef NS_ENUM(NSInteger, TextureIndex)
-{
-    TextureIndexColor    = 0,
-};
-
-typedef struct
-{
-    matrix_float4x4 projectionMatrix;
-    matrix_float4x4 modelViewMatrix;
-} Uniforms;
+} AAPLVertex;
 
 #endif /* ShaderTypes_h */
 
