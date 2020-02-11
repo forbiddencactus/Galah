@@ -2,6 +2,7 @@
 #define Metal_h
 
 #include "MetalImpl.h"
+#include "MTLRenderQueue.h"
 
 void set_mtkview(MetalImpl* renderer, MTKView* view);
 MetalImpl* construct_renderer();

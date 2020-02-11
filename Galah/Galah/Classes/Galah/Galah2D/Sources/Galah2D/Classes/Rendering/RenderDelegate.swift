@@ -7,7 +7,10 @@
 
 public protocol RenderDelegate
 {
+    var RenderQueue: Array<RenderQueue>! = nil;
     var RenderTarget: RenderTarget { get };
+    
+    
     init(_ newRenderTarget: RenderTarget);
     func Draw();
     func SetBackgroundColour(_ colour: Colour);
