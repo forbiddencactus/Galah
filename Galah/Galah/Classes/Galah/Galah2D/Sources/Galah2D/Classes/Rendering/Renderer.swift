@@ -24,8 +24,8 @@ public class Renderer
     private var _renderDelegate: RenderDelegate! = nil;
     public var RenderDelegate: RenderDelegate { get { return _renderDelegate; } }
     
-    private var _targetResolution: Rect<Int> = Constants.TargetResolution;
-    public var TargetResolution: Rect<Int> { get { return _targetResolution; } set { self.SetTargetResolution(newValue); } }
+    private var _targetResolution: Size<Int> = Constants.TargetResolution;
+    public var TargetResolution: Size<Int> { get { return _targetResolution; } set { self.SetTargetResolution(newValue); } }
     
     private init()
     {
@@ -37,7 +37,7 @@ public class Renderer
         
     }
     
-    private func SetTargetResolution(_ newTarget: Rect<Int>)
+    private func SetTargetResolution(_ newTarget: Size<Int>)
     {
         _targetResolution = newTarget;
         

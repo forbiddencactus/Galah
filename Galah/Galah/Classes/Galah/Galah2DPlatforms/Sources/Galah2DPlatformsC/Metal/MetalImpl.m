@@ -29,8 +29,15 @@ static const NSUInteger kMaxBuffersInFlight = 3;
     void* _uniformBufferAddress;
     
     vector_uint2 _viewportSize;
-    
+}
+
+-(void*) RequestBufferWithLabel:(NSString*) label length:(NSUInteger) length
+{
     id<MTLBuffer> textureBuffer;
+
+    textureBuffer = [_device newBufferWithLength: length options:MTLResourceStorageModeShared];
+    
+    textureBuffer.label = label;
 }
 
 -(void) SetMetalKitView:(MTKView *)theView;
@@ -60,11 +67,6 @@ static const NSUInteger kMaxBuffersInFlight = 3;
     depthStateDesc.depthCompareFunction = MTLCompareFunctionLess;
     depthStateDesc.depthWriteEnabled = YES;
     _depthState = [_device newDepthStencilStateWithDescriptor:depthStateDesc];
-
-    textureBuffer = [_device newBufferWithLength:sizeof(AAPLVertex[6])
-                                    options:MTLResourceStorageModeShared];
-    
-    textureBuffer.label = "TextureBuffer";
 
     _commandQueue = [_device newCommandQueue];
     
@@ -173,18 +175,6 @@ static const NSUInteger kMaxBuffersInFlight = 3;
            {
                void* test;
                id<MTLTexture> texture = (__bridge id<MTLTexture>)test;
-               
-               AAPLVertex verts[6] =
-               {
-                          // Pixel positions, Texture coordinates
-                          { {  250,  -250 },  { 1.f, 1.f } },
-                          { { -250,  -250 },  { 0.f, 1.f } },
-                          { { -250,   250 },  { 0.f, 0.f } },
-
-                          { {  250,  -250 },  { 1.f, 1.f } },
-                          { { -250,   250 },  { 0.f, 0.f } },
-                          { {  250,   250 },  { 1.f, 0.f } },
-               };
                
                textureBuffer.contents * = verts;
                

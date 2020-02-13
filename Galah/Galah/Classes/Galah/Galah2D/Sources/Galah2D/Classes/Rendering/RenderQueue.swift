@@ -15,24 +15,24 @@ import Foundation
 
 public protocol RenderQueue
 {
-    private var QueuePointer: UnsafeMutableRawPointer;
+    var QueuePointer: UnsafeMutableRawPointer { get };
 
-    public func IsClear() -> bool;
+    func IsClear() -> Bool;
     
-    public func BatchBufferSize() -> int;
-    public func BatchBufferCount() -> int;
-    public func ItemBufferSize() -> int;
-    public func ItemBufferCount() -> int;
+    func BatchBufferSize() -> Int;
+    func BatchBufferCount() -> Int;
+    func ItemBufferSize() -> Int;
+    func ItemBufferCount() -> Int;
     
     init();
-    public func PushBatch(_ texture: Texture) -> int;
+    func PushBatch(_ texture: Texture) -> Int;
     
-    public func CanFitItems(_ itemCount: int) -> bool;
-    public func GrowItemBuffer(_ itemCount: int);
-    public func CanFitBatches(_ batchCount: int) -> bool;
-    public func GrowBatchBuffer(_ batchCount: int);
+    func CanFitItems(_ itemCount: Int) -> Bool;
+    func GrowItemBuffer(_ itemCount: Int);
+    func CanFitBatches(_ batchCount: Int) -> Bool;
+    func GrowBatchBuffer(_ batchCount: Int);
 
     //Returns batch relative position of item.
-    public func PushItemToRenderBatch(batchPosition: int, itemPosition: Vec2, texturePosition: Vec2) -> int;
-    public func GetBatchItemCount(_ batchPosition: int) -> int;
+    func PushItemToRenderBatch(batchPosition: Int, itemPosition: FVec2, texturePosition: FVec2) -> Int;
+    func GetBatchItemCount(_ batchPosition: Int) -> Int;
 }

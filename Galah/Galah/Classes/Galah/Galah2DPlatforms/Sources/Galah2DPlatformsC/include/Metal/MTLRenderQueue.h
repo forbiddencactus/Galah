@@ -2,13 +2,15 @@
 #define MTLRenderQueue_h
 
 #include "Common/Texture.h"
+#include "Common/Rects.h"
+#include "ShaderTypes.h"
 
 /*
  Basic layout:
  Buffer of 1024 RenderItems
  Buffer of 128 RenderBatches
  
- They can each grow by allocating another 1024x batch if space runs out.
+ They can each grow by allocating a bigger buffer if space runs out.
  */
 
 /*
@@ -22,12 +24,12 @@
 #define MTLRENDERQUEUE_DEFAULT_RENDERITEM_SIZE = 1024
 #define MTLRENDERQUEUE_DEFAULT_RENDERBATCH_SIZE = 128
 
+@class MetalImpl;
+@protocol MTLBuffer;
+
 typedef struct
 {
-    float PositionX;
-    float PositionY;
-    float TexX;
-    float TexY;
+    AAPLVertex verts[6];
 }   RenderItem;
 
 typedef struct
@@ -39,7 +41,9 @@ typedef struct
 
 typedef struct
 {
-    RenderItem* itemBuffer;
+    MetalImpl* renderer;
+    
+    id<MTLBuffer> itemBuffer;
     int itemCount;
     int itemSize;
     
@@ -49,7 +53,10 @@ typedef struct
     
 }   RenderQueue;
 
-RenderQueue* renderqueue_new();
+//itemBuffSize and renderBatchBuffSize allocate the initial size of the buffer based on multiples of the default size. So a reasonable 'initial' value is 1.
+RenderQueue* renderqueue_new(MetalImpl* renderer, int itemBuffSize, int renderBatchBuffSize);
+RenderQueue* renderqueue_new(MetalImpl* renderer);
+
 void renderqueue_clear(RenderQueue* queue);
 bool renderqueue_isclear(RenderQueue* queue);
 
@@ -62,7 +69,7 @@ bool renderqueue_can_fit_batches(RenderQueue* queue, int batchCount);
 void renderqueue_grow_batches(RenderQueue* queue, int batchCount);
 
 //Returns batch relative position of item. 
-int renderbatch_push_renderitem(RenderQueue* queue, int batchPos, int posx, int posy, int texx, int texy);
+int renderbatch_push_renderitem(RenderQueue* queue, int batchPos, Vec2 pos, GRect tex);
 RenderItem* renderbatch_get_renderitem(RenderQueue* queue, int batchPos, int position);
 
 #endif
