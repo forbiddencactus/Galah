@@ -46,10 +46,10 @@ public struct Rect<T: Numeric>
     public let Position: Vec2<T>; //Top Left
     public let Size: Size<T>; //Bottom Right
     
-    public var x { get { return Position.x; } }
-    public var y { get { return Position.y; } }
-    public var width { get { return Size.Width; } }
-    public var height { get { return Size.Height; } }
+    public var x: T { get { return Position.x; } }
+    public var y: T { get { return Position.y; } }
+    public var width: T { get { return Size.Width; } }
+    public var height: T { get { return Size.Height; } }
     
     public init (_ position: Vec2<T>, _ size: Size<T>)
     {

@@ -31,13 +31,20 @@ static const NSUInteger kMaxBuffersInFlight = 3;
     vector_uint2 _viewportSize;
 }
 
--(void*) RequestBufferWithLabel:(NSString*) label length:(NSUInteger) length
+-(id<MTLBuffer>) RequestBufferWithLabel:(NSString*) label length:(NSUInteger) length
 {
     id<MTLBuffer> textureBuffer;
 
     textureBuffer = [_device newBufferWithLength: length options:MTLResourceStorageModeShared];
     
     textureBuffer.label = label;
+    
+    return textureBuffer;
+}
+
+-(void) FreeBuffer:(id<MTLBuffer>) buff
+{
+    buff f
 }
 
 -(void) SetMetalKitView:(MTKView *)theView;
