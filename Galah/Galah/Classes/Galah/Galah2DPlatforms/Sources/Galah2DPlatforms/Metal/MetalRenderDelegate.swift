@@ -16,6 +16,8 @@ import Galah2DPlatformsC
 @available(OSX 10.11, *)
 public class MetalRenderDelegate: RenderDelegate
 {
+    public var RenderQueue: Array<RenderQueue>!
+    
     private var metalRenderer: MetalImpl!//UnsafeMutablePointer<MetalImpl>
     
     private var _renderTarget: RenderTarget! = nil;
@@ -62,11 +64,11 @@ public class MetalRenderDelegate: RenderDelegate
         
     }
     
-    public func SetTargetResolution(_ resolution: Rect<Int>)
+    public func SetTargetResolution(_ resolution: Size)
     {
         renderer_setviewportsize(metalRenderer, Int32(resolution.Width), Int32(resolution.Height));
     }
-
+    
     
     
 }

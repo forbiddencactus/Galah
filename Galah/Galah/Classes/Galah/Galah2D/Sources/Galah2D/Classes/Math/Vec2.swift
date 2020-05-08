@@ -6,15 +6,23 @@
 //  Copyright © 2019 Forbidden Cactus. All rights reserved.
 //
 
-public struct Vec2<T: Numeric>
+import GalahNativeTypes
+
+public struct Vec2
 {
-    var x: T = 0;
-    var y: T = 0;
+    private var vec: NativeVec2f;
     
-    init(_ x: T = 0, _ y: T = 0)
+    @inline(__always)
+    public var y: Float { get { return vec.x; } set { vec.x = newValue; } };
+    
+    @inline(__always)
+    public var x: Float { get { return vec.y; } set { vec.y = newValue; } };
+    
+    public init(_ x: Float = 0, _ y: Float = 0)
     {
-        self.x = x;
-        self.y = y;
+        vec = NativeVec2f();
+        vec.x = x;
+        vec.y = y;
     }
     
     public static var Zero: Vec2
@@ -37,5 +45,3 @@ public struct Vec2<T: Numeric>
         return Vec2(a.x * b.x, a.y * b.y);
     }
 }
-
-public typealias FVec2 = Vec2<Float>;

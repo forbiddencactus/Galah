@@ -44,7 +44,7 @@ static const NSUInteger kMaxBuffersInFlight = 3;
 
 -(void) FreeBuffer:(id<MTLBuffer>) buff
 {
-    buff f
+    //buff free
 }
 
 -(void) SetMetalKitView:(MTKView *)theView;
@@ -183,11 +183,9 @@ static const NSUInteger kMaxBuffersInFlight = 3;
                void* test;
                id<MTLTexture> texture = (__bridge id<MTLTexture>)test;
                
-               textureBuffer.contents * = verts;
+               //textureBuffer.contents * = verts;
                
-               [renderEncoder setVertexBuffer:textureBuffer
-                                       offset:0
-                                     atIndex:AAPLVertexInputIndexVertices];
+               //[renderEncoder setVertexBuffer:textureBuffer offset:0 atIndex:AAPLVertexInputIndexVertices];
 
                [renderEncoder setVertexBytes:&_viewportSize
                                       length:sizeof(_viewportSize)

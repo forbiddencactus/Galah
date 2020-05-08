@@ -5,26 +5,26 @@
 //  Created by Alex Griffin on 14/1/20.
 //
 
-public struct Size<T: Numeric>
+public struct Size
 {
-    public let Width: T;
-    public let Height: T;
+    public let Width: Float;
+    public let Height: Float;
     
-    public init(_ width: T, _ height: T)
+    public init(_ width: Float, _ height: Float)
     {
         Width = width;
         Height = height;
     }
 }
 
-public struct Quad<T: Numeric>
+public struct Quad
 {
-    public let TL: Vec2<T>;
-    public let TR: Vec2<T>;
-    public let BL: Vec2<T>;
-    public let BR: Vec2<T>;
+    public let TL: Vec2;
+    public let TR: Vec2;
+    public let BL: Vec2;
+    public let BR: Vec2;
     
-    public init(tl: Vec2<T>, tr: Vec2<T>, bl: Vec2<T>, br: Vec2<T>)
+    public init(tl: Vec2, tr: Vec2, bl: Vec2, br: Vec2)
     {
         self.TL = tl;
         self.TR = tr;
@@ -32,7 +32,7 @@ public struct Quad<T: Numeric>
         self.BR = br;
     }
     
-    public init(_ rect: Rect<T>)
+    public init(_ rect: Rect)
     {
         self.TL = rect.Position;
         self.TR = Vec2(rect.x + rect.width, rect.y);
@@ -41,17 +41,17 @@ public struct Quad<T: Numeric>
     }
 }
 
-public struct Rect<T: Numeric>
+public struct Rect
 {
-    public let Position: Vec2<T>; //Top Left
-    public let Size: Size<T>; //Bottom Right
+    public let Position: Vec2; //Top Left
+    public let Size: Size; //Bottom Right
     
-    public var x: T { get { return Position.x; } }
-    public var y: T { get { return Position.y; } }
-    public var width: T { get { return Size.Width; } }
-    public var height: T { get { return Size.Height; } }
+    @inline (__always) public var x: Float { get { return Position.x; } }
+    @inline (__always) public var y: Float { get { return Position.y; } }
+    @inline (__always) public var width: Float { get { return Size.Width; } }
+    @inline (__always) public var height: Float { get { return Size.Height; } }
     
-    public init (_ position: Vec2<T>, _ size: Size<T>)
+    public init (_ position: Vec2, _ size: Size)
     {
         Position = position;
         Size = size;

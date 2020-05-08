@@ -1,0 +1,4 @@
+module GalahNativeTypes {
+    umbrella header "NativeTypes.h"
+    export *
+}

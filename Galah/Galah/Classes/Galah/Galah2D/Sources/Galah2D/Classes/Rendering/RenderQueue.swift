@@ -5,7 +5,6 @@
 //  Created by Alex Griffin on 11/2/20.
 //
 
-import Foundation
 
 /*
  A RenderQueue represents an array of batched items that will be drawn on a particular frame.
@@ -33,6 +32,6 @@ public protocol RenderQueue
     func GrowBatchBuffer(_ batchCount: Int);
 
     //Returns batch relative position of item.
-    func PushItemToRenderBatch(batchPosition: Int, itemPosition: FVec2, texturePosition: FVec2) -> Int;
+    func PushItemToRenderBatch(batchPosition: Int, itemPosition: Vec2, texturePosition: Vec2) -> Int;
     func GetBatchItemCount(_ batchPosition: Int) -> Int;
 }

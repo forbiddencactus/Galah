@@ -4,6 +4,8 @@
 #include "Common/Texture.h"
 #include "Common/Rects.h"
 #include "ShaderTypes.h"
+//TODO: Figure out least gross way to import the Galah native types. 
+//#include "GalahNativeTypes-NativeTypes.h"
 
 /*
  Basic layout:
@@ -55,7 +57,7 @@ typedef struct
 
 //itemBuffSize and renderBatchBuffSize allocate the initial size of the buffer based on multiples of the default size. So a reasonable 'initial' value is 1.
 RenderQueue* renderqueue_new(MetalImpl* renderer, int itemBuffSize, int renderBatchBuffSize);
-RenderQueue* renderqueue_new(MetalImpl* renderer);
+//RenderQueue* renderqueue_new(MetalImpl* renderer);
 
 void renderqueue_clear(RenderQueue* queue);
 bool renderqueue_isclear(RenderQueue* queue);

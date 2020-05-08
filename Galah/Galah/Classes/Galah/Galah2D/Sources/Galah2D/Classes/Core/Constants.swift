@@ -9,5 +9,5 @@ public class Constants
 {
     private init() {}
     
-    public static let TargetResolution: Size<Int> = Size<Int>(1920, 1080);
+    public static let TargetResolution: Size = Size(1920, 1080);
 }
