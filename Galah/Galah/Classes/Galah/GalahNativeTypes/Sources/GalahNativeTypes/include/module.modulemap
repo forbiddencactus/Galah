@@ -1,4 +1,34 @@
-module GalahNativeTypes {
-    umbrella header "NativeTypes.h"
-    export *
+module GalahNativeTypes
+{
+    module Maths
+    {
+        module Vector
+        {
+            header "Maths/Vector.h"
+            export *
+        }
+        
+        module Rects
+        {
+            header "Maths/Rects.h"
+            export *
+        }
+        
+        module Matrices
+        {
+            header "Maths/Matrices.h"
+            export *
+        }
+    }
+    
+    module Render
+    {
+        module RenderTypes
+        {
+            header "Render/RenderTypes.h"
+            export *
+        }
+    }
+    //umbrella header "NativeTypes.h"
+    //export *
 }

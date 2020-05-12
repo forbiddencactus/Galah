@@ -1,12 +1,12 @@
 //
-//  FVec2.swift
+//  Vec2.swift
 //  Galah
 //
 //  Created by Alex Griffin on 29/12/19.
 //  Copyright © 2019 Forbidden Cactus. All rights reserved.
 //
 
-import GalahNativeTypes
+import GalahNativeTypes.Maths.Vector
 
 public struct Vec2
 {

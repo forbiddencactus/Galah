@@ -1,5 +1,5 @@
-#ifndef galah_nativetypes_mat3x3
-#define galah_nativetypes_mat3x3
+#ifndef galah_nativetypes_matrices
+#define galah_nativetypes_matrices
 
 //Column major matrix.
 typedef struct __attribute__((__aligned__(16)))

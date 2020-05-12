@@ -2,11 +2,12 @@
 #define MTLRenderQueue_h
 
 #include "Common/Texture.h"
-#include "Common/Rects.h"
+#include "NativeTypes/Vector.h"
+#include "NativeTypes/Rects.h"
 #include "ShaderTypes.h"
 //TODO: Figure out least gross way to import the Galah native types. 
-//#include "GalahNativeTypes-NativeTypes.h"
-
+//#include <GalahNativeTypes.h>
+//#include "../../../../../GalahNativeTypes/Sources/GalahNativeTypes/include/NativeTypes.h"
 /*
  Basic layout:
  Buffer of 1024 RenderItems
@@ -71,7 +72,7 @@ bool renderqueue_can_fit_batches(RenderQueue* queue, int batchCount);
 void renderqueue_grow_batches(RenderQueue* queue, int batchCount);
 
 //Returns batch relative position of item. 
-int renderbatch_push_renderitem(RenderQueue* queue, int batchPos, Vec2 pos, GRect tex);
+//int renderbatch_push_renderitem(RenderQueue* queue, int batchPos, NativeVec2f pos, Native tex);
 RenderItem* renderbatch_get_renderitem(RenderQueue* queue, int batchPos, int position);
 
 #endif

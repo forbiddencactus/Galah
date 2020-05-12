@@ -7,7 +7,7 @@ typedef struct
 {
     float width;
     float height;
-} Size;
+} NativeSize;
 
 typedef struct
 {
@@ -15,6 +15,6 @@ typedef struct
     float tr;
     float bl;
     float br;
-} Quad;
+} NativeQuad;
 
 #endif

@@ -244,7 +244,7 @@ static const NSUInteger kMaxBuffersInFlight = 3;
 
 - (void)mtkView:(nonnull MTKView *)view drawableSizeWillChange:(CGSize)size
 {
-    BridgeSize cSize;
+    NativeSize cSize;
     cSize.width = size.width;
     cSize.height = size.height;
     

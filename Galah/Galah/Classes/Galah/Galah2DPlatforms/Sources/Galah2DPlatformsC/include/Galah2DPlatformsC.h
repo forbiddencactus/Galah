@@ -1,4 +1,3 @@
-//#include "Common/Structs.h"
 #include "Common/Callback.h"
 #include "Common/Texture.h"
 

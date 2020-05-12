@@ -54,7 +54,7 @@ public class MetalRenderDelegate: RenderDelegate
     private func SetUpSizeChangedCallback()
     {
         // The callback closure in Swift.
-        let callback : CallbackWithSize? = { (size : BridgeSize) -> () in
+        let callback : CallbackWithSize? = { (size : NativeSize) -> () in
 
             Renderer.Instance.RenderDelegate.ViewSizeWillChange(width: size.width, height: size.height);
         }

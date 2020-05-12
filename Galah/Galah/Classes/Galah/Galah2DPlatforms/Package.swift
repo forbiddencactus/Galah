@@ -38,13 +38,14 @@ let package = Package(
             targets: ["Galah2DPlatformsC", "Galah2DPlatforms"]),
     ],
     dependencies:[
+        .package(path: "./GalahNativeTypes"),
         .package(path: "./Galah2D")
     ],
     targets:
     [
         .target(
             name: "Galah2DPlatformsC",
-            dependencies: [],
+            dependencies: ["GalahNativeTypes"],
             path: "Sources/Galah2DPlatformsC"/*,
             cxxSettings: [CXXSetting.unsafeFlags(["-fno-objc-arc"])]*/
         ),
