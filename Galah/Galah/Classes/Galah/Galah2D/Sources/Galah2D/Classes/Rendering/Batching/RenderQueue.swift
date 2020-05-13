@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  RenderQueue.swift
 //  
 //
 //  Created by Alex Griffin on 11/2/20.
@@ -7,9 +7,9 @@
 
 
 /*
- A RenderQueue represents an array of batched items that will be drawn on a particular frame.
- Platforms are supposed to implement this in a platform-friendly way to minimise pushing around memory so as to feed verts and stuff
- in a renderer-friendly way.
+ A RenderQueue represents an array of batched items that will be drawn on a particular frame. It's basically a frame command buffer of sorts.
+ Platforms are supposed to implement the platform specific approach so as to push the information to the renderer as quickly as possible.
+ There are (usually) three RenderQueues in our render pipeline.
 */
 
 public protocol RenderQueue

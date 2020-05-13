@@ -23,9 +23,21 @@ module GalahNativeTypes
     
     module Render
     {
-        module RenderTypes
+        module Vert
         {
-            header "Render/RenderTypes.h"
+            header "Render/Vert.h"
+            export *
+        }
+        
+        module SpriteQuad
+        {
+            header "Render/SpriteQuad.h"
+            export *
+        }
+        
+        module RenderSettings
+        {
+            header "Render/RenderSettings.h"
             export *
         }
     }

@@ -52,13 +52,6 @@ public class Transform: Component
         }
     }
     
-    private var _depth: Int = 0;
-    public var Depth: Int
-    {
-        get { return _depth; }
-        set(newDepth) {_depth = newDepth;}
-    }
-    
     public func Construct()
     {        
         self.InternalWorldRefresh();

@@ -16,6 +16,20 @@ open class Node
         get { return _transform; }
     }
     
+    private var _depth: Int = 0;
+    public var Depth: Int
+    {
+        get { return _depth; }
+        set(newDepth) { self.SetNewDepth(newDepth: newDepth); }
+    }
+    
+    private var _enabled: Bool = true;
+    public var Enabled: bool
+    {
+        get { return _enabled; }
+        set(isEnabled) {}
+    }
+    
     public init()
     {
         _components = Array<Component>();
@@ -32,55 +46,27 @@ open class Node
         
         return component;
     }
-}
-
-public protocol ComponentProtocol: AnyObject
-{
-    func Construct();
-    func Begin();
-    func Tick();
-}
-
-public extension ComponentProtocol
-{
-    func Construct() {}
-    func Begin() {}
-    func Tick() {}
-}
-
-open class _Component
-{
-    private var _node: Node? = nil;
-    public var Node: Node
-    {
-        get
-        {
-            return _node!;
-        }
-    }
     
-    //Try not to use this constructor, instead use Node.AddComponent. :)
-    public required init() {}
     
-    internal func Create(_ node: Node)
+    private func SetNewDepth(newDepth: Int)
     {
-        _node = node;
-        
-        guard let this = self as? ComponentProtocol else {
-            return
+        for component in _components
+        {
+            if let renderComponent = component as? RenderComponent
+            {
+                renderComponent.DepthWillChange(oldDepth:_depth, newDepth:newDepth);
+            }
         }
-        
-        this.Construct();
+        _depth = newDepth;
     }
         
-    public var IsTicking: Bool
+    private func SetEnabled(isEnabled: Bool)
     {
-        get
+        _enabled = isEnabled;
+        
+        for component in _components
         {
-            return false; //TODO: IMPLEMENT!
+            component.OnEnable(willEnable: isEnabled);
         }
     }
 }
-
-public typealias Component = _Component & ComponentProtocol;
-

@@ -32,11 +32,6 @@
 
 typedef struct
 {
-    AAPLVertex verts[6];
-}   RenderItem;
-
-typedef struct
-{
     RenderItem* buffer;
     int count;
     Texture* Texture;

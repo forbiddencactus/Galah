@@ -1,5 +1,5 @@
-#ifndef Texture_h
-#define Texture_h
+#ifndef galah_nativetypes_texture
+#define galah_nativetypes_texture
 
 typedef struct
 {
