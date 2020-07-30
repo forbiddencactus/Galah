@@ -7,5 +7,9 @@
 
 open class RenderComponent: Component
 {
+    public func Construct()
+    {
+       //s 
+    }
     public func DepthWillChange(oldDepth: Int, newDepth: Int) {}
 }

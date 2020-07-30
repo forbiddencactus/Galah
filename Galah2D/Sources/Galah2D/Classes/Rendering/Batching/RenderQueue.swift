@@ -35,3 +35,8 @@ public protocol RenderQueue
     func PushItemToRenderBatch(batchPosition: Int, itemPosition: Vec2, texturePosition: Vec2) -> Int;
     func GetBatchItemCount(_ batchPosition: Int) -> Int;
 }
+
+public protocol RenderBatch
+{
+    
+}
