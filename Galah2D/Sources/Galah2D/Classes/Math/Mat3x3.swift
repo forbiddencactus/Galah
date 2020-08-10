@@ -11,7 +11,7 @@ import GalahNativeTypes;
 public struct Mat3x3
 {
     //Column major.
-    private var mat: NativeMat3x3;
+    private var mat: NativeFloat3x3;
     @inline(__always) public var m00: Float { get { return mat.m00; } set { mat.m00 = newValue; } };
     @inline(__always) public var m01: Float { get { return mat.m01; } set { mat.m01 = newValue; } };
     @inline(__always) public var m02: Float { get { return mat.m02; } set { mat.m02 = newValue; } };
@@ -34,30 +34,32 @@ public struct Mat3x3
          m21: Float = 0,
          m22: Float = 0)
     {
-        self.mat = NativeMat3x3();
-        self.mat.m00 = m00;
-        self.mat.m10 = m10;
-        self.mat.m20 = m20;
-        self.mat.m01 = m01;
-        self.mat.m11 = m11;
-        self.mat.m21 = m21;
-        self.mat.m02 = m02;
-        self.mat.m12 = m12;
-        self.mat.m22 = m22;
+        self.mat = NativeFloat3x3(
+            m00 : m00,
+            m10 : m10,
+            m20 : m20,
+            m01 : m01,
+            m11 : m11,
+            m21 : m21,
+            m02 : m02,
+            m12 : m12,
+            m22 : m22
+        );
     }
     
     init(_ m: Mat3x3)
     {
-        self.mat = NativeMat3x3();
-        self.mat.m00 = m.m00;
-        self.mat.m10 = m.m10;
-        self.mat.m20 = m.m20;
-        self.mat.m01 = m.m01;
-        self.mat.m11 = m.m11;
-        self.mat.m21 = m.m21;
-        self.mat.m02 = m.m02;
-        self.mat.m12 = m.m12;
-        self.mat.m22 = m.m22;
+        self.mat = NativeFloat3x3(
+            m00 : m.m00,
+            m10 : m.m10,
+            m20 : m.m20,
+            m01 : m.m01,
+            m11 : m.m11,
+            m21 : m.m21,
+            m02 : m.m02,
+            m12 : m.m12,
+            m22 : m.m22
+        );
     }
 
     static var Identity: Mat3x3

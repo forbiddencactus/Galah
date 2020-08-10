@@ -10,10 +10,13 @@
 //Ideally our renderqueue will be smart enough to know when to prepopulate things when. 
 typedef struct
 {
-    NativeMat3x3 matrix;
-    int texatlasindex;
-    NativeVert verts[6];
-    
-} NativeSpriteQuad;
+    NativeFloat3x3 matrix;
+    int texatlasindex;    
+} NativeTexPoint2D;
+
+typedef struct
+{
+    NativeVert vert[6];
+} NativeTexQuad2D;
 
 #endif

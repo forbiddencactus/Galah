@@ -7,7 +7,7 @@
 
 public class Renderer
 {
-    private static let _layerBufferSize: Int = 124;
+    private static let LAYERBUFFERSIZE: Int = 124;
     
     private static var _instance: Renderer! = nil;
     public static var Instance: Renderer
@@ -30,14 +30,12 @@ public class Renderer
     public var TargetResolution: Size { get { return _targetResolution; } set { self.SetTargetResolution(newValue); } }
     
     // Render Layers & Batches
-    private var firstLayer: RenderLayer? = nil;
-    private var layerBuffer: UnsafeMutableBufferPointer<RenderLayer>? = nil;
+    private var renderLayers: ContiguousArray<RenderLayer>? = nil;
     
     private init()
     {
-        //Pre fill layer buffer.
-        layerBuffer = UnsafeMutableBufferPointer<RenderLayer>.allocate(capacity: Renderer._layerBufferSize);
-        layerBuffer?.initialize(repeating: RenderLayer());
+        renderLayers = ContiguousArray<RenderLayer>();
+        renderLayers?.reserveCapacity(Renderer.LAYERBUFFERSIZE);
     }
     
     public func Render()
@@ -54,33 +52,25 @@ public class Renderer
     
     internal func GetLayer(_ depth: Int) -> RenderLayer
     {
-        var layer: RenderLayer? = firstLayer;
-        
-        while (layer != nil)
+        for i in 0..<renderLayers?.count
         {
-            if (layer!.depth == depth)
-            {
-                return layer!;
-            }
-            
-            layer = layer!.nextLayer;
+            print(i)
         }
-        
-        //No layer found? Insert at appropriate depth in the list.
     }
 }
 
-internal class RenderLayer: BufferItem
+internal struct RenderLayer: BufferItem
 {
     internal var isActive: Bool = false;
     
     var depth: Int;
-    var nextLayer: RenderLayer? = nil;
+    var layers: ContiguousArray<RenderComponent>? = nil;
+    
+    var firstItem
         
     fileprivate init()
     {
         
     }
-    
 }
 

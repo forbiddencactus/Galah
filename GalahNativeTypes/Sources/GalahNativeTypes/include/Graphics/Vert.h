@@ -6,8 +6,8 @@
 
 typedef struct
 {
-    NativeVec2f pos;
-    NativeVec2f uv;
+    NativeFloat2 pos;
+    NativeFloat2 uv;
 } NativeVert;
 
 #endif

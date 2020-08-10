@@ -5,13 +5,21 @@ typedef struct __attribute__((__aligned__(8)))
 {
     float x;
     float y;
-} NativeVec2f;
+} NativeFloat2;
 
 typedef struct __attribute__((__aligned__(16)))
 {
     float x;
     float y;
     float z;
-} NativeVec3f;
+} NativeFloat3;
+
+typedef struct __attribute__((__aligned__(16)))
+{
+    float x;
+    float y;
+    float z;
+    float w;
+} NativeFloat4;
 
 #endif
