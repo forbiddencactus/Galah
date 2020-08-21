@@ -25,15 +25,20 @@ FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-//  Created by Alex Griffin on 12/1/20.
+//  Created by Alex Griffin on 14/1/20.
 //
 
-public class RenderTarget
+
+
+//Gets the pointer to an object an retains it.
+public func GetPointerFromObject(_ object: AnyObject) -> UnsafeMutableRawPointer
 {
-    public var TargetPointer: UnsafeMutableRawPointer;
-    
-    public init(_ targetPointer: UnsafeMutableRawPointer)
-    {
-        TargetPointer = targetPointer;
-    }
+    return UnsafeMutableRawPointer(Unmanaged.passRetained(object).toOpaque());
+}
+
+
+//Releases a pointer
+public func ReleasePointer(_ pointer: UnsafeMutableRawPointer)
+{
+    Unmanaged<AnyObject>.fromOpaque(pointer).release();
 }
