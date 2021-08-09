@@ -33,7 +33,7 @@ DEALINGS IN THE SOFTWARE.
 internal class ContiguousMutableBuffer<T> where T: BufferElement
 {
     private let blueprint: T = T();
-    private let buffer: UnsafeMutablePointer<T?>;
+    private var buffer: UnsafeMutablePointer<T?>;
     
     private let initialCapacity: Int;
     private var capacity: Int;
@@ -67,13 +67,45 @@ internal class ContiguousMutableBuffer<T> where T: BufferElement
     
     public func Add(_ element: T)
     {
+        if (count < capacity)
+        {
         let p: UnsafeMutablePointer<T?> = buffer.advanced(by: count);
         p.initialize(to: element);
         
         count += 1;
+        }
+        else
+        {
+            //Resize.
+            self.Resize();
+            self.Add(element);
+        }
     }
     
-    //Insert 'insert' function here. 
+    public func InsertNew(_ index: Int) throws
+    {
+        do
+        {
+        try self.Insert(index, blueprint);
+        }
+        catch ContiguousMutableBufferError.OutOfRange
+        {
+        throw ContiguousMutableBufferError.OutOfRange;
+        }
+        
+    }
+    
+    public func Insert(_ index: Int, _ element: T) throws
+    {
+        if (index < count)
+        {
+            let p: UnsafeMutablePointer<T?> = buffer.advanced(by: index);
+            //p.deinitialize(count: 1); //Not needed?
+            p.initialize(to: element);
+        }
+        
+        throw ContiguousMutableBufferError.OutOfRange;
+    }
     
     public func Delete(_ index: Int) throws
     {
@@ -86,6 +118,7 @@ internal class ContiguousMutableBuffer<T> where T: BufferElement
             }
             else
             {
+                //WARNING: Not entirely sure if this will blow up the memory. Unit tests?
                 let p: UnsafeMutablePointer<T?> = buffer.advanced(by: index);
                     
                 p.assign(from: buffer.advanced(by: index + 1),count: count - index );
@@ -95,6 +128,27 @@ internal class ContiguousMutableBuffer<T> where T: BufferElement
         }
         
         throw ContiguousMutableBufferError.OutOfRange;
+    }
+    
+    internal func Resize()
+    {
+        let newCapacity: Int = capacity * capacity;
+        let oldBuffer: UnsafeMutablePointer<T?> = buffer;
+        buffer = UnsafeMutablePointer<T?>.allocate(capacity: newCapacity);
+        
+        buffer.assign(from: oldBuffer, count: capacity);
+        capacity = newCapacity;
+        
+        oldBuffer.deallocate();
+        
+        /*let test: (ContiguousMutableBuffer<BufferElement>) ->() ->() = ContiguousMutableBuffer<BufferElement>.AddNew;
+        
+        let hullo: ContiguousMutableBuffer<BufferElement> = ContiguousMutableBuffer<BufferElement>(withInitialCapacity: 5);
+        
+        test(hullo)();*/
+        
+        
+        //ARC will deallocate old buffer ref here? ¯\_(ツ)_/¯
     }
     
     deinit

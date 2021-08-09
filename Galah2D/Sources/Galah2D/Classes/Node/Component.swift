@@ -33,7 +33,7 @@ public protocol ComponentProtocol: AnyObject
     //Basic stuff
     func Construct();
     func Begin();
-    func Tick();
+    //func Tick();
     
     //Enable disable
     func OnEnable(willEnable: Bool);
