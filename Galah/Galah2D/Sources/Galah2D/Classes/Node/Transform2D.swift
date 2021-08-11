@@ -28,24 +28,10 @@ DEALINGS IN THE SOFTWARE.
 //  Created by Alex Griffin on 31/12/19.
 //
 
-public class Transform: Component
-{
-    private var _parent: Transform? = nil;
-    public var Parent: Transform?
-    {
-        get
-        {
-            return _parent;
-        }
-        
-        set(newParent)
-        {
-            self.SetParent(parent: newParent);
-        }
-    }
-    
-    private var _children: Array<Transform> = Array<Transform>();
-    
+import Galah;
+
+public class Transform2D: Transform
+{    
     private var _localPosition: Vec2 = Vec2.Zero;
     private var _worldPosition: Vec2 = Vec2.Zero;
     private var _localRotation: Float = 0;
@@ -75,7 +61,7 @@ public class Transform: Component
     }
     
     public func Construct()
-    {        
+    {
         self.InternalWorldRefresh();
     }
     
@@ -209,4 +195,5 @@ public class Transform: Component
         }
     }
 }
+
 

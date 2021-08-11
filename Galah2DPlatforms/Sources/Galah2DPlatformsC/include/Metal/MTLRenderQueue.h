@@ -24,7 +24,7 @@
 
 //TODO: Place asserts around the implementation of this to check for basic overflow fun.
 
-#define MTLRENDERQUEUE_DEFAULT_RENDERITEM_SIZE = 1024
+/*#define MTLRENDERQUEUE_DEFAULT_RENDERITEM_SIZE = 1024
 #define MTLRENDERQUEUE_DEFAULT_RENDERBATCH_SIZE = 128
 
 @class MetalImpl;
@@ -32,9 +32,9 @@
 
 typedef struct
 {
-    RenderItem* buffer;
+    //RenderItem* buffer;
     int count;
-    Texture* Texture;
+    //Texture* Texture;
 }   RenderBatch;
 
 typedef struct
@@ -71,4 +71,4 @@ void renderqueue_grow_batches(RenderQueue* queue, int batchCount);
 RenderItem* renderbatch_get_renderitem(RenderQueue* queue, int batchPos, int position);
 
 #endif
-
+*/

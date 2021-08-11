@@ -25,58 +25,70 @@ FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-//  Created by Alex Griffin on 13/5/20.
+//  Created by Alex Griffin on 31/12/19.
 //
 
-public protocol ComponentProtocol: AnyObject
+open class Node: BufferElement
 {
-    //Basic stuff
-    func Construct();
-    func Begin();
-    //func Tick();
+    private var _transform: Transform!;
+    private var _components: Array<Component>
     
-    //Enable disable
-    func OnEnable(willEnable: Bool);
-}
-
-public extension ComponentProtocol
-{
-    func Construct() {}
-    func Begin() {}
-    func Tick() {}
-    func OnEnable(willEnable: Bool) {}
-}
-
-open class _Component: BufferElement
-{
-    private var _node: Node? = nil;
-    public var Node: Node
+    public var Transform: Transform
     {
-        get
-        {
-            return _node!;
-        }
+        get { return _transform; }
     }
     
-    internal func Create(_ node: Node)
+    private var _depth: Int = 0;
+    public var Depth: Int
     {
-        _node = node;
-        
-        guard let this = self as? ComponentProtocol else {
-            return
-        }
-        
-        this.Construct();
+        get { return _depth; }
+        set(newDepth) { self.SetNewDepth(newDepth: newDepth); }
     }
-            
-    public var IsTicking: Bool
+    
+    private var _enabled: Bool = true;
+    public var Enabled: Bool
     {
-        get
+        get { return _enabled; }
+        set(isEnabled) {}
+    }
+    
+    public init()
+    {
+        _components = Array<Component>();
+        _transform = AddComponent();
+    }
+    
+    public func AddComponent<T>() -> T where T: Component
+    {
+        let component: T = T();
+        
+        component.Create(self);
+        
+        _components.append(component);
+        
+        return component;
+    }
+    
+    
+    private func SetNewDepth(newDepth: Int)
+    {
+        for component in _components
         {
-            return false; //TODO: IMPLEMENT!
+           /* if let renderComponent = component as? RenderComponent
+            {
+                renderComponent.DepthWillChange(oldDepth:_depth, newDepth:newDepth);
+            }*/
+        }
+        _depth = newDepth;
+    }
+        
+    private func SetEnabled(isEnabled: Bool)
+    {
+        _enabled = isEnabled;
+        
+        for component in _components
+        {
+            component.OnEnable(willEnable: isEnabled);
         }
     }
 }
-
-public typealias Component = _Component & ComponentProtocol;
-

@@ -25,70 +25,48 @@ FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-//  Created by Alex Griffin on 31/12/19.
+//  Created by Alex Griffin on 13/5/20.
 //
 
-open class Node
+public protocol ComponentProtocol: AnyObject
 {
-    private var _transform: Transform!;
-    private var _components: Array<Component>
+    //Basic stuff
+    func Construct();
+    func Begin();
     
-    public var Transform: Transform
+    //Enable disable
+    func OnEnable(willEnable: Bool);
+}
+
+public extension ComponentProtocol
+{
+    func Construct() {}
+    func Begin() {}
+    func OnEnable(willEnable: Bool) {}
+}
+
+open class _Component: BufferElement
+{
+    private var _node: Node? = nil;
+    public var Node: Node
     {
-        get { return _transform; }
-    }
-    
-    private var _depth: Int = 0;
-    public var Depth: Int
-    {
-        get { return _depth; }
-        set(newDepth) { self.SetNewDepth(newDepth: newDepth); }
-    }
-    
-    private var _enabled: Bool = true;
-    public var Enabled: Bool
-    {
-        get { return _enabled; }
-        set(isEnabled) {}
-    }
-    
-    public init()
-    {
-        _components = Array<Component>();
-        _transform = AddComponent();
-    }
-    
-    public func AddComponent<T>() -> T where T: Component
-    {
-        let component: T = T();
-        
-        component.Create(self);
-        
-        _components.append(component);
-        
-        return component;
-    }
-    
-    
-    private func SetNewDepth(newDepth: Int)
-    {
-        for component in _components
+        get
         {
-            if let renderComponent = component as? RenderComponent
-            {
-                renderComponent.DepthWillChange(oldDepth:_depth, newDepth:newDepth);
-            }
+            return _node!;
         }
-        _depth = newDepth;
     }
-        
-    private func SetEnabled(isEnabled: Bool)
+    
+    internal func Create(_ node: Node)
     {
-        _enabled = isEnabled;
+        _node = node;
         
-        for component in _components
-        {
-            component.OnEnable(willEnable: isEnabled);
+        guard let this = self as? ComponentProtocol else {
+            return
         }
+        
+        this.Construct();
     }
 }
+
+public typealias Component = _Component & ComponentProtocol;
+

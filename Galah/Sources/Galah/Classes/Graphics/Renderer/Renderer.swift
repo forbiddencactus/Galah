@@ -77,23 +77,23 @@ public class Renderer
         //Update matrices here?
     }
     
-    internal func GetLayer(_ depth: Int) -> RenderLayer
+    /*internal func GetLayer(_ depth: Int) -> RenderLayer
     {
         for i in 0..<renderLayers?.count
         {
             print(i)
         }
-    }
+    }*/
 }
 
 internal struct RenderLayer: BufferItem
 {
     internal var isActive: Bool = false;
     
-    var depth: Int;
+    //var depth: Int;
     var layers: ContiguousArray<RenderComponent>? = nil;
     
-    var firstItem
+    //var firstItem
         
     fileprivate init()
     {
