@@ -9,14 +9,11 @@ let package = Package(
     [
         .library(
             name: "Galah",
-            targets: ["Galah"]),
-    ],
-    dependencies:
-    [
-        .package(path: "./GalahNativeTypes")
+            targets: ["GalahNative","Galah"]),
     ],
     targets:
     [
-        .target(name: "Galah", dependencies: ["GalahNativeTypes"], path: "Sources/Galah"),
+        .target(name: "GalahNative", path: "Sources/GalahNative"),
+        .target(name: "Galah", dependencies: ["GalahNative"], path: "Sources/Galah"),
     ]
 )

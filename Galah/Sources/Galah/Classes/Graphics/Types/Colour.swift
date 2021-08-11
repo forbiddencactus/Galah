@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 //  Created by Alex Griffin on 14/1/20.
 //
 
-import GalahNativeTypes.Maths.Vector;
+import GalahNative.Maths;
 
 public struct Colour
 {

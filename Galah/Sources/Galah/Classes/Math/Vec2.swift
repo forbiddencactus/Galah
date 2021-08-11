@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 //  Created by Alex Griffin on 29/12/19.
 //
 
-import GalahNativeTypes.Maths.Vector
+import GalahNative.Maths
 
 public struct Vec2
 {

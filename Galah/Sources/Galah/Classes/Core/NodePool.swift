@@ -19,7 +19,7 @@ internal class NodePool
     struct ComponentPool
     {
         public let BatchPool: Array<ComponentPoolBatch>;
-        public let BatchTypes: Dictionary<Component>;
+        public let BatchTypes: Dictionary<Component, Bool>;
     }
     
     struct DepthPool
@@ -29,4 +29,6 @@ internal class NodePool
     }
     
     public let DepthPools: Array<DepthPool>;
+    
+    
 }

@@ -1,0 +1,14 @@
+module GalahNative
+{
+    module Memory
+    {
+        umbrella "Memory"
+        export *
+    }
+    
+    module Maths
+    {
+        umbrella "Maths"
+        export *
+    }
+}
