@@ -21,29 +21,16 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+//  Created by Alex Griffin on 31/07/2020.
+//
 
-#ifndef galah_nativetypes_vector
-#define galah_nativetypes_vector
-
-typedef struct __attribute__((__aligned__(8)))
+internal protocol BufferItem
 {
-    float x;
-    float y;
-} NativeFloat2;
+    var isActive: Bool { get set };
+}
 
-typedef struct __attribute__((__aligned__(16)))
+open class BufferElement
 {
-    float x;
-    float y;
-    float z;
-} NativeFloat3;
-
-typedef struct __attribute__((__aligned__(16)))
-{
-    float x;
-    float y;
-    float z;
-    float w;
-} NativeFloat4;
-
-#endif
+    //Due to the way these objects are allocated/init, it's a bad idea to put any constructor behaviour here.
+    public required init(){};
+}

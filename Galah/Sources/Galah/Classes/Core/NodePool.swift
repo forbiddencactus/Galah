@@ -28,6 +28,8 @@ internal class NodePool
         public let ComponentPools: Array<ComponentPool>;
     }
     
+    // Remember to also add a passbatch pool. 
+    
     public let DepthPools: Array<DepthPool>;
     
     

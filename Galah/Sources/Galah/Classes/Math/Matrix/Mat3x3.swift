@@ -137,9 +137,9 @@ public struct Mat3x3
             m22: mat.m22);
     }
 
-    public static func MultiplyVec2(m: Mat3x3, vec: Vec2) -> Vec2
+    public static func MultiplyFloat2(m: Mat3x3, vec: Float2) -> Float2
     {
-        return Vec2(
+        return Float2(
             m.mat.m00 * vec.x + m.mat.m01 * vec.y + m.mat.m02,
             m.mat.m10 * vec.x + m.mat.m11 * vec.y + m.mat.m12);
     }
@@ -163,9 +163,9 @@ public struct Mat3x3
         return Mat3x3.MultiplyMat3x3(m1: lhs, m2: rhs);
     }
 
-    public static func *(lhs: Mat3x3, rhs: Vec2) -> Vec2
+    public static func *(lhs: Mat3x3, rhs: Float2) -> Float2
     {
-        return Mat3x3.MultiplyVec2(m: lhs, vec: rhs);
+        return Mat3x3.MultiplyFloat2(m: lhs, vec: rhs);
     }
     
     enum Mat3x3Error: Error
