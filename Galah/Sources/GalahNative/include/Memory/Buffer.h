@@ -26,10 +26,11 @@ SOFTWARE.
 #define Buffer_h
 
 #include "GalahNative.h"
+
 typedef struct
 {
-    size_t elementSize;
-    size_t bufferSize;
+    memsize elementSize;
+    memsize bufferSize;
     uint count;
     uint capacity;
     Buff* buffer;
@@ -40,7 +41,7 @@ typedef struct
 //Autoresize will always resize capacity * 2.
 
 // Allocs a NativeBuffer that will hold capacity amount of elements of elementSize.
-NativeBuffer buffer_create(size_t elementSize, uint capacity, bool isAutoResize);
+NativeBuffer buffer_create(memsize elementSize, uint capacity, bool isAutoResize);
 
 // Adds an element to the end of the buffer, and returns the index. -1 if add failed.
 int buffer_add(NativeBuffer* buf, void* element);
@@ -50,6 +51,9 @@ int buffer_insert(NativeBuffer* buf, void* element, uint index);
 
 // Removes an element at the index position in the buffer, and returns the new count. -1 if remove failed.
 int buffer_remove(NativeBuffer* buf, uint index);
+
+// Removes elements from startIndex to endIndex, including endIndex.
+int buffer_remove_range(NativeBuffer* buf, uint startIndex, uint endIndex);
 
 // Gets the element at position index. Returns null if failed. 
 void* buffer_get(NativeBuffer* buf, uint index);

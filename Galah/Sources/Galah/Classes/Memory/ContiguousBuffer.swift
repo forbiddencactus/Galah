@@ -22,118 +22,96 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import GalahNative.Memory;
 
 //A contiguous buffer allocated on the heap containing elements of a particular type.
-internal class ContiguousMutableBuffer<T> where T: BufferElement
+public class ContiguousMutableBuffer<T> where T: GObject
 {
-    private let blueprint: T = T();
-    private var buffer: UnsafeMutablePointer<T?>;
     
-    private let initialCapacity: Int;
-    private var capacity: Int;
+    private let blueprint: T;
+    private var buffer: NativeBuffer;
+    
     private var count: Int = 0;
     
-    public init(withInitialCapacity: Int)
+    @inlinable
+    @inline(__always)
+    public var Capacity: Int { get { return Int(buffer.capacity); } };
+    
+    
+    public init(withInitialCapacity: Int) throws
     {
-        //Set the initial capacity
-        initialCapacity = withInitialCapacity;
-        capacity = initialCapacity;
-        
-        // populate the buffer, fill with nil
-        buffer = UnsafeMutablePointer<T?>.allocate(capacity: initialCapacity);
-        buffer.initialize(repeating: nil, count: initialCapacity);
+        let sizeOf: Int = MemoryLayout<T>.size;
+        buffer = buffer_create(sizeOf, uint(withInitialCapacity), true);
+        blueprint = T.Construct();
+
+        if(buffer.buffer == nil)
+        {
+            throw ContiguousMutableBufferError.AllocError;
+        }
     }
     
-    public func ItemAt(_ index: Int) throws -> T
+    public func ItemAt(_ index: Int) throws -> T?
     {
         if (index < count)
         {
-            return buffer[index]!;
+            let ret: T? = GetRefFromPointer(buffer_get(&buffer, uint(index)));
+            return ret;
         }
         
         throw ContiguousMutableBufferError.OutOfRange;
     }
     
-    public func AddNew()
+    public func AddNew() throws
     {
-        self.Add(blueprint);
+        try self.Add(blueprint);
     }
     
-    public func Add(_ element: T)
+    public func Add(_ element: T) throws
     {
-        if (count < capacity)
-        {
-        let p: UnsafeMutablePointer<T?> = buffer.advanced(by: count);
-        p.initialize(to: element);
+        let ptr = GetPointerFromObject(element);
         
-        count += 1;
-        }
-        else
+        if(buffer_add(&buffer, ptr) != -1)
         {
-            //Resize.
-            self.Resize();
-            self.Add(element);
+            count += 1;
+            return;
         }
+        
+        throw ContiguousMutableBufferError.AllocError;
     }
     
     public func InsertNew(_ index: Int) throws
     {
-        do
-        {
         try self.Insert(index, blueprint);
-        }
-        catch ContiguousMutableBufferError.OutOfRange
-        {
-        throw ContiguousMutableBufferError.OutOfRange;
-        }
-        
     }
     
     public func Insert(_ index: Int, _ element: T) throws
     {
         if (index < count)
         {
-            let p: UnsafeMutablePointer<T?> = buffer.advanced(by: index);
-            //p.deinitialize(count: 1); //Not needed?
-            p.initialize(to: element);
+            let ptr = GetPointerFromObject(element);
+            if(buffer_insert(&buffer, ptr, uint(index)) != -1)
+            {
+                count += 1;
+                return;
+            }
+            throw ContiguousMutableBufferError.AllocError;
         }
         
         throw ContiguousMutableBufferError.OutOfRange;
     }
     
-    public func Delete(_ index: Int) throws
+    public func Remove(_ index: Int) throws
     {
         if (index < count)
         {
-            if (index == (count - 1) )
-            {
-                buffer[index] = nil;
-                count -= 1;
-            }
-            else
-            {
-                //WARNING: Not entirely sure if this will blow up the memory. Unit tests?
-                let p: UnsafeMutablePointer<T?> = buffer.advanced(by: index);
-                    
-                p.assign(from: buffer.advanced(by: index + 1),count: count - index );
-                buffer[count - 1] = nil;
-                count -= 1;
-            }
+            buffer_remove(&buffer, uint(index));
+            return;
         }
         
         throw ContiguousMutableBufferError.OutOfRange;
     }
     
-    internal func Resize()
-    {
-        let newCapacity: Int = capacity * capacity;
-        let oldBuffer: UnsafeMutablePointer<T?> = buffer;
-        buffer = UnsafeMutablePointer<T?>.allocate(capacity: newCapacity);
-        
-        buffer.assign(from: oldBuffer, count: capacity);
-        capacity = newCapacity;
-        
-        oldBuffer.deallocate();
+
         
         /*let test: (ContiguousMutableBuffer<BufferElement>) ->() ->() = ContiguousMutableBuffer<BufferElement>.AddNew;
         
@@ -143,15 +121,16 @@ internal class ContiguousMutableBuffer<T> where T: BufferElement
         
         
         //ARC will deallocate old buffer ref here? ¯\_(ツ)_/¯
-    }
+    
     
     deinit
     {
-        buffer.deallocate();
+        buffer_free(&buffer);
     }
 }
 
-internal enum ContiguousMutableBufferError: Error
+public enum ContiguousMutableBufferError: Error
 {
     case OutOfRange;
+    case AllocError;
 }

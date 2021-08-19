@@ -22,25 +22,43 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import GalahNative.Maths;
 
-public struct Colour
+// Gets the pointer to an object without retaining it.
+public func GetPointerFromObject(_ object: AnyObject) -> UnsafeMutableRawPointer
 {
-    private var col: NativeFloat4;
+    return UnsafeMutableRawPointer(Unmanaged.passUnretained(object).toOpaque());
+}
+
+// Gets the pointer to an object whilst retaining it.
+public func GetRetainedPointerFromObject(_ object: AnyObject) -> UnsafeMutableRawPointer
+{
+    return UnsafeMutableRawPointer(Unmanaged.passRetained(object).toOpaque());
+}
+
+// Gets an unretained ref to a pointer.
+public func GetRefFromPointer(_ pointer: UnsafeMutableRawPointer) -> AnyObject?
+{
+    let ptr = Unmanaged<AnyObject>.fromOpaque(pointer);
+    return ptr.takeUnretainedValue();
+}
+
+// Gets an unretained ref to a pointer of type T.
+public func GetRefFromPointer<T>(_ pointer: UnsafeMutableRawPointer) ->T?
+{
+    let ptr = GetRefFromPointer(pointer);
     
-    @inline(__always)
-    public var r: Float { get { return col.x; } set { col.x = newValue; } };
-    @inline(__always)
-    public var g: Float { get { return col.y; } set { col.x = newValue; } };
-    @inline(__always)
-    public var b: Float { get { return col.z; } set { col.x = newValue; } };
-    @inline(__always)
-    public var a: Float { get { return col.w; } set { col.x = newValue; } };
-    
-    public init(_ red: Float,_ green: Float,_ blue: Float,_ alpha: Float)
+    if(ptr is T)
     {
-        col = NativeFloat4(x: red, y: green, z: blue, w: alpha);
+        return ptr as! T?
+    }
+    else
+    {
+        return nil;
     }
 }
 
-typealias Colour = Col;
+// Releases a pointer
+public func ReleasePointer(_ pointer: UnsafeMutableRawPointer)
+{
+    Unmanaged<AnyObject>.fromOpaque(pointer).release();
+}

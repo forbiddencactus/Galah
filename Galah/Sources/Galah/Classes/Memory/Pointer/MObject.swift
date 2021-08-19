@@ -22,17 +22,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-
-
-//Gets the pointer to an object an retains it.
-public func GetPointerFromObject(_ object: AnyObject) -> UnsafeMutableRawPointer
+// A manually allocated object. Yours to go nuts with. 
+public class MObject: GObject
 {
-    return UnsafeMutableRawPointer(Unmanaged.passRetained(object).toOpaque());
-}
-
-
-//Releases a pointer
-public func ReleasePointer(_ pointer: UnsafeMutableRawPointer)
-{
-    Unmanaged<AnyObject>.fromOpaque(pointer).release();
+    
 }

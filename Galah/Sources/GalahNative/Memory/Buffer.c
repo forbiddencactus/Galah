@@ -3,7 +3,7 @@ MIT License
 
 Copyright © 2020, 2021 Alexis Griffin.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
+Permission is hereby granted, dealloc of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
@@ -23,15 +23,18 @@ SOFTWARE.
 */
 
 #include "Memory/Buffer.h"
+#include "Memory/Alloc.h"
 
 // Allocs a NativeBuffer that will hold capacity amount of elements of elementSize.
-NativeBuffer buffer_create(size_t elementSize, uint capacity, bool isAutoResize)
+NativeBuffer buffer_create(memsize elementSize, uint capacity, bool isAutoResize)
 {
     NativeBuffer buf;
-    buf.buffer = malloc(elementSize * capacity);
+    buf.bufferSize = elementSize * capacity;
+    buf.buffer = alloc(buf.bufferSize);
     buf.elementSize = elementSize;
     buf.capacity = capacity;
     buf.isAutoResize = isAutoResize;
+    
     buf.count = 0;
     
     return buf;
@@ -83,7 +86,7 @@ int buffer_insert(NativeBuffer* buf, void* element, uint index)
         }
     }
     //Make space for the element...
-    size_t movesize = buf->count - index;
+    memsize movesize = buf->count - index;
     memmove(buf->buffer + (buf->elementSize * (index + 1)), buf->buffer + (buf->elementSize * index),movesize * buf->elementSize);
     //Copy the new element...
     memcpy(buf->buffer + (buf->elementSize * index), element, buf->elementSize);
@@ -96,9 +99,30 @@ int buffer_remove(NativeBuffer* buf, uint index)
 {
     if(index < buf->count)
     {
-        size_t size = buf->count - index;
-        memmove(buf->buffer + (buf->elementSize * index), buf->buffer + (buf->elementSize * (index + 1)), size);
+        if(index != (buf->count -1))
+        {
+            memsize size = buf->count - index;
+            memmove(buf->buffer + (buf->elementSize * index), buf->buffer + (buf->elementSize * (index + 1)), size);
+        }
         return --buf->count;
+    }
+    
+    return -1;
+}
+
+// Removes elements from startIndex to endIndex, including endIndex.
+int buffer_remove_range(NativeBuffer* buf, uint startIndex, uint endIndex)
+{
+    if(endIndex > startIndex && endIndex < buf->count)
+    {
+        uint amount = (endIndex - startIndex) + 1;
+        memsize moveSize = amount * buf->elementSize;
+        
+        if(endIndex != (buf->count -1))
+        {
+            memmove(buf->buffer + (buf->elementSize * startIndex),buf->buffer + buf->elementSize * (endIndex + 1), moveSize);
+        }
+        return buf->count - amount;
     }
     
     return -1;
@@ -124,13 +148,14 @@ bool buffer_grow(NativeBuffer* buf, uint newCapacity)
     }
     
     Buff* oldBuffer = buf->buffer;
-    buf->buffer = malloc(buf->elementSize * newCapacity);
+    buf->buffer = alloc(buf->elementSize * newCapacity);
     
     if(buf->buffer != NULL)
     {
-        memcpy(buf->buffer, oldBuffer, buf->capacity);
+        memcpy(buf->buffer, oldBuffer, buf->bufferSize);
         buf->capacity = newCapacity;
-        free(oldBuffer);
+        buf->bufferSize = buf->elementSize * buf->capacity;
+        dealloc(oldBuffer);
         return true;
     }
     else
@@ -143,6 +168,6 @@ bool buffer_grow(NativeBuffer* buf, uint newCapacity)
 
 bool buffer_free(NativeBuffer* buf)
 {
-    free(buf->buffer);
+    dealloc(buf->buffer);
     buf->buffer = NULL;
 }

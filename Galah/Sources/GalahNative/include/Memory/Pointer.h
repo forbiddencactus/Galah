@@ -21,16 +21,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-//  Created by Alex Griffin on 31/07/2020.
-//
 
-internal protocol BufferItem
-{
-    var isActive: Bool { get set };
-}
+#ifndef Pointer_h
+#define Pointer_h
 
-open class BufferElement
-{
-    //Due to the way these objects are allocated/init, it's a bad idea to put any constructor behaviour here.
-    public required init(){};
-}
+#endif

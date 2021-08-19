@@ -22,25 +22,37 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import GalahNative.Maths;
-
-public struct Colour
+// An object which is manually managed by the Galah engine.
+open class GObject
 {
-    private var col: NativeFloat4;
+    private static var internallyConstructed: Bool = false;
     
-    @inline(__always)
-    public var r: Float { get { return col.x; } set { col.x = newValue; } };
-    @inline(__always)
-    public var g: Float { get { return col.y; } set { col.x = newValue; } };
-    @inline(__always)
-    public var b: Float { get { return col.z; } set { col.x = newValue; } };
-    @inline(__always)
-    public var a: Float { get { return col.w; } set { col.x = newValue; } };
-    
-    public init(_ red: Float,_ green: Float,_ blue: Float,_ alpha: Float)
+    //Due to the way these objects are allocated/init, it's a bad idea to put any constructor behaviour here.
+    public required init() throws
     {
-        col = NativeFloat4(x: red, y: green, z: blue, w: alpha);
+        if(GObject.internallyConstructed != true)
+        {
+            throw GObjectError.NotProperlyConstructed;
+        }
+        GObject.internallyConstructed = false;
+    };
+    
+    internal static func Construct<T>() throws -> T where T: GObject
+    {
+        internallyConstructed = true;
+        let constr: T = try T.init();
+        constr.OnConstruct();
+        
+        return constr;
     }
+    
+    // Called by init(), put your construction behaviour here.
+    public func OnConstruct() {}
 }
 
-typealias Colour = Col;
+public enum GObjectError: Error
+{
+    // GObjects are manually managed by the engine. Don't use init!
+    case NotProperlyConstructed;
+    case AllocError;
+}
