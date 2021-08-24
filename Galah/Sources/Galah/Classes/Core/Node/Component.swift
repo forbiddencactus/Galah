@@ -45,7 +45,7 @@ public extension ComponentProtocol
     func OnEnable(willEnable: Bool) {}
 }
 
-open class _Component: BufferElement
+open class _Component: GObject
 {
     private var _node: Node? = nil;
     public var Node: Node

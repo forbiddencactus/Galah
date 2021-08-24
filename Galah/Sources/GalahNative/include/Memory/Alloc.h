@@ -27,16 +27,14 @@ SOFTWARE.
 
 #include "GalahNative.h"
 
-// This is malloc().
-void* alloc(memsize size);
+void* glh_malloc(MemSize size);
 
-// This is free().
-void dealloc(void* ptr);
+void glh_free(void* ptr);
 
-// This is memcpy().
-void* copy(void* dest, const void* src, memsize size);
+void* glh_memcpy(void* dest, const void* src, MemSize size);
 
-// This is memmove
-void* move(void* dest, const void* src, memsize size);
+void* glh_memmove(void* dest, const void* src, MemSize size);
+
+void* glh_memset(void* dest, int value, MemSize size);
 
 #endif

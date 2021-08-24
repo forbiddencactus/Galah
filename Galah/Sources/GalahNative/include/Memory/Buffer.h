@@ -29,10 +29,10 @@ SOFTWARE.
 
 typedef struct
 {
-    memsize elementSize;
-    memsize bufferSize;
-    uint count;
-    uint capacity;
+    MemSize elementSize;
+    MemSize bufferSize;
+    GUInt count;
+    GUInt capacity;
     Buff* buffer;
     bool isAutoResize;
 }   NativeBuffer;
@@ -41,25 +41,25 @@ typedef struct
 //Autoresize will always resize capacity * 2.
 
 // Allocs a NativeBuffer that will hold capacity amount of elements of elementSize.
-NativeBuffer buffer_create(memsize elementSize, uint capacity, bool isAutoResize);
+NativeBuffer buffer_create(MemSize elementSize, GUInt capacity, bool isAutoResize);
 
 // Adds an element to the end of the buffer, and returns the index. -1 if add failed.
-int buffer_add(NativeBuffer* buf, void* element);
+int buffer_add(NativeBuffer* buf, const void* element);
 
 // Inserts an element to index position in the buffer, and returns the index. -1 if insert failed.
-int buffer_insert(NativeBuffer* buf, void* element, uint index);
+int buffer_insert(NativeBuffer* buf, const void* element, GUInt index);
 
 // Removes an element at the index position in the buffer, and returns the new count. -1 if remove failed.
-int buffer_remove(NativeBuffer* buf, uint index);
+int buffer_remove(NativeBuffer* buf, GUInt index);
 
 // Removes elements from startIndex to endIndex, including endIndex.
-int buffer_remove_range(NativeBuffer* buf, uint startIndex, uint endIndex);
+int buffer_remove_range(NativeBuffer* buf, GUInt startIndex, GUInt endIndex);
 
 // Gets the element at position index. Returns null if failed. 
-void* buffer_get(NativeBuffer* buf, uint index);
+void* buffer_get(NativeBuffer* buf, GUInt index);
 
 // Attempts to grow the buffer to newCapacity. Returns true if successful.
-bool buffer_grow(NativeBuffer* buf, uint newCapacity);
+bool buffer_grow(NativeBuffer* buf, GUInt newCapacity);
 
 // Attempts to free the buffer. Returns true if success.
 bool buffer_free(NativeBuffer* buf);

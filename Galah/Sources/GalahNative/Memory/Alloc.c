@@ -24,26 +24,27 @@ SOFTWARE.
 
 #include "Memory/Alloc.h"
 
-// This is malloc().
-void* alloc(memsize size)
+void* glh_malloc(MemSize size)
 {
     return malloc(size);
 }
 
-// This is free().
-void dealloc(void* ptr)
+void glh_free(void* ptr)
 {
     free(ptr);
 }
 
-// This is memcpy().
-void* copy(void* dest, const void* src, memsize size)
+void* glh_memcpy(void* dest, const void* src, MemSize size)
 {
     return memcpy(dest, src, size);
 }
 
-// This is memmove
-void* move(void* dest, const void* src, memsize size)
+void* glh_memmove(void* dest, const void* src, MemSize size)
 {
     return memmove(dest, src, size);
+}
+
+void* glh_memset(void* dest, int value, MemSize size)
+{
+    return memset(dest, value, size);
 }

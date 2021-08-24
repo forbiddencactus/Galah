@@ -27,27 +27,56 @@ open class GObject
 {
     private static var internallyConstructed: Bool = false;
     
+    // Default object constructor.
+    public func OnDefaultConstruct() {}
+    
+    // Called whenever Galah constructs an instance from the default object.
+    public func OnConstruct() {}
+    
+    // Called whenever Galah destroys an instance.
+    public func OnDestroy() {}
+    
+    // Called whenever Galah 
+    
     //Due to the way these objects are allocated/init, it's a bad idea to put any constructor behaviour here.
     public required init() throws
     {
         if(GObject.internallyConstructed != true)
         {
             throw GObjectError.NotProperlyConstructed;
+            return;
         }
         GObject.internallyConstructed = false;
     };
     
-    internal static func Construct<T>() throws -> T where T: GObject
+    private static func ConstructDefault<T>() -> T? where T: GObject
     {
         internallyConstructed = true;
-        let constr: T = try T.init();
+        let constr: T;
+        do
+        {
+            constr = try T();
+        }
+        catch{}
+        
         constr.OnConstruct();
         
         return constr;
     }
     
-    // Called by init(), put your construction behaviour here.
-    public func OnConstruct() {}
+    internal static func Construct<T>(_ store: GObjectStore? = nil) -> T? where T: GObject
+    {
+        if(store != nil)
+        {
+            if(store?.defaultObjectPtr == nil)
+            {
+                return ConstructDefault();
+            }
+            
+        }
+        
+        return nil;
+    }
 }
 
 public enum GObjectError: Error

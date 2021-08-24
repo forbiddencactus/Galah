@@ -26,11 +26,11 @@ SOFTWARE.
 #include "Memory/Alloc.h"
 
 // Allocs a NativeBuffer that will hold capacity amount of elements of elementSize.
-NativeBuffer buffer_create(memsize elementSize, uint capacity, bool isAutoResize)
+NativeBuffer buffer_create(MemSize elementSize, GUInt capacity, bool isAutoResize)
 {
     NativeBuffer buf;
     buf.bufferSize = elementSize * capacity;
-    buf.buffer = alloc(buf.bufferSize);
+    buf.buffer = glh_malloc(buf.bufferSize);
     buf.elementSize = elementSize;
     buf.capacity = capacity;
     buf.isAutoResize = isAutoResize;
@@ -41,7 +41,7 @@ NativeBuffer buffer_create(memsize elementSize, uint capacity, bool isAutoResize
 }
 
 // Adds an element to the end of the buffer, and returns the index. -1 if add failed.
-int buffer_add(NativeBuffer* buf, void* element)
+int buffer_add(NativeBuffer* buf, const void* element)
 {
     if(buf->count >= buf->capacity)
     {
@@ -57,14 +57,14 @@ int buffer_add(NativeBuffer* buf, void* element)
             return -1;
         }
     }
-    memcpy(buf->buffer + (buf->elementSize * buf->count), element, buf->elementSize);
+    glh_memcpy(buf->buffer + (buf->elementSize * buf->count), element, buf->elementSize);
     buf->count += 1;
     
     return buf->count - 1;
 }
 
 // Inserts an element to index position in the buffer, and returns the index. -1 if insert failed.
-int buffer_insert(NativeBuffer* buf, void* element, uint index)
+int buffer_insert(NativeBuffer* buf, const void* element, GUInt index)
 {
     if(index >= buf->count)
     {
@@ -86,23 +86,23 @@ int buffer_insert(NativeBuffer* buf, void* element, uint index)
         }
     }
     //Make space for the element...
-    memsize movesize = buf->count - index;
-    memmove(buf->buffer + (buf->elementSize * (index + 1)), buf->buffer + (buf->elementSize * index),movesize * buf->elementSize);
+    MemSize movesize = buf->count - index;
+    glh_memmove(buf->buffer + (buf->elementSize * (index + 1)), buf->buffer + (buf->elementSize * index),movesize * buf->elementSize);
     //Copy the new element...
-    memcpy(buf->buffer + (buf->elementSize * index), element, buf->elementSize);
+    glh_memcpy(buf->buffer + (buf->elementSize * index), element, buf->elementSize);
     
     return index;
 }
 
 // Removes an element at the index position in the buffer, and returns the new count. -1 if remove failed.
-int buffer_remove(NativeBuffer* buf, uint index)
+int buffer_remove(NativeBuffer* buf, GUInt index)
 {
     if(index < buf->count)
     {
         if(index != (buf->count -1))
         {
-            memsize size = buf->count - index;
-            memmove(buf->buffer + (buf->elementSize * index), buf->buffer + (buf->elementSize * (index + 1)), size);
+            MemSize size = buf->count - index;
+            glh_memmove(buf->buffer + (buf->elementSize * index), buf->buffer + (buf->elementSize * (index + 1)), size);
         }
         return --buf->count;
     }
@@ -111,16 +111,16 @@ int buffer_remove(NativeBuffer* buf, uint index)
 }
 
 // Removes elements from startIndex to endIndex, including endIndex.
-int buffer_remove_range(NativeBuffer* buf, uint startIndex, uint endIndex)
+int buffer_remove_range(NativeBuffer* buf, GUInt startIndex, GUInt endIndex)
 {
     if(endIndex > startIndex && endIndex < buf->count)
     {
-        uint amount = (endIndex - startIndex) + 1;
-        memsize moveSize = amount * buf->elementSize;
+        GUInt amount = (endIndex - startIndex) + 1;
+        MemSize moveSize = amount * buf->elementSize;
         
         if(endIndex != (buf->count -1))
         {
-            memmove(buf->buffer + (buf->elementSize * startIndex),buf->buffer + buf->elementSize * (endIndex + 1), moveSize);
+            glh_memmove(buf->buffer + (buf->elementSize * startIndex),buf->buffer + buf->elementSize * (endIndex + 1), moveSize);
         }
         return buf->count - amount;
     }
@@ -129,7 +129,7 @@ int buffer_remove_range(NativeBuffer* buf, uint startIndex, uint endIndex)
 }
 
 // Gets the element at position index. Returns null if failed.
-void* buffer_get(NativeBuffer* buf, uint index)
+void* buffer_get(NativeBuffer* buf, GUInt index)
 {
     if(index < buf->count)
     {
@@ -140,7 +140,7 @@ void* buffer_get(NativeBuffer* buf, uint index)
 }
 
 // Attempts to grow the buffer to newCapacity. Returns true if successful.
-bool buffer_grow(NativeBuffer* buf, uint newCapacity)
+bool buffer_grow(NativeBuffer* buf, GUInt newCapacity)
 {
     if(buf->capacity >= newCapacity)
     {
@@ -148,14 +148,14 @@ bool buffer_grow(NativeBuffer* buf, uint newCapacity)
     }
     
     Buff* oldBuffer = buf->buffer;
-    buf->buffer = alloc(buf->elementSize * newCapacity);
+    buf->buffer = glh_malloc(buf->elementSize * newCapacity);
     
     if(buf->buffer != NULL)
     {
-        memcpy(buf->buffer, oldBuffer, buf->bufferSize);
+        glh_memcpy(buf->buffer, oldBuffer, buf->bufferSize);
         buf->capacity = newCapacity;
         buf->bufferSize = buf->elementSize * buf->capacity;
-        dealloc(oldBuffer);
+        glh_free(oldBuffer);
         return true;
     }
     else
@@ -168,6 +168,6 @@ bool buffer_grow(NativeBuffer* buf, uint newCapacity)
 
 bool buffer_free(NativeBuffer* buf)
 {
-    dealloc(buf->buffer);
+    glh_free(buf->buffer);
     buf->buffer = NULL;
 }

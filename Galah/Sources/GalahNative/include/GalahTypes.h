@@ -22,19 +22,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef GalahNative_h
-#define GalahNative_h
+#ifndef GalahTypes_h
+#define GalahTypes_h
 
-// Standard C includes...
-#include <stdio.h>
-#include "stdbool.h"
-#include <stdlib.h>
-#include <string.h>
-
-// Galah Types...
-#include "GalahTypes.h"
 typedef void Buff;
-typedef size_t memsize;
-typedef uint guint;
+typedef size_t MemSize;
+typedef uint GUInt;
 
 #endif

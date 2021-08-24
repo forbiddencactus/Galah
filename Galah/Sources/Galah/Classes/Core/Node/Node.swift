@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 //  Created by Alex Griffin on 31/12/19.
 //
 
-open class Node: BufferElement
+open class Node: GObject
 {
     private var _transform: Transform!;
     private var _components: Array<Component>

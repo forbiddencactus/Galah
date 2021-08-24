@@ -22,6 +22,42 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import GalahNative.Memory;
+import SwiftShims;
+
+public struct GetSize<T>
+{
+    public static func SizeOf() -> MemSize
+    {
+        let theClass: T.Type = T.self;
+
+        if (theClass is AnyClass)
+        {
+            let ret = swift_class_getInstanceExtents(theClass: theClass as! AnyClass);
+            return MemSize(ret.positive);
+        }
+        else
+        {
+            return MemoryLayout<T>.stride;
+        }
+    }
+}
+
+// Gets the size on the heap of a ref or value.
+public func SizeOf(_ value: inout Any) -> MemSize
+{
+    if (value is AnyClass)
+    {
+        return _swift_stdlib_malloc_size(&value);
+    }
+    else
+    {
+        return MemoryLayout.stride(ofValue: value);
+    }
+}
+
+@_silgen_name("swift_class_getInstanceExtents") func swift_class_getInstanceExtents(theClass: AnyClass) -> (negative: UInt, positive: UInt)
+
 
 // Gets the pointer to an object without retaining it.
 public func GetPointerFromObject(_ object: AnyObject) -> UnsafeMutableRawPointer

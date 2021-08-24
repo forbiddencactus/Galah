@@ -33,14 +33,12 @@ public class ContiguousMutableBuffer<T> where T: GObject
     
     private var count: Int = 0;
     
-    @inlinable
-    @inline(__always)
-    public var Capacity: Int { get { return Int(buffer.capacity); } };
+    public var Capacity: GUInt { get { return buffer.capacity; } };
     
     
     public init(withInitialCapacity: Int) throws
     {
-        let sizeOf: Int = MemoryLayout<T>.size;
+        let sizeOf: Int = GetSize<T>.SizeOf();
         buffer = buffer_create(sizeOf, uint(withInitialCapacity), true);
         blueprint = T.Construct();
 

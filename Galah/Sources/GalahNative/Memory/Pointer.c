@@ -23,3 +23,34 @@ SOFTWARE.
 */
 
 #include "Memory/Pointer.h"
+#include "Memory/Alloc.h"
+
+GPtr ptr_add(GPtr ptr, MemSize typesize, GUInt amount)
+{
+    GPtr ret;
+    ret.ptr = ptr.ptr + (amount * typesize);
+    return ret;
+}
+
+GPtr ptr_sub(GPtr ptr, MemSize typesize, GUInt amount)
+{
+    GPtr ret;
+    ret.ptr = ptr.ptr - (amount * typesize);
+    return ret;
+}
+
+void ptr_set(GPtr* outptr, void* inptr)
+{
+    outptr->ptr = inptr;
+}
+
+// Assigns the value of inassignptr into the location pointed to by ptr.
+void ptr_assign(GPtr* ptr, void* inassignptr, MemSize size)
+{
+    glh_memcpy(ptr->ptr, inassignptr, size);
+}
+
+void ptr_setnull(GPtr* inptr)
+{
+    inptr->ptr = NULL;
+}
