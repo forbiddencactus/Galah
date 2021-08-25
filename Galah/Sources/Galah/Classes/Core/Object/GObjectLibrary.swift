@@ -21,28 +21,123 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+
+// These are all just workarounds because there's no easy way to do placement new in Swift.
+// So we have to do dirty tricks. *shrug*
+// Todo: figure out how to get placement new (probs some runtime hackery needed?)
+
 import GalahNative.Memory;
 
-struct GObjectStore
+struct GObjectStoreRaw
 {
-    let defaultObjectPtr: GObject?;
-    let mallocSize: MemSize;
+    internal var defaultObjectPtr: GObject? = nil;
+    internal var mallocSize: MemSize = 0;
     
-    public static func New<T>() -> GObjectStore where T: GObject
+    public init(){}
+    internal init(defaultObjectPtr: GObject?, mallocSize: MemSize)
     {
-        let theDefaultObj = GObject.ConstructDefault<T>(self);
+        self.defaultObjectPtr = defaultObjectPtr;
+        self.mallocSize = mallocSize
     }
 }
 
-class GObjectLib
+struct GObjectStore<T> where T: GObject
 {
-    static let sharedInstance = GObjectLib()
+    internal var defaultObjectPtr: T? = nil;
+    internal var mallocSize: MemSize = 0;
     
-    private cont
-    
-    public init()
+    // This looks slow. Todo: improve. Generics on Swift suuuucks :/
+    public static func New() -> GObjectStore<T>
     {
+        var raw = GObjectStoreRaw();
+        let defaultObject: T = GObject.ConstructDefault(&raw)!;
+        var omgSwiftSyntaxSucks: Any = defaultObject as Any;
+        raw.mallocSize = SizeOf(&omgSwiftSyntaxSucks);
+        let retVal = GObjectStore<T>(raw);
+        return retVal;
     }
     
-    public func GetDefaultObject
+    public static func New() -> GObjectStoreRaw
+    {
+        var raw = GObjectStoreRaw();
+        let defaultObject: T = GObject.ConstructDefault(&raw)!;
+        var omgSwiftSyntaxSucks: Any = defaultObject as Any;
+        raw.mallocSize = SizeOf(&omgSwiftSyntaxSucks);
+        return raw;
+    }
+    
+    public init(_ gObjStore: GObjectStoreRaw)
+    {
+        if(gObjStore.defaultObjectPtr is T)
+        {
+            defaultObjectPtr = (gObjStore.defaultObjectPtr as! T);
+            mallocSize = gObjStore.mallocSize;
+        }
+    }
+    
+    public func GetRaw() -> GObjectStoreRaw
+    {
+        return GObjectStoreRaw(defaultObjectPtr: defaultObjectPtr, mallocSize: mallocSize);
+    }
+    
+    private init() {}
+}
+
+// This whole thing is really cache unfriendly, todo rewrite properly. 
+public class GObjectLib
+{
+    public static let sharedInstance = GObjectLib()
+    private var internalDic: Dictionary<HashableType<GObject>, GObjectStoreRaw>;
+    
+    internal init()
+    {
+        internalDic = Dictionary<HashableType<GObject>, GObjectStoreRaw>();
+    }
+    
+    public func GetDefaultObject<T>() -> T? where T: GObject
+    {
+        var val: GObjectStoreRaw? = internalDic[T.self];
+        if(val == nil)
+        {
+            val = GObjectStore<T>.New();
+            internalDic[T.self] = val;
+        }
+        
+        if(val?.defaultObjectPtr != nil)
+        {
+            return val?.defaultObjectPtr as! T?;
+        }
+        else
+        {
+            return nil; //This shouldn't happen?
+        }
+    }
+}
+
+//Swiped from: https://stackoverflow.com/questions/42459484/make-a-swift-dictionary-where-the-key-is-type
+
+/// Hashable wrapper for a metatype value.
+struct HashableType<T> : Hashable
+{
+
+  static func == (lhs: HashableType, rhs: HashableType) -> Bool {
+    return lhs.base == rhs.base
+  }
+
+  let base: T.Type
+
+  init(_ base: T.Type) {
+    self.base = base
+  }
+    
+  func hash(into hasher: inout Hasher) {
+    hasher.combine(ObjectIdentifier(base))
+  }
+}
+
+extension Dictionary {
+  subscript<T>(key: T.Type) -> Value? where Key == HashableType<T> {
+    get { return self[HashableType(key)] }
+    set { self[HashableType(key)] = newValue }
+  }
 }

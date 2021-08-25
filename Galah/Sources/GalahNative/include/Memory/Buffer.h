@@ -61,6 +61,8 @@ void* buffer_get(NativeBuffer* buf, GUInt index);
 // Attempts to grow the buffer to newCapacity. Returns true if successful.
 bool buffer_grow(NativeBuffer* buf, GUInt newCapacity);
 
+void* buffer_makespace(NativeBuffer* buf, GUInt atIndex);
+
 // Attempts to free the buffer. Returns true if success.
 bool buffer_free(NativeBuffer* buf);
 

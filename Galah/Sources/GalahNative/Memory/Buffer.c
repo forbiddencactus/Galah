@@ -43,22 +43,12 @@ NativeBuffer buffer_create(MemSize elementSize, GUInt capacity, bool isAutoResiz
 // Adds an element to the end of the buffer, and returns the index. -1 if add failed.
 int buffer_add(NativeBuffer* buf, const void* element)
 {
-    if(buf->count >= buf->capacity)
+    if(buffer_makespace(buf, buf->count) == NULL)
     {
-        if(buf->isAutoResize)
-        {
-            if(!buffer_grow(buf, buf->capacity * 2))
-            {
-                return -1;
-            }
-        }
-        else
-        {
-            return -1;
-        }
+        return -1;
     }
-    glh_memcpy(buf->buffer + (buf->elementSize * buf->count), element, buf->elementSize);
-    buf->count += 1;
+    
+    glh_memcpy(buf->buffer + (buf->elementSize * buf->count - 1), element, buf->elementSize);
     
     return buf->count - 1;
 }
@@ -66,28 +56,11 @@ int buffer_add(NativeBuffer* buf, const void* element)
 // Inserts an element to index position in the buffer, and returns the index. -1 if insert failed.
 int buffer_insert(NativeBuffer* buf, const void* element, GUInt index)
 {
-    if(index >= buf->count)
+    if(buffer_makespace(buf, index) == NULL)
     {
         return -1;
     }
-        
-    if(buf->count >= buf->capacity)
-    {
-        if(buf->isAutoResize)
-        {
-            if(!buffer_grow(buf, buf->capacity * 2))
-            {
-                return -1;
-            }
-        }
-        else
-        {
-            return -1;
-        }
-    }
-    //Make space for the element...
-    MemSize movesize = buf->count - index;
-    glh_memmove(buf->buffer + (buf->elementSize * (index + 1)), buf->buffer + (buf->elementSize * index),movesize * buf->elementSize);
+    
     //Copy the new element...
     glh_memcpy(buf->buffer + (buf->elementSize * index), element, buf->elementSize);
     
@@ -164,6 +137,40 @@ bool buffer_grow(NativeBuffer* buf, GUInt newCapacity)
     }
     
     return false;
+}
+
+void* buffer_makespace(NativeBuffer* buf, GUInt atIndex)
+{
+    if(buf->count >= buf->capacity)
+    {
+        if(buf->isAutoResize)
+        {
+            if(!buffer_grow(buf, buf->capacity * 2))
+            {
+                return NULL;
+            }
+        }
+        else
+        {
+            return NULL;
+        }
+    }
+    
+    if(atIndex > buf->count)
+    {
+        return NULL;
+    }
+    
+    if(atIndex < (buf->count) )
+    {
+        //Make space for the element...
+        MemSize movesize = buf->count - atIndex;
+        glh_memmove(buf->buffer + (buf->elementSize * (atIndex + 1)), buf->buffer + (buf->elementSize * atIndex),movesize * buf->elementSize);
+    }
+    
+    buf->count++;
+    
+    return buf->buffer + (buf->elementSize * atIndex);
 }
 
 bool buffer_free(NativeBuffer* buf)

@@ -64,19 +64,27 @@ open class GObject
         return constr;
     }
     
-    internal static func Construct<T>(_ store: GObjectStore? = nil) -> T? where T: GObject
+    internal static func ConstructDefault<T>(_ store: inout GObjectStoreRaw) -> T? where T: GObject
     {
-        if(store != nil)
+        if(store.defaultObjectPtr == nil)
         {
-            if(store?.defaultObjectPtr == nil)
-            {
-                return ConstructDefault();
-            }
-            
+            store.defaultObjectPtr = ConstructDefault();
         }
-        
-        return nil;
+        return store.defaultObjectPtr as! T?;
     }
+    
+    internal static func Construct<T>(_ ptr: inout Ptr<T>) -> Ptr<T>
+    {
+        var defaultObj: T = GetDefaultObject() as! T;
+        ptr.Set(&defaultObj);
+        return ptr;
+    }
+    
+    public static func GetDefaultObject<T>() -> T? where T: GObject
+    {
+        return GObjectLib.sharedInstance.GetDefaultObject();
+    }
+    
 }
 
 public enum GObjectError: Error

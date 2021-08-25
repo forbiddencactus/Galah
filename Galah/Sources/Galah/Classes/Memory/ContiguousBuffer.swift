@@ -28,7 +28,6 @@ import GalahNative.Memory;
 public class ContiguousMutableBuffer<T> where T: GObject
 {
     
-    private let blueprint: T;
     private var buffer: NativeBuffer;
     
     private var count: Int = 0;
@@ -40,7 +39,6 @@ public class ContiguousMutableBuffer<T> where T: GObject
     {
         let sizeOf: Int = GetSize<T>.SizeOf();
         buffer = buffer_create(sizeOf, uint(withInitialCapacity), true);
-        blueprint = T.Construct();
 
         if(buffer.buffer == nil)
         {

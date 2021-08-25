@@ -27,17 +27,26 @@ import GalahNative.Memory;
 // An unsafe C style pointer, with all the overloads and other good things.
 struct Ptr<T>
 {
-    private let size: MemSize = GetSize<T>.SizeOf();
+    private let size: MemSize;
     private var ptr: GPtr = GPtr(); //GPtr is basically our void*.
     
     @inlinable
     @inline(__always)
     public var raw: GPtr { get { return ptr; } };
     
+    // Allocates a pointer of size of the pointer element * count.
     public static func Allocate(_ count: GUInt) -> Ptr<T>
     {
         var retPtr = Ptr();
         retPtr.ptr.ptr = glh_malloc(retPtr.size * Int(count));
+        return retPtr;
+    }
+    
+    // Allocates a pointer of size of the pointer's element. 
+    public static func Allocate() -> Ptr<T>
+    {
+        var retPtr = Ptr();
+        retPtr.ptr.ptr = glh_malloc(retPtr.size);
         return retPtr;
     }
     
@@ -53,26 +62,31 @@ struct Ptr<T>
     
     public init(_ rawPointer: UnsafeMutableRawPointer)
     {
+        size = GetSize<T>.SizeOf();
         ptr.ptr = rawPointer;
     }
     
     public init(_ gPointer: GPtr)
     {
+        size = GetSize<T>.SizeOf();
         ptr = gPointer;
     }
     
     public init(_ pointer: Ptr<T>)
     {
+        size = pointer.size;
         ptr = pointer.ptr;
     }
     
     // Usage: Ptr(obj), naturally no guarantee is made to the pointee's lifespan.
+    // Creates a pointer from a pointer or reference. ptr* ptr = 
     public init(_ object: inout T)
     {
+        size = GetSize<T>.SizeOf();
         ptr_set(&ptr, &object);
     }
     
-    // Copies the value of rhs into the location pointed to by lhs.
+    // Copies the value of value into the location pointed to by lhs.
     @inlinable
     @inline(__always)
     public mutating func Set(_ value: inout T)
@@ -119,7 +133,7 @@ struct Ptr<T>
     @inline(__always)
     public static func *=(lhs: inout Ptr<T>, rhs: inout Any)
     {
-        ptr_assign(&lhs.ptr, &rhs, MemoryLayout.size(ofValue: rhs));
+        ptr_assign(&lhs.ptr, &rhs, SizeOf(&rhs));
     }
     
     // Maths stuff.
