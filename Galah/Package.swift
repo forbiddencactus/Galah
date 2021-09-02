@@ -15,5 +15,6 @@ let package = Package(
     [
         .target(name: "GalahNative", path: "Sources/GalahNative"),
         .target(name: "Galah", dependencies: ["GalahNative"], path: "Sources/Galah"),
-    ]
+    ],
+    swiftLanguageVersions: [.v5]
 )

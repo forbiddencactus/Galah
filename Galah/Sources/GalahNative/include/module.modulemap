@@ -11,4 +11,10 @@ module GalahNative
         umbrella "Maths"
         export *
     }
+    
+    module SwiftRuntime
+    {
+        umbrella "SwiftRuntime"
+        export *
+    }
 }
