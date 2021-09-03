@@ -13,13 +13,13 @@ internal class NodePool
     {
         public let NodeBuffer: ContiguousMutableBuffer<Node>;
         public let BatchId: String;
-        public let BatchMembers: Dictionary<Type,ContiguousMutableBuffer<Component>>;
+        public let BatchMembers: Dictionary<HashableType<GObject>, ContiguousMutableBuffer<Component>>;
     }
     
     struct ComponentPool
     {
         public let BatchPool: Array<ComponentPoolBatch>;
-        public let BatchTypes: Dictionary<Component, Bool>;
+        public let BatchTypes: Dictionary<HashableType<Component>, Bool>;
     }
     
     struct DepthPool

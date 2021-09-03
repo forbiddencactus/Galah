@@ -12,13 +12,19 @@
 //
 // galah-engine.org | https://github.com/forbiddencactus/Galah
 //--------------------------------------------------------------------------//
-// C typedefs for convenience or to simplify platform abstraction down the line. 
+// Manage Swift references. 
 
-#ifndef GalahTypes_h
-#define GalahTypes_h
 
-typedef void Buff;
-typedef size_t MemSize;
-typedef uint GUInt;
+internal func retainObject(_ object: AnyObject)
+{
+    let ptr = GetPointerFromObject(object);
+    ptr.assumingMemoryBound(to: ClassHeader.self).pointee.strongRetainCounts += 1;
+}
 
-#endif
+// Note that this won't, as of yet, dealloc the object if you decrease the refcount.
+// Also note you don't really wanna call this on manually allocated objects probably. 
+internal func releaseObject(_ object: AnyObject)
+{
+    let ptr = GetPointerFromObject(object);
+    ptr.assumingMemoryBound(to: ClassHeader.self).pointee.strongRetainCounts -= 1;
+}

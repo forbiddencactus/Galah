@@ -1,44 +1,35 @@
-/*
-MIT License
+//---- Galah Engine---------------------------------------------------------//
+//
+// This source file is part of the Galah open source game engine.
+//
+// Copyright © 2020, 2021, the Galah contributors.
+//
+// Licensed under the MIT Licence.
+//
+// You can find a copy of Galah's licence in LICENCE.MD
+// You can find a list of Galah's contributors in CONTRIBUTORS.MD
+// You can find a list of Galah's attributions in ATTRIBUTIONS.MD
+//
+// galah-engine.org | https://github.com/forbiddencactus/Galah
+//--------------------------------------------------------------------------//
+// A contiguous buffer allocated on the heap containing elements of a particular type.
 
-Copyright © 2020, 2021 Alexis Griffin.
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
 
 import GalahNative.Memory;
 
-//A contiguous buffer allocated on the heap containing elements of a particular type.
 public class ContiguousMutableBuffer<T> where T: GObject
 {
     
     private var buffer: NativeBuffer;
     
-    private var count: Int = 0;
-    
-    public var Capacity: GUInt { get { return buffer.capacity; } };
+    public var Count: Int { get { return Int(buffer.count); } }
+    public var Capacity: UInt { get { return UInt(buffer.capacity); } };
     
     
     public init(withInitialCapacity: Int) throws
     {
         let sizeOf: Int = GetSize<T>.SizeOf();
-        buffer = buffer_create(sizeOf, uint(withInitialCapacity), true);
+        buffer = buffer_create(sizeOf, GUInt(withInitialCapacity), true);
 
         if(buffer.buffer == nil)
         {
@@ -48,9 +39,9 @@ public class ContiguousMutableBuffer<T> where T: GObject
     
     public func ItemAt(_ index: Int) throws -> T?
     {
-        if (index < count)
+        if (index < Count)
         {
-            let ret: T? = GetRefFromPointer(buffer_get(&buffer, uint(index)));
+            let ret: T? = GetRefFromPointer(buffer_get(&buffer, GUInt(index)));
             return ret;
         }
         
@@ -59,49 +50,59 @@ public class ContiguousMutableBuffer<T> where T: GObject
     
     public func AddNew() throws
     {
-        try self.Add(blueprint);
+        let ptr = try MakeSpace(Count);
+        
+        T.Construct(ptr);
     }
     
     public func Add(_ element: T) throws
     {
         let ptr = GetPointerFromObject(element);
         
-        if(buffer_add(&buffer, ptr) != -1)
+        if(buffer_add(&buffer, ptr) == -1)
         {
-            count += 1;
-            return;
+            throw ContiguousMutableBufferError.AllocError;
         }
         
-        throw ContiguousMutableBufferError.AllocError;
     }
     
     public func InsertNew(_ index: Int) throws
     {
-        try self.Insert(index, blueprint);
+        let ptr = try MakeSpace(index);
+        T.Construct(ptr);
     }
     
     public func Insert(_ index: Int, _ element: T) throws
     {
-        if (index < count)
+        if (index >= Count)
         {
-            let ptr = GetPointerFromObject(element);
-            if(buffer_insert(&buffer, ptr, uint(index)) != -1)
-            {
-                count += 1;
-                return;
-            }
+            throw ContiguousMutableBufferError.OutOfRange;
+        }
+        
+        let ptr = GetPointerFromObject(element);
+        if(buffer_insert(&buffer, ptr, GUInt(index)) == -1)
+        {
             throw ContiguousMutableBufferError.AllocError;
+        }
+    }
+    
+    public func Remove(_ index: Int) throws
+    {
+        if (index < Count)
+        {
+            buffer_remove(&buffer, GUInt(index));
+            return;
         }
         
         throw ContiguousMutableBufferError.OutOfRange;
     }
     
-    public func Remove(_ index: Int) throws
+    public func MakeSpace(_ index: Int) throws -> Ptr<T>
     {
-        if (index < count)
+        if (index <= Count)
         {
-            buffer_remove(&buffer, uint(index));
-            return;
+            let returnPtr = Ptr<T>(buffer_makespace(&buffer, GUInt(index))!);
+            return returnPtr;
         }
         
         throw ContiguousMutableBufferError.OutOfRange;

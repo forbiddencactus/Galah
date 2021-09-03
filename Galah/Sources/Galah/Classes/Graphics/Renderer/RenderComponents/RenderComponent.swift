@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 open class RenderComponent: Component
 {
-    public func Construct()
+    public override func Construct()
     {
        //s 
     }

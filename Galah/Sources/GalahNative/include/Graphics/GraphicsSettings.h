@@ -12,13 +12,15 @@
 //
 // galah-engine.org | https://github.com/forbiddencactus/Galah
 //--------------------------------------------------------------------------//
-// C typedefs for convenience or to simplify platform abstraction down the line. 
+// Preprocessor render settings.
 
-#ifndef GalahTypes_h
-#define GalahTypes_h
+#ifndef galah_nativetypes_graphicssettings
+#define galah_nativetypes_graphicssettings
 
-typedef void Buff;
-typedef size_t MemSize;
-typedef uint GUInt;
-
+/*typedef enum
+{
+    CullModeNone,
+    CullModeAABTree
+    //Potential compute based cull here?
+}*/
 #endif

@@ -1,33 +1,25 @@
-/*
-MIT License
-
-Copyright © 2020, 2021 Alexis Griffin.
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
+//---- Galah Engine---------------------------------------------------------//
+//
+// This source file is part of the Galah open source game engine.
+//
+// Copyright © 2020, 2021, the Galah contributors.
+//
+// Licensed under the MIT Licence.
+//
+// You can find a copy of Galah's licence in LICENCE.MD
+// You can find a list of Galah's contributors in CONTRIBUTORS.MD
+// You can find a list of Galah's attributions in ATTRIBUTIONS.MD
+//
+// galah-engine.org | https://github.com/forbiddencactus/Galah
+//--------------------------------------------------------------------------//
+// Float2 vector type.
 
 import GalahNative.Maths
 
 public struct Float2
 {
     @usableFromInline
-    internal var vec: NativeFloat2;
+    internal var vec: GFloat2;
     
     @inlinable
     @inline(__always)
@@ -41,7 +33,7 @@ public struct Float2
     @inline(__always)
     public init(_ x: Float = 0, _ y: Float = 0)
     {
-        vec = NativeFloat2(x: x, y: y);
+        vec = GFloat2(x: x, y: y);
     }
     
     //Constructs a zero vector.
@@ -123,6 +115,6 @@ public struct Float2
     @inline(__always)
     public mutating func Scale(_ vector: Float2)
     {
-        vec = NativeFloat2(x: vec.x * vector.x, y: vec.y * vector.y);
+        vec = GFloat2(x: vec.x * vector.x, y: vec.y * vector.y);
     }
 }

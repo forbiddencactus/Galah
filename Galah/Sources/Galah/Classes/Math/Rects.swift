@@ -42,12 +42,12 @@ public struct Size
 
 public struct Quad
 {
-    public let TL: Vec2;
-    public let TR: Vec2;
-    public let BL: Vec2;
-    public let BR: Vec2;
+    public let TL: Float2;
+    public let TR: Float2;
+    public let BL: Float2;
+    public let BR: Float2;
     
-    public init(tl: Vec2, tr: Vec2, bl: Vec2, br: Vec2)
+    public init(tl: Float2, tr: Float2, bl: Float2, br: Float2)
     {
         self.TL = tl;
         self.TR = tr;
@@ -58,15 +58,15 @@ public struct Quad
     public init(_ rect: Rect)
     {
         self.TL = rect.Position;
-        self.TR = Vec2(rect.x + rect.width, rect.y);
-        self.BL = Vec2(rect.x, rect.y + rect.height);
-        self.BR = Vec2(rect.x + rect.width, rect.y + rect.height);
+        self.TR = Float2(rect.x + rect.width, rect.y);
+        self.BL = Float2(rect.x, rect.y + rect.height);
+        self.BR = Float2(rect.x + rect.width, rect.y + rect.height);
     }
 }
 
 public struct Rect
 {
-    public let Position: Vec2; //Top Left
+    public let Position: Float2; //Top Left
     public let Size: Size; //Bottom Right
     
     @inline (__always) public var x: Float { get { return Position.x; } }
@@ -74,7 +74,7 @@ public struct Rect
     @inline (__always) public var width: Float { get { return Size.Width; } }
     @inline (__always) public var height: Float { get { return Size.Height; } }
     
-    public init (_ position: Vec2, _ size: Size)
+    public init (_ position: Float2, _ size: Size)
     {
         Position = position;
         Size = size;

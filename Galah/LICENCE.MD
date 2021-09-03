@@ -1,7 +1,7 @@
 MIT License
 
-Copyright © 2020, 2021, the Galah Contributors.
-You can find a list of Galah's Contributors in CONTRIBUTORS.MD
+Copyright © 2020, 2021, the Galah contributors.
+You can find a list of Galah's contributors in CONTRIBUTORS.MD
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

@@ -12,13 +12,8 @@
 //
 // galah-engine.org | https://github.com/forbiddencactus/Galah
 //--------------------------------------------------------------------------//
-// C typedefs for convenience or to simplify platform abstraction down the line. 
+// A 'smart pointer' that points to a GObject irregardless of where it gets shuffled to in memory.
 
-#ifndef GalahTypes_h
-#define GalahTypes_h
-
-typedef void Buff;
-typedef size_t MemSize;
-typedef uint GUInt;
-
-#endif
+public struct Hnd<T> where T: GObject
+{
+}
