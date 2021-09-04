@@ -14,7 +14,24 @@
 //--------------------------------------------------------------------------//
 // The table through which Handles keep track of where in memory GObjects live.
 
-internal typealias GIndex = UInt32;
+// Index for GObjects.
+internal struct GIndex
+{
+    internal let index: UInt8;
+    internal var counter: UInt8;
+    
+    init()
+    {
+        index = UInt8.max;
+        counter = UInt8.max;
+    }
+    
+    fileprivate init(index: UInt8, counter: UInt8)
+    {
+        self.index = index;
+        self.counter = counter;
+    }
+}
 
 // GObjects are in charge of updating the table.
 // However, if you're copying a GObject, you gotta give the object a hint through
@@ -24,65 +41,81 @@ internal class GObjectTable
     public static let sharedInstance: GObjectTable = GObjectTable();
     
     private var
-    objectIndex: GIndex = 0;
+    objectIndex: UInt8 = 0;
     
     private var
-    lookupTable = Dictionary<GIndex, GObject>();
+    lookupTable = Dictionary<UInt8, LookupItem>();
+    
+    private var
+    reuseCache = Array<GIndex>();
     
     // Gets an object from the lookup table.
     func GetObject(_ index: GIndex) -> GObject?
     {
-        return lookupTable[index];
+        let item: LookupItem? = lookupTable[index.index];
+        
+        if( item?.index.counter == index.counter)
+        {
+            return item?.object;
+        }
     }
     
     // Updates or adds an object in the lookup table.
     func UpdateObject(index: GIndex, reference: GObject)
     {
-        lookupTable[index] = reference;
+        let item: LookupItem? = lookupTable[index.index];
+        
+        if( item?.index.counter == index.counter)
+        {
+            lookupTable[index.index]?.object = reference;
+        }
     }
     
     // Removes an object from the lookup table.
     func RemoveObject(_ index: GIndex)
     {
-        lookupTable.removeValue(forKey: index);
+        let item: LookupItem? = lookupTable[index.index];
+        var reuseIndex = index;
+        
+        if( item?.index.counter == index.counter)
+        {
+            lookupTable.removeValue(forKey: index.index);
+        }
+        
+        reuseIndex.counter += 1;
+        reuseCache.append(reuseIndex);
     }
     
     // Returns a unique object index for a new object.
     internal func GetNewGIndex() -> GIndex
     {
-        /*
-        Note that if for some reason you exceed the index's max number,
-        Galah will attempt to recycle an old unused index.
-        */
-        if(objectIndex < GIndex.max)
+        if( reuseCache.count > 0 )
         {
-            let returnVal = objectIndex;
-            objectIndex += 1;
-            return returnVal;
+            let index = reuseCache.last!;
+            reuseCache.removeLast();
+            return index;
         }
         else
         {
-            // If your program is getting to this point, you're probably doing things wrong.
-            var possibleIndex: GIndex = 0;
-            while true
+            if(objectIndex < UInt8.max)
             {
-                if(possibleIndex >= GIndex.max)
-                {
-                    /*
-                    Uh, you have too many objects?
-                    Try increasing the size of GIndex.
-                    Failing that, uh, don't allocate as many GObjects? xD
-                    */
-                    fatalError();
-                }
-                
-                if(lookupTable[possibleIndex] == nil)
-                {
-                    return possibleIndex;
-                }
-                
-                possibleIndex += 1;
+                let index = GIndex(index: objectIndex, counter: 0);
+                objectIndex += 1;
+                return index;
+            }
+            else
+            {
+                // Uh... you have WAY too many objects.
+                fatalError();
+                return GIndex();
             }
         }
+        
+    }
+    
+    private struct LookupItem
+    {
+        public let index: GIndex;
+        public var object: GObject;
     }
 }

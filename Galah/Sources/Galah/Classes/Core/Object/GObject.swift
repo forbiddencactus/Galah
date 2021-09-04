@@ -64,9 +64,9 @@ open class GObject
     }
         
     // Call this to indicate to the object to no longer update its position with the object table.
-    internal func WillCopy()
+    internal func HasBeenCopied()
     {
-        shouldUpdateTable = false;
+        objectIndex = GIndex();
     }
     
     // Call this after the object copy, on the object's copy, so that the object table is updated.
@@ -75,9 +75,8 @@ open class GObject
         GObjectTable.sharedInstance.UpdateObject(index: objectIndex, reference: self);
     }
     
-    private var objectIndex: GIndex = 0;
+    private var objectIndex: GIndex;
     private var willDestroy: Bool = false;
-    private var shouldUpdateTable: Bool = true;
     
     private func internalConstruct()
     {
@@ -89,10 +88,7 @@ open class GObject
     
     private func internalDestruct()
     {
-        if(shouldUpdateTable)
-        {
-            GObjectTable.sharedInstance.RemoveObject(objectIndex);
-        }
+        GObjectTable.sharedInstance.RemoveObject(objectIndex);
         
         self.OnDestroy();
     }
