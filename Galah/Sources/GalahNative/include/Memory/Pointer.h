@@ -31,6 +31,9 @@ GPtr ptr_add(GPtr ptr, MemSize typesize, GUInt amount);
 // Returns a pointer subtracted by amount*typesize.
 GPtr ptr_sub(GPtr ptr, MemSize typesize, GUInt amount);
 
+// Returns a pointer pointing to sourcePtr. 
+GPtr ptr_get_ptr_to_ptr(GPtr sourcePtr);
+
 // Used to (try to?) avoid pointless type casting, sets a GPtr from a void*.
 void ptr_set(GPtr* outptr, void* inptr);
 

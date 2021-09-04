@@ -31,6 +31,14 @@ GPtr ptr_sub(GPtr ptr, MemSize typesize, GUInt amount)
     return ret;
 }
 
+// Returns a pointer pointing to sourcePtr.
+GPtr ptr_get_ptr_to_ptr(GPtr sourcePtr)
+{
+    GPtr ret;
+    ret.ptr = &sourcePtr.ptr;
+    return ret;
+}
+
 void ptr_set(GPtr* outptr, void* inptr)
 {
     outptr->ptr = inptr;

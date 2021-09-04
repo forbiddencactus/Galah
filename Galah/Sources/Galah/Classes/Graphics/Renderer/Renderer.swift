@@ -28,10 +28,10 @@ DEALINGS IN THE SOFTWARE.
 //  Created by Alex Griffin on 12/1/20.
 //
 
+import GalahNative.Settings
+
 public class Renderer
-{
-    private static let LAYERBUFFERSIZE: Int = 124;
-    
+{    
     private static var _instance: Renderer! = nil;
     public static var Instance: Renderer
     {
@@ -49,20 +49,14 @@ public class Renderer
     private var _renderDelegate: RenderDelegate! = nil;
     public var RenderDelegate: RenderDelegate { get { return _renderDelegate; } }
     
-    private var _targetResolution: Size = Constants.TargetResolution;
-    public var TargetResolution: Size { get { return _targetResolution; } set { self.SetTargetResolution(newValue); } }
+    private var
+    _targetResolution: Size = Size(GSETTINGS_GFX_TARGETRESOLUTIONWIDTH,GSETTINGS_GFX_TARGETRESOLUTIONHEIGHT);
     
-    // Render Layers & Batches
-    private var renderLayers: ContiguousArray<RenderLayer>? = nil;
+    public var TargetResolution: Size { get { return _targetResolution; } set { self.SetTargetResolution(newValue); } }
     
     private init()
     {
-        renderLayers = ContiguousArray<RenderLayer>();
-        renderLayers?.reserveCapacity(Renderer.LAYERBUFFERSIZE);
-        
-        let point : UnsafeMutablePointer<RenderLayer?> = UnsafeMutablePointer<RenderLayer?>.allocate(capacity: 10);
-        point.initialize(to: nil);
-        //point.
+
     }
     
     public func Render()
@@ -84,20 +78,5 @@ public class Renderer
             print(i)
         }
     }*/
-}
-
-internal struct RenderLayer: BufferItem
-{
-    internal var isActive: Bool = false;
-    
-    //var depth: Int;
-    var layers: ContiguousArray<RenderComponent>? = nil;
-    
-    //var firstItem
-        
-    fileprivate init()
-    {
-        
-    }
 }
 

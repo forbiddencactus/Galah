@@ -16,6 +16,8 @@
 
 import GalahNative.Memory;
 
+public typealias VoidPtr = Int;
+
 public struct Ptr<T>
 {
     @usableFromInline
@@ -51,6 +53,7 @@ public struct Ptr<T>
     
     public init()
     {
+        size = GetSize<T>.SizeOf();
         ptr_setnull(&ptr);
     }
     
@@ -102,6 +105,14 @@ public struct Ptr<T>
     public mutating func Set(ptr: inout Ptr<Any>, size: MemSize)
     {
         ptr_assign(&self.ptr, &ptr.ptr.ptr, size);
+    }
+    
+    // Returns a new pointer that points to this pointer.
+    @inlinable
+    @inline(__always)
+    public func GetPointerToThis() -> Ptr<VoidPtr>
+    {
+        return Ptr<VoidPtr>(ptr_get_ptr_to_ptr(self.ptr));
     }
     
     //############

@@ -21,7 +21,7 @@
 
 void* glh_malloc(MemSize size);
 
-__attribute__((__forceinline)) // Force inline or else alloca will cause severe havok.
+__attribute__((always_inline))
 void* glh_alloca(MemSize size);
 
 void glh_free(void* ptr);

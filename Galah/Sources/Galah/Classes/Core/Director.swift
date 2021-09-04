@@ -28,3 +28,13 @@ DEALINGS IN THE SOFTWARE.
 //  Created by Alex Griffin on 12/1/20.
 //
 
+import GalahNative.Types;
+
+public class Director
+{
+    public static let sharedInstance: Director = Director();
+    
+    internal let nodePool: NodePool = NodePool();
+    internal static var frameIndex: GUShort = 0;
+
+}

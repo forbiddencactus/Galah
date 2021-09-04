@@ -17,4 +17,16 @@ module GalahNative
         umbrella "SwiftRuntime"
         export *
     }
+    
+    module Settings
+    {
+        umbrella "Settings"
+        export*
+    }
+    
+    module Types
+    {
+        header "GalahTypes.h"
+        export *
+    }
 }

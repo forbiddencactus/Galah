@@ -94,6 +94,12 @@ public func GetRefFromPointer<T>(_ pointer: UnsafeMutableRawPointer) ->T?
     }
 }
 
+// Gets an unretained ref to a pointer of type T.
+public func GetRefFromPointer<T>(_ pointer: Ptr<T>) ->T?
+{
+    return unsafeBitCast(pointer.raw.ptr, to: T.self);
+}
+
 // Releases a pointer
 public func ReleasePointer(_ pointer: UnsafeMutableRawPointer)
 {

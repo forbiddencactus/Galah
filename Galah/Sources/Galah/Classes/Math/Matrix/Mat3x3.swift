@@ -27,7 +27,7 @@ import GalahNative.Maths;
 public struct Mat3x3
 {
     //Column major.
-    private var mat: NativeFloat3x3;
+    private var mat: GFloat3x3;
     @inline(__always) public var m00: Float { get { return mat.m00; } set { mat.m00 = newValue; } };
     @inline(__always) public var m01: Float { get { return mat.m01; } set { mat.m01 = newValue; } };
     @inline(__always) public var m02: Float { get { return mat.m02; } set { mat.m02 = newValue; } };
@@ -50,7 +50,7 @@ public struct Mat3x3
          m21: Float = 0,
          m22: Float = 0)
     {
-        self.mat = NativeFloat3x3(
+        self.mat = GFloat3x3(
             m00 : m00,
             m10 : m10,
             m20 : m20,
@@ -65,7 +65,7 @@ public struct Mat3x3
     
     init(_ m: Mat3x3)
     {
-        self.mat = NativeFloat3x3(
+        self.mat = GFloat3x3(
             m00 : m.m00,
             m10 : m.m10,
             m20 : m.m20,

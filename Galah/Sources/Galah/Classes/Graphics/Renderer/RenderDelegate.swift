@@ -30,7 +30,6 @@ DEALINGS IN THE SOFTWARE.
 
 public protocol RenderDelegate
 {
-    var RenderQueue: Array<RenderQueue>! { get };
     var RenderTarget: RenderTarget { get };
     
     

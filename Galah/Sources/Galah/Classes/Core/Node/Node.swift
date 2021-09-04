@@ -1,4 +1,4 @@
-//---- Galah Engine---------------------------------------------------------//
+//---- Galah Engine --------------------------------------------------------//
 //
 // This source file is part of the Galah open source game engine.
 //
@@ -16,8 +16,10 @@
 
 public class Node: GObject
 {
-    private var _transform: Transform!;
-    private var _components: Array<Component>
+    
+    private var
+    nodeIndex: NodeIndex = 0;
+    
     
     public var Transform: Transform
     {
@@ -58,13 +60,7 @@ public class Node: GObject
     
     private func SetNewDepth(newDepth: Int)
     {
-        for component in _components
-        {
-           /* if let renderComponent = component as? RenderComponent
-            {
-                renderComponent.DepthWillChange(oldDepth:_depth, newDepth:newDepth);
-            }*/
-        }
+
         _depth = newDepth;
     }
         

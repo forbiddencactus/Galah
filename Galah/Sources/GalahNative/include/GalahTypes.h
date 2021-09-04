@@ -20,5 +20,6 @@
 typedef void Buff;
 typedef size_t MemSize;
 typedef uint GUInt;
+typedef ushort GUShort;
 
 #endif

@@ -23,7 +23,7 @@ open class GObject
     public func OnDestroy() {}
         
     // Construct an instance of the specified GObject.
-    public static func Construct<T>() -> T? where T: GObject
+    internal static func Construct<T>() -> T? where T: GObject
     {
         internallyConstructed = true;
         let constr: T;
@@ -38,13 +38,14 @@ open class GObject
         
         retainObject(constr);
         
-        constr.OnConstruct();
+        constr.internalConstruct();
         
         return constr;
     }
     
     // Construct into the specified pointer.
-    public static func Construct<T>(_ ptr: Ptr<T>) -> T? where T: GObject
+    @discardableResult
+    internal static func Construct<T>(_ ptr: Ptr<T>) -> T? where T: GObject
     {
         internallyConstructed = true;
         let constr: T;
@@ -57,18 +58,52 @@ open class GObject
             return nil;
         }
                 
-        constr.OnConstruct();
+        constr.internalConstruct();
         
         return constr;
     }
+        
+    // Call this to indicate to the object to no longer update its position with the object table.
+    internal func WillCopy()
+    {
+        shouldUpdateTable = false;
+    }
     
-    private static var internallyConstructed: Bool = false;
+    // Call this after the object copy, on the object's copy, so that the object table is updated.
+    internal func IsCopied()
+    {
+        GObjectTable.sharedInstance.UpdateObject(index: objectIndex, reference: self);
+    }
+    
+    private var objectIndex: GIndex = 0;
+    private var willDestroy: Bool = false;
+    private var shouldUpdateTable: Bool = true;
+    
+    private func internalConstruct()
+    {
+        objectIndex = GObjectTable.sharedInstance.GetNewGIndex();
+        GObjectTable.sharedInstance.UpdateObject(index: objectIndex, reference: self);
+        
+        self.OnConstruct();
+    }
+    
+    private func internalDestruct()
+    {
+        if(shouldUpdateTable)
+        {
+            GObjectTable.sharedInstance.RemoveObject(objectIndex);
+        }
+        
+        self.OnDestroy();
+    }
 
+    private static var internallyConstructed: Bool = false;
     // TODO: Investigate replacing OnConstruct with just the required init?
     public required init() throws
     {
         if(GObject.internallyConstructed != true)
         {
+            // GObjects are manually managed by the engine. You can't construct them yourself!
             throw GObjectError.NotProperlyConstructed;
             return;
         }
@@ -78,7 +113,7 @@ open class GObject
 
 public enum GObjectError: Error
 {
-    // GObjects are manually managed by the engine. Don't use init!
+    // GObjects are manually managed by the engine. You can't construct them yourself!
     case NotProperlyConstructed;
     case AllocError;
 }

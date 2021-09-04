@@ -15,7 +15,7 @@
 // A manually allocated object. Yours to go nuts with.
 
 
-public class MObject: GObject
+public class MObject
 {
     
 }

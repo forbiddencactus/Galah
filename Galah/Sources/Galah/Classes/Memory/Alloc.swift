@@ -40,5 +40,5 @@ internal func galah_placementNew<T>(_ ptrToPlace: Ptr<T>) throws -> T where T: A
     // Increment the strong retain by one because we want to manually manage this object.
     value.assumingMemoryBound(to: ClassHeader.self).pointee.strongRetainCounts += 1;
 
-    return unsafeBitCast(value, to: AnyObject.self) as! T;
+    return unsafeBitCast(value, to: T.self);
 }

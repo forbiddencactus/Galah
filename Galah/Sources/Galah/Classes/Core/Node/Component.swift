@@ -1,4 +1,4 @@
-//---- Galah Engine---------------------------------------------------------//
+//---- Galah Engine --------------------------------------------------------//
 //
 // This source file is part of the Galah open source game engine.
 //
@@ -14,10 +14,14 @@
 //--------------------------------------------------------------------------//
 // Nodes have Components that drive the Node's behaviour. 
 
+import GalahNative.Types;
 
+typealias ComponentIndex = GUShort;
 open class Component: GObject
 {
-    private var _node: Node? = nil;
+    private var nodeIndex: NodeIndex = 0;
+    private var componentIndex: ComponentIndex = 0;
+    
     public var Node: Node
     {
         get

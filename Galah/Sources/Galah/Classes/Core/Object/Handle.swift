@@ -14,6 +14,23 @@
 //--------------------------------------------------------------------------//
 // A 'smart pointer' that points to a GObject irregardless of where it gets shuffled to in memory.
 
+import GalahNative.Types;
+
 public struct Hnd<T> where T: GObject
 {
+    private let index: GIndex;
+    private var currentFrameCache: GUShort;
+    private unowned var refCache: T?;
+    
+    public unowned var ref: T?
+    {
+        mutating get
+        {
+            if(Director.frameIndex != currentFrameCache)
+            {
+                refCache = GObjectTable.sharedInstance.GetObject(index) as! T;
+            }
+            return refCache;
+        }
+    }
 }

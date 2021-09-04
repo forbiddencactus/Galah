@@ -26,7 +26,7 @@ import GalahNative.Maths;
 
 public struct Colour
 {
-    private var col: NativeFloat4;
+    private var col: GFloat4;
     
     @inline(__always)
     public var r: Float { get { return col.x; } set { col.x = newValue; } };
@@ -39,8 +39,8 @@ public struct Colour
     
     public init(_ red: Float,_ green: Float,_ blue: Float,_ alpha: Float)
     {
-        col = NativeFloat4(x: red, y: green, z: blue, w: alpha);
+        col = GFloat4(x: red, y: green, z: blue, w: alpha);
     }
 }
 
-typealias Colour = Col;
+typealias Col = Colour;

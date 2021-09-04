@@ -63,7 +63,6 @@ public class ContiguousMutableBuffer<T> where T: GObject
         {
             throw ContiguousMutableBufferError.AllocError;
         }
-        
     }
     
     public func InsertNew(_ index: Int) throws
