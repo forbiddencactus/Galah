@@ -23,16 +23,21 @@
  */
 // Cheers to Wes Wickwire for their awesome work opening up the Swift runtime! Functional swift here we come!
 
-internal func galah_placementNew<T>(_ ptrToPlace: Ptr<T>) throws -> T where T: AnyObject
+internal func galah_placementNew<T>(_ ptr: Ptr<T>) throws -> T where T: AnyObject
 {
-    var md = ClassMetadata(type: T.Type.self);
+    return try galah_placementNew(type: T.self, ptr: ptr.GetVoidPtr()) as! T;
+}
+
+internal func galah_placementNew(type: Any.Type, ptr: Ptr<VoidPtr>) throws -> AnyObject
+{
+    var md = ClassMetadata(type: type.self);
     let info = md.toTypeInfo();
-    let metadata = unsafeBitCast(T.self, to: UnsafeRawPointer.self);
+    let metadata = unsafeBitCast(type.self, to: UnsafeRawPointer.self);
 
     // Not sure we need this alignment stuff for now...
     // let alignmentMask = Int32(md.pointer.pointee.instanceAlignmentMask)
 
-    let value: UnsafeMutableRawPointer = ptrToPlace.raw.ptr!;
+    let value: UnsafeMutableRawPointer = ptr.raw.ptr!;
 
     value.storeBytes(of: metadata, as: UnsafeRawPointer.self);
     try setProperties(typeInfo: info, pointer: UnsafeMutableRawPointer(mutating: value));
@@ -40,5 +45,5 @@ internal func galah_placementNew<T>(_ ptrToPlace: Ptr<T>) throws -> T where T: A
     // Increment the strong retain by one because we want to manually manage this object.
     value.assumingMemoryBound(to: ClassHeader.self).pointee.strongRetainCounts += 1;
 
-    return unsafeBitCast(value, to: T.self);
+    return unsafeBitCast(value, to: AnyObject.self);
 }

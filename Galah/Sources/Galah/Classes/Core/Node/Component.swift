@@ -16,11 +16,17 @@
 
 import GalahNative.Types;
 
-typealias ComponentIndex = GUShort;
+typealias ComponentIndex = UInt8;
 open class Component: GObject
 {
-    private var nodeIndex: NodeIndex = 0;
-    private var componentIndex: ComponentIndex = 0;
+    internal var
+    nodeIndex = NodeIndex();
+    
+    internal var
+    componentIndex: ComponentIndex = 0;
+    
+    internal var
+    node: Node;
     
     public var Node: Node
     {

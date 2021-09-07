@@ -75,6 +75,11 @@ public struct Ptr<T>
         ptr = pointer.ptr;
     }
     
+    public init (_ pointer: Ptr<VoidPtr>)
+    {
+        size = GetSize<T>.SizeOf();
+        ptr = pointer.ptr;
+    }
     // Usage: Ptr(obj), naturally no guarantee is made to the pointee's lifespan.
     // Creates a pointer from a pointer or reference. ptr* ptr = 
     public init(_ object: inout T)
@@ -113,6 +118,14 @@ public struct Ptr<T>
     public func GetPointerToThis() -> Ptr<VoidPtr>
     {
         return Ptr<VoidPtr>(ptr_get_ptr_to_ptr(self.ptr));
+    }
+    
+    // Returns a new pointer that points to this pointer.
+    @inlinable
+    @inline(__always)
+    public func GetVoidPtr() -> Ptr<VoidPtr>
+    {
+        return Ptr<VoidPtr>(ptr);
     }
     
     //############

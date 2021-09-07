@@ -16,10 +16,14 @@
 
 public class Node: GObject
 {
+    public var
+    name: String = "Node";
     
-    private var
-    nodeIndex: NodeIndex = 0;
+    internal var
+    nodeIndex = NodeIndex();
     
+    internal var
+    components = Array<Component>();
     
     public var Transform: Transform
     {
@@ -68,7 +72,7 @@ public class Node: GObject
     {
         _enabled = isEnabled;
         
-        for component in _components
+        for component in components
         {
             component.OnEnable(willEnable: isEnabled);
         }

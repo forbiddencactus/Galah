@@ -1,4 +1,4 @@
-//---- Galah Engine---------------------------------------------------------//
+//---- Galah Engine --------------------------------------------------------//
 //
 // This source file is part of the Galah open source game engine.
 //
@@ -25,11 +25,23 @@ open class GObject
     // Construct an instance of the specified GObject.
     internal static func Construct<T>() -> T? where T: GObject
     {
+        return GObject.Construct(type: T.self) as? T;
+    }
+    
+    // Construct into the specified pointer.
+    @discardableResult
+    internal static func Construct<T>(_ ptr: Ptr<T>) -> T? where T: GObject
+    {
+        return GObject.Construct(type: T.self, ptr: ptr.GetVoidPtr()) as? T;
+    }
+    
+    internal static func Construct(type: GObject.Type) -> GObject?
+    {
         internallyConstructed = true;
-        let constr: T;
+        let constr: GObject;
         do
         {
-            constr = try T();
+            constr = try type.init();
         }
         catch
         {
@@ -43,21 +55,21 @@ open class GObject
         return constr;
     }
     
-    // Construct into the specified pointer.
-    @discardableResult
-    internal static func Construct<T>(_ ptr: Ptr<T>) -> T? where T: GObject
+    internal static func Construct(type: GObject.Type, ptr: Ptr<VoidPtr>) -> GObject?
     {
         internallyConstructed = true;
-        let constr: T;
+        let constr: GObject;
         do
         {
-            constr = try galah_placementNew(ptr);
+            constr = try galah_placementNew(type: type, ptr: ptr) as! GObject;
         }
         catch
         {
             return nil;
         }
-                
+        
+        retainObject(constr);
+        
         constr.internalConstruct();
         
         return constr;

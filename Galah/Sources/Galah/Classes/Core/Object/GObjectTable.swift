@@ -1,4 +1,4 @@
-//---- Galah Engine---------------------------------------------------------//
+//---- Galah Engine --------------------------------------------------------//
 //
 // This source file is part of the Galah open source game engine.
 //
@@ -26,7 +26,7 @@ internal struct GIndex
         counter = UInt8.max;
     }
     
-    fileprivate init(index: UInt8, counter: UInt8)
+    internal init(index: UInt8, counter: UInt8)
     {
         self.index = index;
         self.counter = counter;
