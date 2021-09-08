@@ -73,12 +73,14 @@ internal class NodePool
         return newNode;
     }
     
+    // Updates a node with data from the specified table.
     internal func UpdateNode(node: Node, table: NodeTable)
     {
         node.nodeIndex = table.index;
         node.components = table.components;
     }
     
+    // Adds a component to a node.
     @discardableResult
     internal func AddComponent(componentType: Component.Type, node: NodeIndex) -> Component?
     {
@@ -113,6 +115,7 @@ internal class NodePool
         return newComponent;
     }
     
+    // Updates a component with data from the specified table.
     internal func UpdateComponent(component: Component, table: NodeTable)
     {
         component.nodeIndex = table.node.nodeIndex;
@@ -143,6 +146,39 @@ internal class NodePool
         
         reuseIndex.counter += 1;
         reuseCache.append(reuseIndex);
+    }
+    
+    // Trawls through the scratch buffers and places nodes and their components in the correct archetype. 
+    internal func UpdateNodePool()
+    {
+        // Our update scratch space.
+        var updateScratchSpace = Dictionary<UInt8, NodeTable>();
+        
+        // First, trawl through the node scratch space...
+        for node: Node in nodeScratchBuffer
+        {
+            // We'll use both the existing lookupTable and this scratch space to determine what lives where.
+            updateScratchSpace[node.nodeIndex.index] = NodeTable(index: node.nodeIndex, node: node);
+        }
+        
+        // Then, trawl through the component scratch space, and add nodes.
+        for component: Component in componentScratchBuffer
+        {
+            var updateTable: NodeTable? = updateScratchSpace[component.nodeIndex.index];
+            let parentNode: Node = component.Node;
+            
+            if(updateTable == nil)
+            {
+                updateTable = NodeTable(index: parentNode.nodeIndex, node: parentNode);
+            }
+            
+            updateTable!.components.append(component);
+            
+            updateScratchSpace[parentNode.nodeIndex.index] = updateTable!;
+        }
+        
+        // At this point, we should have a list of what nodes and their components need to be updated.
+        // We should have also have an idea of where they live.
     }
     
     // Returns a unique object index for a new object.
@@ -177,6 +213,11 @@ internal class NodePool
         let NodeBuffer: ContiguousMutableBuffer<Node>;
         public let BatchId: String;
         public let BatchMembers: Dictionary<HashableType<GObject>, ContiguousMutableBuffer<Component>>;
+        
+        public func GetComponentForNodeExists(nodeBatchIndex: Int, componentIndex: ComponentIndex) -> Bool
+        {
+            return false;
+        }
     }
     
     // Sort batches by archetypes of nodes with exactly the same components.
@@ -204,9 +245,22 @@ internal class NodePool
     
     struct NodeTable
     {
+        // If this is null, node is childed to scratch buffers.
+        var nodeParentBuffer = Ptr<ArchetypeSubBatch>.Null();
         var index: NodeIndex;
         var node: Node;
-        var components: Array<Component>;
+        var components = Array<Component>();
+        var componentTypes = Array<HashableType<Component>>();
+
+        public mutating func RefreshComponentTypes()
+        {
+            componentTypes.removeAll(keepingCapacity: true);
+            
+            for component: Component in components
+            {
+                componentTypes.append(HashableType<Component>(type(of: component)));
+            }
+        }
     }
     
     

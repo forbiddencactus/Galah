@@ -17,7 +17,7 @@
 
 import GalahNative.Memory;
 
-public class ContiguousMutableBuffer<T> where T: GObject
+public class ContiguousMutableBuffer<T>: Sequence where T: GObject
 {
     
     private var buffer: NativeBuffer;
@@ -107,23 +107,51 @@ public class ContiguousMutableBuffer<T> where T: GObject
         throw ContiguousMutableBufferError.OutOfRange;
     }
     
-
+    deinit
+    {
+        buffer_free(&buffer);
+    }
+    
+    // Sequence protocol:
+    public func makeIterator() -> ContiguousMutableBufferIterator<T>
+    {
+        return ContiguousMutableBufferIterator<T>(buffer: self, elementIndex: 0);
+    }
         
         /*let test: (ContiguousMutableBuffer<BufferElement>) ->() ->() = ContiguousMutableBuffer<BufferElement>.AddNew;
         
         let hullo: ContiguousMutableBuffer<BufferElement> = ContiguousMutableBuffer<BufferElement>(withInitialCapacity: 5);
         
         test(hullo)();*/
-        
-        
-        //ARC will deallocate old buffer ref here? ¯\_(ツ)_/¯
-    
-    
-    deinit
-    {
-        buffer_free(&buffer);
-    }
 }
+
+public struct ContiguousMutableBufferIterator<T>: IteratorProtocol where T: GObject
+{
+    let buffer: ContiguousMutableBuffer<T>;
+    var elementIndex: Int;
+    
+    public init(buffer: ContiguousMutableBuffer<T>, elementIndex: Int)
+    {
+        self.buffer = buffer;
+        self.elementIndex = elementIndex;
+    }
+    
+    public mutating func next() -> T?
+    {
+        if(elementIndex < buffer.Count)
+        {
+            let ret: T? = buffer.ItemAt(elementIndex);
+            elementIndex += 1;
+            return ret;
+        }
+        
+        return nil;
+    }
+    
+
+}
+
+
 
 public enum ContiguousMutableBufferError: Error
 {

@@ -30,6 +30,11 @@ public struct Ptr<T>
     @inline(__always)
     public var raw: GPtr { get { return ptr; } };
     
+    public static func Null() -> Ptr<T>
+    {
+        return Ptr<T>();
+    }
+    
     // Allocates a pointer of size of the pointer element * count.
     public static func Allocate(_ count: GUInt) -> Ptr<T>
     {
@@ -120,7 +125,7 @@ public struct Ptr<T>
         return Ptr<VoidPtr>(ptr_get_ptr_to_ptr(self.ptr));
     }
     
-    // Returns a new pointer that points to this pointer.
+    // Returns a void pointer from this pointer.
     @inlinable
     @inline(__always)
     public func GetVoidPtr() -> Ptr<VoidPtr>

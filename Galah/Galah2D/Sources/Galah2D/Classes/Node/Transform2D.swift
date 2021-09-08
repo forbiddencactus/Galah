@@ -1,4 +1,4 @@
-//---- Galah Engine---------------------------------------------------------//
+//---- Galah Engine --------------------------------------------------------//
 //
 // This source file is part of the Galah open source game engine.
 //
@@ -12,7 +12,7 @@
 //
 // galah-engine.org | https://github.com/forbiddencactus/Galah
 //--------------------------------------------------------------------------//
-// Our transform2D class. Has support for shear like the classics!
+// The Transform2D class. Has support for shear like the classics!
 
 import Galah;
 
