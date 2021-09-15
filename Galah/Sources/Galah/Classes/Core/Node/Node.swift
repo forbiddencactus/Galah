@@ -14,7 +14,7 @@
 //--------------------------------------------------------------------------//
 // Nodes are the base object type that can be placed in scenes.
 
-public class Node: GObject
+public final class Node: GObject
 {
     public var
     name: String = "Node";
@@ -50,6 +50,18 @@ public class Node: GObject
         //_transform = AddComponent();
     }
     
+    // Gets the pass this node belongs to.
+    public func GetPassIndex() -> String
+    {
+        // Todo: fill out
+        return "Default";
+    }
+    
+    // Gets the subarchetype batch for this node.
+    public func GetSubArchetypeBatchIndex() -> String
+    {
+        return "Default"
+    }
     //public func AddComponent<T>() -> T where T: Component
     //{
         //let component: T = T();
@@ -64,8 +76,8 @@ public class Node: GObject
     
     private func SetNewDepth(newDepth: Int)
     {
-
         _depth = newDepth;
+        NodePool.sharedInstance.MarkDirty(node: self);
     }
         
     private func SetEnabled(isEnabled: Bool)

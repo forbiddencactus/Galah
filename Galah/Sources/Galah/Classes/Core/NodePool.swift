@@ -21,6 +21,7 @@ internal typealias NodeIndex = GIndex;
 // TODO: use the indices to pack a bitfield pointing directly to the data?
 internal class NodePool
 {
+    private static let poolSizes: Int = 16;
     static let sharedInstance: NodePool = Director.sharedInstance.nodePool;
     
     // NodeIndex acts as an internal index to locate nodes and their components in the batches.
@@ -33,19 +34,23 @@ internal class NodePool
     lookupTable = Dictionary<UInt8, NodeTable>();
     
     // PassBatches are batches per-pass of objects to render, like opaque, transparent, blah.
-    private let
-    passBatches = Array<PassBatch>();
+    private var
+    passBatches = Dictionary<String,PassBatch>();
     
     // Scratch buffers:
     // At the end of each frame, Nodes are moved to their most appropriate batches.
     
     // Component scratch buffers are where newly created components go.
-    private let
-    componentScratchBuffer: ContiguousMutableBuffer<Component>;
+    private var
+    componentScratchBuffer: Dictionary<HashableType<Component>,ContiguousMutableBuffer>;
     
     // Node scratch buffers are where newly created nodes go.
     private let
-    nodeScratchBuffer: ContiguousMutableBuffer<Node>;
+    nodeScratchBuffer: ContiguousMutableBufferT<Node>;
+    
+    // Nodes whose depth or subarchetype types have changed get marked here.
+    private var
+    nodeDirtyBucket: Array<Node>;
     
     // Creates a node.
     internal func CreateNode(transformType: Transform.Type) -> Node?
@@ -89,24 +94,33 @@ internal class NodePool
         
         let componentIndex: ComponentIndex = ComponentIndex(table!.components.count);
         
-        let ptr: Ptr<Component>;
+        let ptr: Ptr<VoidPtr>;
         
         do
         {
-            ptr = try componentScratchBuffer.MakeSpace(componentScratchBuffer.Count);
+            let buffer: ContiguousMutableBuffer? = componentScratchBuffer[componentType];
+            
+            if(buffer == nil)
+            {
+                componentScratchBuffer[componentType] = AllocContiguousBuffer(type: componentType);
+            }
+            
+            ptr = try buffer!.MakeSpace(buffer!.Count);
         }
         catch
         {
             return nil;
         }
         
-        let newComponent: Component? = GObject.Construct(ptr);
+        let newComponent: Component? = GObject.Construct(type: componentType,ptr: ptr) as! Component?;
         if(newComponent == nil) { return nil;}
         
         newComponent!.componentIndex = componentIndex;
         self.UpdateComponent(component: newComponent!, table: table!);
         
         table!.components.append(newComponent!);
+        
+        table!.RefreshComponentTypes();
         
         lookupTable[node.index] = table!;
         
@@ -179,6 +193,42 @@ internal class NodePool
         
         // At this point, we should have a list of what nodes and their components need to be updated.
         // We should have also have an idea of where they live.
+        
+        for nodes in updateScratchSpace.values
+        {
+            let passIndex = nodes.node.GetPassIndex();
+            let subBatchIndex = nodes.node.GetSubArchetypeBatchIndex();
+            let masterTable = lookupTable[nodes.index.index]!;
+            
+            if(passBatches[passIndex] == nil)
+            {
+                passBatches[passIndex] = PassBatch(Index: passIndex);
+            }
+            
+            let depthIndex = passBatches[passIndex]!.GetIndexForDepth(depth: nodes.node.Depth);
+            
+            if(passBatches[passIndex]!.DepthBatches[depthIndex].ArchetypeBatch[masterTable.componentTypes] == nil)
+            {
+                let archeType = NodeArchetype.CreateArchetype(nodeTable: masterTable);
+                passBatches[passIndex]!.DepthBatches[depthIndex].ArchetypeBatch[nodes.componentTypes] = archeType;
+            }
+            
+        if(passBatches[passIndex]!.DepthBatches[depthIndex].ArchetypeBatch[masterTable.componentTypes]?.SubArchetypeBatch[subBatchIndex] == nil)
+            {
+             // Todo finish this
+            }
+            
+        }
+    }
+    
+    internal func MarkDirty(node: Node)
+    {
+        nodeDirtyBucket.append(node);
+    }
+    
+    private func AllocContiguousBuffer(type: GObject.Type) throws -> ContiguousMutableBuffer
+    {
+        return try ContiguousMutableBuffer(withType: type, withInitialCapacity: NodePool.poolSizes);
     }
     
     // Returns a unique object index for a new object.
@@ -208,11 +258,11 @@ internal class NodePool
     }
 
     // Sort batches by BatchId (material type, texture, etc).
-    struct ArchetypeSubBatch
+    struct SubArchetypeBatch
     {
-        let NodeBuffer: ContiguousMutableBuffer<Node>;
+        let NodeBuffer: ContiguousMutableBufferT<Node>;
         public let BatchId: String;
-        public let BatchMembers: Dictionary<HashableType<GObject>, ContiguousMutableBuffer<Component>>;
+        public let BatchMembers: Dictionary<HashableType<GObject>, ContiguousMutableBuffer>;
         
         public func GetComponentForNodeExists(nodeBatchIndex: Int, componentIndex: ComponentIndex) -> Bool
         {
@@ -223,9 +273,56 @@ internal class NodePool
     // Sort batches by archetypes of nodes with exactly the same components.
     struct NodeArchetype
     {
-        public let DepthPool: Array<DepthBatch>;
-        public let ComponentBatchTypes: Dictionary<HashableType<Component>, Int>;
-        public let ComponentBatchTypeArray: Array<HashableType<Component>>;
+        public var SubArchetypeBatch: Dictionary<String,SubArchetypeBatch>;
+        public var ComponentBatchTypes: Dictionary<HashableType<Component>, Int>;
+        public var ComponentBatchTypeArray: Array<HashableType<Component>>;
+        
+        // Create an archetype for the specified nodetable.
+        public static func CreateArchetype(nodeTable: NodeTable) -> NodeArchetype
+        {
+            var allTypes = Dictionary<HashableType<Component>, Int>();
+            
+            for componentType in nodeTable.componentTypes
+            {
+                if(allTypes[componentType] == nil)
+                {
+                    allTypes[componentType] = 1;
+                }
+                else
+                {
+                    allTypes[componentType]! += 1;
+                }
+                
+                var type = ClassMetadata(type: componentType.base);
+                
+                var hasSuper = true;
+                while(hasSuper)
+                {
+                    let theSuper = type.superClassMetadata();
+                    if(theSuper != nil)
+                    {
+                        type = theSuper!.asClassMetadata()!;
+                        let fType = HashableType<Component>(unsafeBitCast(type.pointer, to: Component.Type.self));
+
+                        if(allTypes[fType] == nil)
+                        {
+                            allTypes[fType] = 1;
+                        }
+                        else
+                        {
+                            allTypes[fType]! += 1;
+                        }
+                    }
+                    else
+                    {
+                        hasSuper = false;
+                    }
+                }
+
+            }
+            
+            return NodeArchetype(SubArchetypeBatch: Dictionary<String,SubArchetypeBatch>(), ComponentBatchTypes: allTypes, ComponentBatchTypeArray: nodeTable.componentTypes);
+        }
 
     }
     
@@ -233,20 +330,26 @@ internal class NodePool
     struct DepthBatch
     {
         public let Depth: Int;
-        public let ComponentSubBatch: Array<ArchetypeSubBatch>;
+        public var ArchetypeBatch: Dictionary<Array<HashableType<Component>>,NodeArchetype>;
     }
     
     // PassBatches are batches per-pass of objects to render, like opaque, transparent, blah.
     struct PassBatch
     {
-        public let Index: Int;
-        public let ComponentBatch: Array<NodeArchetype>;
+        public let Index: String;
+        public let DepthBatches = Array<DepthBatch>();
+        
+        // Returns the correct index for the supplied depth, creating it if required.
+        public func GetIndexForDepth(depth: Int) -> Int
+        {
+            
+        }
     }
     
     struct NodeTable
     {
         // If this is null, node is childed to scratch buffers.
-        var nodeParentBuffer = Ptr<ArchetypeSubBatch>.Null();
+        var nodeParentBuffer = Ptr<SubArchetypeBatch>.Null();
         var index: NodeIndex;
         var node: Node;
         var components = Array<Component>();

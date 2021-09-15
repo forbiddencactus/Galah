@@ -20,9 +20,9 @@ public struct Hnd<T> where T: GObject
 {
     private let index: GIndex;
     private var currentFrameCache: GUShort;
-    private unowned var refCache: T?;
+    private unowned(unsafe) var refCache: T?;
     
-    public unowned var ref: T?
+    public unowned(unsafe) var ref: T?
     {
         mutating get
         {

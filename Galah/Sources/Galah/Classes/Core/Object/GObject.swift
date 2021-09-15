@@ -55,6 +55,7 @@ open class GObject
         return constr;
     }
     
+    @discardableResult
     internal static func Construct(type: GObject.Type, ptr: Ptr<VoidPtr>) -> GObject?
     {
         internallyConstructed = true;

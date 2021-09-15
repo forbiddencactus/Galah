@@ -20,26 +20,38 @@ public struct GetSize<T>
 {
     public static func SizeOf() -> MemSize
     {
-        let kind = Kind(type: T.self);
-        switch kind
-        {
-            case .struct:
-                do
-                {
-                    return try typeInfo(of: T.self).size;
-                }
-                catch
-                {
-                    return 0;
-                }
-            
-            case .class:
-                let md = ClassMetadata(type: T.self);
-                return Int(md.pointer.pointee.instanceSize)
-            
-            default:
+        return Galah.SizeOf(T.self);
+    }
+}
+
+public func SizeOf(_ type: Any.Type) -> MemSize
+{
+    let kind = Kind(type: type.self);
+    switch kind
+    {
+        case .struct:
+            do
+            {
+                return try typeInfo(of: type.self).size;
+            }
+            catch
+            {
                 return 0;
-        }
+            }
+        
+        case .class:
+            let md = ClassMetadata(type: type.self);
+            return Int(md.pointer.pointee.instanceSize)
+        
+        default:
+            do
+            {
+                return try typeInfo(of: type.self).size;
+            }
+            catch
+            {
+                return 0;
+            }
     }
 }
 
@@ -75,23 +87,14 @@ public func GetRetainedPointerFromObject(_ object: AnyObject) -> UnsafeMutableRa
 // Gets an unretained ref to a pointer.
 public func GetRefFromPointer(_ pointer: UnsafeMutableRawPointer) -> AnyObject?
 {
-    let ptr = Unmanaged<AnyObject>.fromOpaque(pointer);
-    return ptr.takeUnretainedValue();
+    return unsafeBitCast(value, to: AnyObject.self)
 }
 
 // Gets an unretained ref to a pointer of type T.
 public func GetRefFromPointer<T>(_ pointer: UnsafeMutableRawPointer) ->T?
 {
-    let ptr = GetRefFromPointer(pointer);
-    
-    if(ptr is T)
-    {
-        return ptr as! T?
-    }
-    else
-    {
-        return nil;
-    }
+    return unsafeBitCast(value, to: T.self)
+
 }
 
 // Gets an unretained ref to a pointer of type T.
