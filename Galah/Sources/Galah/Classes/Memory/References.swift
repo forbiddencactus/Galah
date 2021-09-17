@@ -14,6 +14,32 @@
 //--------------------------------------------------------------------------//
 // Manage Swift references. 
 
+internal struct Ref<T> where T: GObject
+{
+    @usableFromInline
+    internal unowned(unsafe) var _ref: T
+
+    @usableFromInline @_transparent
+    internal init(ref: T) { _ref = ref }
+    
+    @inlinable @inline(__always)
+    internal unowned(unsafe) var ref: T
+    {
+        get
+        {
+            return _ref;
+        }
+    }
+
+    @inlinable
+    @_transparent
+    public func FastFunc<R>(_ body: (T) throws -> R) rethrows -> R
+    {
+        var tmp = self;
+        return try body(tmp._ref);
+    }
+}
+
 
 internal func retainObject(_ object: AnyObject)
 {

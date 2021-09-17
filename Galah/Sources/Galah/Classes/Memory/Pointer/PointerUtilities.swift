@@ -87,13 +87,13 @@ public func GetRetainedPointerFromObject(_ object: AnyObject) -> UnsafeMutableRa
 // Gets an unretained ref to a pointer.
 public func GetRefFromPointer(_ pointer: UnsafeMutableRawPointer) -> AnyObject?
 {
-    return unsafeBitCast(value, to: AnyObject.self)
+    return unsafeBitCast(pointer, to: AnyObject.self)
 }
 
 // Gets an unretained ref to a pointer of type T.
 public func GetRefFromPointer<T>(_ pointer: UnsafeMutableRawPointer) ->T?
 {
-    return unsafeBitCast(value, to: T.self)
+    return unsafeBitCast(pointer, to: T.self)
 
 }
 
