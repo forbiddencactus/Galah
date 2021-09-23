@@ -1,4 +1,4 @@
-//---- Galah Engine---------------------------------------------------------//
+//---- Galah Engine --------------------------------------------------------//
 //
 // This source file is part of the Galah open source game engine.
 //
@@ -27,7 +27,7 @@ public class ContiguousMutableBuffer: Sequence
     
     public init(withType: GObject.Type, withInitialCapacity: Int) throws
     {
-        
+        type = withType;
         let sizeOf: Int = SizeOf(withType);
         buffer = buffer_create(sizeOf, GUInt(withInitialCapacity), true);
         
@@ -193,8 +193,6 @@ public struct ContiguousMutableBufferIterator<T>: IteratorProtocol where T: GObj
         
         return nil;
     }
-    
-
 }
 
 

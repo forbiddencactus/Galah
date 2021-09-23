@@ -29,4 +29,10 @@ module GalahNative
         header "GalahTypes.h"
         export *
     }
+    
+    module Thread
+    {
+        umbrella "Thread"
+        export *
+    }
 }

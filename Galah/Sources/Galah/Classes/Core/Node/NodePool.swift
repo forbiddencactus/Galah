@@ -52,6 +52,10 @@ internal class NodePool
     private var
     nodeDirtyBucket: Array<Node>;
     
+    internal init()
+    {
+    }
+    
     // Creates a node.
     internal func CreateNode(transformType: Transform.Type) -> Node?
     {
@@ -175,6 +179,8 @@ internal class NodePool
             updateScratchSpace[node.nodeIndex.index] = NodeTable(index: node.nodeIndex, node: node);
         }
         
+        let theVar: Unmanaged<Component>;
+                
         // Then, trawl through the component scratch space, and add nodes.
         for component: Component in componentScratchBuffer
         {

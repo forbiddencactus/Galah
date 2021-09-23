@@ -1,4 +1,4 @@
-//---- Galah Engine---------------------------------------------------------//
+//---- Galah Engine --------------------------------------------------------//
 //
 // This source file is part of the Galah open source game engine.
 //
@@ -13,6 +13,7 @@
 // galah-engine.org | https://github.com/forbiddencactus/Galah
 //--------------------------------------------------------------------------//
 // Manage Swift references. 
+
 
 internal struct Ref<T> where T: GObject
 {
@@ -35,7 +36,7 @@ internal struct Ref<T> where T: GObject
     @_transparent
     public func FastFunc<R>(_ body: (T) throws -> R) rethrows -> R
     {
-        var tmp = self;
+        let tmp = self;
         return try body(tmp._ref);
     }
 }

@@ -28,7 +28,7 @@ public struct Hnd<T> where T: GObject
         {
             if(Director.frameIndex != currentFrameCache)
             {
-                refCache = GObjectTable.sharedInstance.GetObject(index) as! T;
+                refCache = GObjectTable.sharedInstance.GetObject(index) as! T?;
             }
             return refCache;
         }

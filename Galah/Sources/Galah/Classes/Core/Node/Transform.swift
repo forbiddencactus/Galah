@@ -32,7 +32,6 @@ public class Transform: Component
     
     private var _children: Array<Transform> = Array<Transform>();
     
-    
     public func Construct()
     {
         //self.InternalWorldRefresh();

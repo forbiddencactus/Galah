@@ -75,9 +75,12 @@ internal class GObjectTable
     func RemoveObject(_ index: GIndex)
     {
         let item: LookupItem? = lookupTable[index.index];
+        
+        if(item == nil) { return; }
+        
         var reuseIndex = index;
         
-        if( item?.index.counter == index.counter)
+        if( item!.index.counter == index.counter)
         {
             lookupTable.removeValue(forKey: index.index);
         }

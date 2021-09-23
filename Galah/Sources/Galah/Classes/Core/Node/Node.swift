@@ -46,8 +46,7 @@ public final class Node: GObject
     
     public required init()
     {
-        _components = Array<Component>();
-        //_transform = AddComponent();
+        components = Array<Component>();
     }
     
     // Gets the pass this node belongs to.
@@ -62,6 +61,7 @@ public final class Node: GObject
     {
         return "Default"
     }
+    
     //public func AddComponent<T>() -> T where T: Component
     //{
         //let component: T = T();

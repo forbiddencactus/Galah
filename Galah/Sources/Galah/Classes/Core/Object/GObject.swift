@@ -88,7 +88,7 @@ open class GObject
         GObjectTable.sharedInstance.UpdateObject(index: objectIndex, reference: self);
     }
     
-    private var objectIndex: GIndex;
+    private var objectIndex: GIndex = GIndex();
     private var willDestroy: Bool = false;
     
     private func internalConstruct()
@@ -107,6 +107,7 @@ open class GObject
     }
 
     private static var internallyConstructed: Bool = false;
+    
     // TODO: Investigate replacing OnConstruct with just the required init?
     public required init() throws
     {
@@ -118,6 +119,11 @@ open class GObject
         }
         GObject.internallyConstructed = false;
     };
+    
+    deinit
+    {
+        self.internalDestruct();
+    }
 }
 
 public enum GObjectError: Error

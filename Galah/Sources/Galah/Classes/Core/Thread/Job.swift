@@ -12,23 +12,4 @@
 //
 // galah-engine.org | https://github.com/forbiddencactus/Galah
 //--------------------------------------------------------------------------//
-// RenderDelegates are overriden by per-platform implementations.
-
-public protocol RenderDelegate
-{
-    var RenderTarget: RenderTarget { get };
-    
-    
-    init(_ newRenderTarget: RenderTarget);
-    func Draw();
-    func SetBackgroundColour(_ colour: Colour);
-    func SetTargetResolution(_ resolution: Size);
-}
-
-public extension RenderDelegate
-{
-    func ViewSizeWillChange(width: Float, height: Float)
-    {
-        ///
-    }
-}
+// Jobs can be scheduled to run on separate threads through the JobPool.
