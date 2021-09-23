@@ -32,7 +32,6 @@ public final class Thread: GObject
     
     public func SetJob(job: @escaping (Any) ->(), jobArg: Any) -> Bool
     {
-        
         return glh_thread_setjob(&internalThread, unsafeBitCast(job, to: glh_thread_function?.self), unsafeBitCast(jobArg, to: UnsafeMutableRawPointer.self));
     }
     
