@@ -123,6 +123,12 @@ bool buffer_grow(GBuffer* buf, GUInt newCapacity)
         buf->capacity = newCapacity;
         buf->bufferSize = buf->elementSize * buf->capacity;
         glh_free(oldBuffer);
+        
+        if( buf->bufferResizeCallback != NULL)
+        {
+            buf->bufferResizeCallback(buf->bufferResizeCallbackTarget);
+        }
+        
         return true;
     }
     else

@@ -14,9 +14,9 @@ Galah is a lovingly hand crafted Swift game engine for PC, Mac, Linux, and mobil
 - 2D with sprite batching, atlasing, and custom materials
 - Write shaders in HLSL. (SPIR-V Cross)
 - Easy to use UI layer. 
-- Forward rendering pipeline
 - Input layer for keyboard, touchscreens, and gamepads. 
 - 2D physics with Liquidfun, ported to fit Galah.
+- 3D forward and deferred pipelines.
 - 3D physics with PhysX. 
 - 3D Audio, and one day, support for MOD files?
 - An editor, built on top of Galah's own tech. 

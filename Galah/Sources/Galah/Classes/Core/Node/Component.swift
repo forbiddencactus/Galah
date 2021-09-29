@@ -32,7 +32,7 @@ open class Component: GObject
     {
         get
         {
-            return _node!;
+            return node;
         }
     }
     

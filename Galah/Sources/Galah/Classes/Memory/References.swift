@@ -46,7 +46,7 @@ public struct Ref<T> where T: GObject
     public func FastFunc<R>(_ body: (T) throws -> R) rethrows -> R
     {
         let tmp = self;
-        return try body(tmp._ref);
+        return try body(tmp._ref!);
     }
 }
 
