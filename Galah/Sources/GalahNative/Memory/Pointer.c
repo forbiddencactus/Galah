@@ -54,3 +54,13 @@ void ptr_setnull(GPtr* inptr)
 {
     inptr->ptr = NULL;
 }
+
+bool ptr_getnull(GPtr* inptr)
+{
+    if (inptr->ptr == NULL)
+    {
+        return true;
+    }
+    
+    return false;
+}

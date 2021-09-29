@@ -12,18 +12,16 @@
 //
 // galah-engine.org | https://github.com/forbiddencactus/Galah
 //--------------------------------------------------------------------------//
-// Vert types.
+// Fences for lockless threads. 
 
-#ifndef galah_nativetypes_rendervert
-#define galah_nativetypes_rendervert
+#ifndef Barrier_h
+#define Barrier_h
 
-#include "./Maths/Vector.h"
-#include "./Maths/Matrices.h"
+__attribute__((always_inline))
+inline void glh_fence_acquire();
 
-typedef struct
-{
-    GFloat2 pos;
-    GFloat2 uv;
-} GVert;
+__attribute__((always_inline))
+inline void glh_fence_release();
 
-#endif
+
+#endif /* Barrier.h */

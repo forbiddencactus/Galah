@@ -19,6 +19,7 @@
 internal typealias NodeIndex = GIndex;
 
 // TODO: use the indices to pack a bitfield pointing directly to the data?
+// TODO: Rewrite this abomination in C, in Swift it's just horrendous and probably slow.
 internal class NodePool
 {
     private static let poolSizes: Int = 16;
@@ -106,7 +107,7 @@ internal class NodePool
             
             if(buffer == nil)
             {
-                componentScratchBuffer[componentType] = AllocContiguousBuffer(type: componentType);
+                componentScratchBuffer[componentType] = try AllocContiguousBuffer(type: componentType);
             }
             
             ptr = try buffer!.MakeSpace(buffer!.Count);
@@ -173,56 +174,103 @@ internal class NodePool
         var updateScratchSpace = Dictionary<UInt8, NodeTable>();
         
         // First, trawl through the node scratch space...
-        for node: Node in nodeScratchBuffer
+        for i in 0..<nodeScratchBuffer.Count
         {
             // We'll use both the existing lookupTable and this scratch space to determine what lives where.
+            let node: Node = try! nodeScratchBuffer.ItemAt(i)!;
             updateScratchSpace[node.nodeIndex.index] = NodeTable(index: node.nodeIndex, node: node);
         }
-        
-        let theVar: Unmanaged<Component>;
-                
+                        
         // Then, trawl through the component scratch space, and add nodes.
-        for component: Component in componentScratchBuffer
+        for compType in componentScratchBuffer.keys
         {
-            var updateTable: NodeTable? = updateScratchSpace[component.nodeIndex.index];
-            let parentNode: Node = component.Node;
-            
-            if(updateTable == nil)
+            let compBuff = componentScratchBuffer[compType]! as! ContiguousMutableBufferT<Component>
+            for i in 0..<compBuff.Count
             {
-                updateTable = NodeTable(index: parentNode.nodeIndex, node: parentNode);
+                let component: Component = try! compBuff.ItemAt(i)!;
+                var updateTable: NodeTable? = updateScratchSpace[component.nodeIndex.index];
+                let parentNode: Node = component.Node;
+                
+                if(updateTable == nil)
+                {
+                    updateTable = NodeTable(index: parentNode.nodeIndex, node: parentNode);
+                }
+                
+                updateTable!.components.append(component);
+                
+                updateScratchSpace[parentNode.nodeIndex.index] = updateTable!;
             }
-            
-            updateTable!.components.append(component);
-            
-            updateScratchSpace[parentNode.nodeIndex.index] = updateTable!;
         }
         
         // At this point, we should have a list of what nodes and their components need to be updated.
         // We should have also have an idea of where they live.
         
-        for nodes in updateScratchSpace.values
+        for nodetable in updateScratchSpace.values
         {
-            let passIndex = nodes.node.GetPassIndex();
-            let subBatchIndex = nodes.node.GetSubArchetypeBatchIndex();
-            let masterTable = lookupTable[nodes.index.index]!;
+            let passIndex = nodetable.node.GetPassIndex();
+            var node = nodetable.node;
+            let subBatchIndex = nodetable.node.GetSubArchetypeBatchIndex();
+            var masterTable = lookupTable[nodetable.index.index]!;
             
             if(passBatches[passIndex] == nil)
             {
                 passBatches[passIndex] = PassBatch(Index: passIndex);
             }
             
-            let depthIndex = passBatches[passIndex]!.GetIndexForDepth(depth: nodes.node.Depth);
+            let depthIndex = passBatches[passIndex]!.GetIndexForDepth(depth: nodetable.node.Depth);
             
             if(passBatches[passIndex]!.DepthBatches[depthIndex].ArchetypeBatch[masterTable.componentTypes] == nil)
             {
                 let archeType = NodeArchetype.CreateArchetype(nodeTable: masterTable);
-                passBatches[passIndex]!.DepthBatches[depthIndex].ArchetypeBatch[nodes.componentTypes] = archeType;
+                passBatches[passIndex]!.DepthBatches[depthIndex].ArchetypeBatch[nodetable.componentTypes] = archeType;
             }
-            
         if(passBatches[passIndex]!.DepthBatches[depthIndex].ArchetypeBatch[masterTable.componentTypes]?.SubArchetypeBatch[subBatchIndex] == nil)
             {
-             // Todo finish this
+                let subArchetypeBatch = SubArchetypeBatch(batchID: subBatchIndex);
+            passBatches[passIndex]!.DepthBatches[depthIndex].ArchetypeBatch[masterTable.componentTypes]?.SubArchetypeBatch[subBatchIndex] = subArchetypeBatch;
             }
+            
+            let index: Int = try! (passBatches[passIndex]!.DepthBatches[depthIndex].ArchetypeBatch[masterTable.componentTypes]?.SubArchetypeBatch[subBatchIndex]!.NodeBuffer.Add(node))!;
+            
+            node.HasBeenCopied();
+            try! passBatches[passIndex]!.DepthBatches[depthIndex].ArchetypeBatch[masterTable.componentTypes]!.SubArchetypeBatch[subBatchIndex]!.NodeBuffer.ItemAt(index)!.IsCopied();
+            
+            if(!masterTable.nodeParentBuffer.IsNull())
+            {
+                // There's an existing owning buffer which owns this node.
+                masterTable.nodeParentBuffer.RunFunc
+                {
+                    try! $0.NodeBuffer.Remove(masterTable.nodeParentBufferIndex);
+                }
+            }
+            else
+            {
+                // The node lives in the scratch buffer.
+            }
+            
+            for component in masterTable.components
+            {
+                // A horrendous brute force solution.
+                // TODO: In contiguousmutablebuffer, we can probably do some pointer magic to ameliorate this?
+                var contains: Bool = false;
+
+                for theComponent in updateScratchSpace[node.nodeIndex.index]!.components
+                {
+                    if( theComponent == component)
+                    {
+                        contains = true;
+                    }
+                }
+                
+                if(!contains)
+                {
+                    passBatches[passIndex]!.DepthBatches[depthIndex].ArchetypeBatch[masterTable.componentTypes]!.SubArchetypeBatch[subBatchIndex]!.BatchMembers[component.self].;
+                    masterTable.nodeParentBuffer.RunFunc {$0.BatchMembers}
+                }
+            }
+            
+            nodeScratchBuffer.Clear();
+            componentScratchBuffer.removeAll();
             
         }
     }
@@ -266,9 +314,14 @@ internal class NodePool
     // Sort batches by BatchId (material type, texture, etc).
     struct SubArchetypeBatch
     {
-        let NodeBuffer: ContiguousMutableBufferT<Node>;
-        public let BatchId: String;
-        public let BatchMembers: Dictionary<HashableType<GObject>, ContiguousMutableBuffer>;
+        public var NodeBuffer = try! ContiguousMutableBufferT<Node>(withInitialCapacity: 16);
+        public var BatchId: String;
+        public var BatchMembers = Dictionary<HashableType<GObject>, ContiguousMutableBuffer>();
+        
+        public init(batchID: String)
+        {
+            self.BatchId = batchID;
+        }
         
         public func GetComponentForNodeExists(nodeBatchIndex: Int, componentIndex: ComponentIndex) -> Bool
         {
@@ -343,7 +396,7 @@ internal class NodePool
     struct PassBatch
     {
         public let Index: String;
-        public let DepthBatches = Array<DepthBatch>();
+        public var DepthBatches = Array<DepthBatch>();
         
         // Returns the correct index for the supplied depth, creating it if required.
         public func GetIndexForDepth(depth: Int) -> Int
@@ -356,6 +409,7 @@ internal class NodePool
     {
         // If this is null, node is childed to scratch buffers.
         var nodeParentBuffer = Ptr<SubArchetypeBatch>.Null();
+        var nodeParentBufferIndex: Int = 0;
         var index: NodeIndex;
         var node: Node;
         var components = Array<Component>();

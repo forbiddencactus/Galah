@@ -28,7 +28,12 @@ public struct Ptr<T>
     
     @inlinable
     @inline(__always)
-    public var raw: GPtr { get { return ptr; } };
+    public var gptr: GPtr { get { return ptr; } };
+    
+    @inlinable
+    @inline(__always)
+    public var raw: UnsafeMutableRawPointer? { get { return ptr.ptr; } };
+    
     
     public static func Null() -> Ptr<T>
     {
@@ -54,6 +59,22 @@ public struct Ptr<T>
     public static func Free(_ ptr: Ptr<T>)
     {
         glh_free(ptr.ptr.ptr);
+    }
+    
+    public func RunFunc<R>(_ body: (T) throws -> R) rethrows -> R
+    {
+        let tmp = unsafeBitCast(ptr.ptr, to: T.self);
+        return try body(tmp);
+    }
+    
+    public mutating func IsNull() -> Bool
+    {
+        if (ptr_getnull(&ptr))
+        {
+            return true;
+        }
+        
+        return false;
     }
     
     public init()
@@ -91,6 +112,12 @@ public struct Ptr<T>
     {
         size = GetSize<T>.SizeOf();
         ptr_set(&ptr, &object);
+    }
+    
+    public init(_ anyObj: inout Any)
+    {
+        size = GetSize<VoidPtr>.SizeOf();
+        ptr_set(&ptr, &anyObj);
     }
     
     // Copies the value of value into the location pointed to by lhs.

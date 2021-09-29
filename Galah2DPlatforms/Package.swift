@@ -39,7 +39,6 @@ let package = Package(
     ],
     dependencies:[
         .package(path: "./Galah"),
-        .package(path: "./Galah2D")
     ],
     targets:
     [
@@ -51,7 +50,7 @@ let package = Package(
         ),
         .target(
             name: "Galah2DPlatforms",
-            dependencies: ["Galah2DPlatformsC", "Galah2D"],
+            dependencies: ["Galah2DPlatformsC"],
             path: "Sources/Galah2DPlatforms"
         ),
     ]

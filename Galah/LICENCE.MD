@@ -1,4 +1,4 @@
-MIT License
+# MIT Licence
 
 Copyright © 2020, 2021, the Galah contributors.
 You can find a list of Galah's contributors in CONTRIBUTORS.MD
@@ -6,7 +6,7 @@ You can find a list of Galah's contributors in CONTRIBUTORS.MD
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+to use, copy, modify, merge, publish, distribute, sublicence, and/or sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
 

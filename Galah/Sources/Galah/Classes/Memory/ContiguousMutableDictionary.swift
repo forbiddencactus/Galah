@@ -12,18 +12,8 @@
 //
 // galah-engine.org | https://github.com/forbiddencactus/Galah
 //--------------------------------------------------------------------------//
-// Vert types.
+// A contiguous mutable dictionary allocated on the heap containing elements of a particular type.
 
-#ifndef galah_nativetypes_rendervert
-#define galah_nativetypes_rendervert
-
-#include "./Maths/Vector.h"
-#include "./Maths/Matrices.h"
-
-typedef struct
+public struct ContiguousMutableDictionary<Key: Hashable, Value>
 {
-    GFloat2 pos;
-    GFloat2 uv;
-} GVert;
-
-#endif
+}

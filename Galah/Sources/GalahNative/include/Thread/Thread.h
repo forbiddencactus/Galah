@@ -33,8 +33,9 @@ typedef struct
  * NOTE: This stuff is fairly minimalistic and relies on ownership to maintain thread safety.
  * As a guide, nativethreadptr, and shouldExit are 'owned' by the main/owner thread, and can only
  * be read by the child thread. hasJob, job, and jobArg can only be set by the owner thread, and
- * cleared by the child thread. hasJob relies on the CPU's atomic set instruction to remain thread safe,
+ * cleared by the child thread. hasJob relies on the atomic set instruction to remain thread safe,
  * and should be checked for false by the owner thread before "setting".
+ * Threads should only be owned by a single thread.
  */
  
 // Initialises the GThread pointed to by *thread. Thread will autosleep when it has no work. 

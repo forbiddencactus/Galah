@@ -16,7 +16,7 @@
 
 public class Transform: Component
 {
-    private var _parent: Transform? = nil;
+    internal var _parent: Transform? = nil;
     public var Parent: Transform?
     {
         get

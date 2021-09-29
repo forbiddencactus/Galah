@@ -43,4 +43,7 @@ void ptr_assign(GPtr* ptr, void* inassignptr, MemSize size);
 // Sets the value of inptr to NULL.
 void ptr_setnull(GPtr* inptr);
 
+// Gets whether a poiinter is NULL
+bool ptr_getnull(GPtr* inptr);
+
 #endif

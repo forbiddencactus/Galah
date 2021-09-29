@@ -72,10 +72,23 @@ public func SizeOf(_ value: inout Any) -> MemSize
 @_silgen_name("swift_class_getInstanceExtents") func swift_class_getInstanceExtents(theClass: AnyClass) -> (negative: UInt, positive: UInt)
 
 
+public func GetPointer<T>(_ value: inout T) -> UnsafeMutableRawPointer
+{
+    if( value is AnyClass)
+    {
+        return Cast(value);
+    }
+    else
+    {
+        return Cast(value);
+    }
+}
+
 // Gets the pointer to an object without retaining it.
 public func GetPointerFromObject(_ object: AnyObject) -> UnsafeMutableRawPointer
 {
-    return UnsafeMutableRawPointer(Unmanaged.passUnretained(object).toOpaque());
+    let ret: UnsafeMutableRawPointer = Cast(object);
+    return ret;
 }
 
 // Gets the pointer to an object whilst retaining it.
@@ -85,7 +98,7 @@ public func GetRetainedPointerFromObject(_ object: AnyObject) -> UnsafeMutableRa
 }
 
 // Gets an unretained ref to a pointer.
-public func GetRefFromPointer(_ pointer: UnsafeMutableRawPointer) -> AnyObject?
+public func GetRefFromPointer(_ pointer: UnsafeMutableRawPointer?) -> AnyObject?
 {
     return unsafeBitCast(pointer, to: AnyObject.self)
 }
@@ -94,17 +107,28 @@ public func GetRefFromPointer(_ pointer: UnsafeMutableRawPointer) -> AnyObject?
 public func GetRefFromPointer<T>(_ pointer: UnsafeMutableRawPointer) ->T?
 {
     return unsafeBitCast(pointer, to: T.self)
-
 }
 
 // Gets an unretained ref to a pointer of type T.
 public func GetRefFromPointer<T>(_ pointer: Ptr<T>) ->T?
 {
-    return unsafeBitCast(pointer.raw.ptr, to: T.self);
+    return unsafeBitCast(pointer.raw, to: T.self);
+}
+
+// Gets an unretained ref to a pointer of type T.
+public func GetRefFromPointer<T>(_ pointer: Ptr<VoidPtr>) ->T?
+{
+    return unsafeBitCast(pointer.raw, to: T.self);
 }
 
 // Releases a pointer
 public func ReleasePointer(_ pointer: UnsafeMutableRawPointer)
 {
     Unmanaged<AnyObject>.fromOpaque(pointer).release();
+}
+
+// Casts the object into T
+public func Cast<T>(_ input: Any?) -> T
+{
+    return unsafeBitCast(input, to: T.self);
 }

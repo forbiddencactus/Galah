@@ -12,19 +12,28 @@
 //
 // galah-engine.org | https://github.com/forbiddencactus/Galah
 //--------------------------------------------------------------------------//
-// Manage Swift references. 
+// A wrapper for a Swift ref, to avoid retain perf hits, and other utilities. 
 
 
-internal struct Ref<T> where T: GObject
+public struct Ref<T> where T: GObject
 {
     @usableFromInline
-    internal unowned(unsafe) var _ref: T
+    internal unowned(unsafe) var _ref: T?
 
     @usableFromInline @_transparent
-    internal init(ref: T) { _ref = ref }
+    internal init(ref: T) { _ref = ref; }
+    
+    @usableFromInline @_transparent
+    internal init(_ ptr: UnsafeMutableRawPointer) { _ref = Cast(ptr); }
+    
+    @usableFromInline @_transparent
+    internal init(_ ptr: Ptr<VoidPtr>) { _ref = Cast(ptr.raw); }
+    
+    @usableFromInline @_transparent
+    internal init(_ ptr: Ptr<T>) { _ref = Cast(ptr.raw); }
     
     @inlinable @inline(__always)
-    internal unowned(unsafe) var ref: T
+    internal unowned(unsafe) var ref: T?
     {
         get
         {

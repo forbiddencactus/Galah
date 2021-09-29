@@ -14,26 +14,25 @@
 //--------------------------------------------------------------------------//
 // The Transform2D class. Has support for shear like the classics!
 
-import Galah;
 
 public class Transform2D: Transform
 {    
-    private var _localPosition: Vec2 = Vec2.Zero;
-    private var _worldPosition: Vec2 = Vec2.Zero;
+    private var _localPosition: Float2 = Float2.Zero;
+    private var _worldPosition: Float2 = Float2.Zero;
     private var _localRotation: Float = 0;
     private var _worldRotation: Float = 0;
-    private var _localScale: Vec2 = Vec2.Zero;
-    private var _worldScale: Vec2 = Vec2.Zero;
-    private var _localShear: Vec2 = Vec2.Zero;
-    private var _worldShear: Vec2 = Vec2.Zero;
+    private var _localScale: Float2 = Float2.Zero;
+    private var _worldScale: Float2 = Float2.Zero;
+    private var _localShear: Float2 = Float2.Zero;
+    private var _worldShear: Float2 = Float2.Zero;
     
-    public var LocalPosition: Vec2 { get { return _localPosition; } set { self.SetLocalPosition(position: newValue); } }
-    public var WorldPosition: Vec2 { get { return _worldPosition; } set { self.SetWorldPosition(position: newValue); } }
+    public var LocalPosition: Float2 { get { return _localPosition; } set { self.SetLocalPosition(position: newValue); } }
+    public var WorldPosition: Float2 { get { return _worldPosition; } set { self.SetWorldPosition(position: newValue); } }
     public var LocalRotation: Float { get { return _localRotation; } set { self.SetLocalRotation(rotation: newValue); } }
     public var WorldRotation: Float { get { return _worldRotation; } set { self.SetWorldRotation(rotation: newValue); } }
-    public var LocalScale: Vec2 { get { return _localScale; } set { self.SetLocalScale(scale: newValue); } }
-    public var WorldScale: Vec2 { get { return _worldScale; } set { self.SetWorldScale(scale: newValue); } }
-    public var LocalShear: Vec2 { get { return _localShear; } set { self.SetLocalShear(shear: newValue); } }
+    public var LocalScale: Float2 { get { return _localScale; } set { self.SetLocalScale(scale: newValue); } }
+    public var WorldScale: Float2 { get { return _worldScale; } set { self.SetWorldScale(scale: newValue); } }
+    public var LocalShear: Float2 { get { return _localShear; } set { self.SetLocalShear(shear: newValue); } }
     
     
     private var _cachedMatrix: Mat3x3 = Mat3x3.Identity;
@@ -51,7 +50,7 @@ public class Transform2D: Transform
         self.InternalWorldRefresh();
     }
     
-    public func SetParent(parent: Transform?, keepWorldPosition: Bool = true)
+    public func override SetParent(parent: Transform?, keepWorldPosition: Bool = true)
     {
         _parent = parent;
         //update local positions...
@@ -59,7 +58,7 @@ public class Transform2D: Transform
         {
             if (_parent != nil)
             {
-                _localPosition = Mat3x3.MultiplyVec2(m: try! _parent!._cachedMatrix.Invert(), vec: _worldPosition);
+                _localPosition = Mat3x3.MultiplyFloat2(m: try! _parent!._cachedMatrix.Invert(), vec: _worldPosition);
                 _localRotation = _worldRotation - _parent!._worldRotation;
                 _localScale = _worldScale - _parent!._worldScale;
                 _localShear = _worldShear - _parent!._worldShear;
@@ -78,13 +77,13 @@ public class Transform2D: Transform
         
     }
     
-    private func SetLocalPosition(position: Vec2)
+    private func SetLocalPosition(position: Float2)
     {
         _localPosition = position;
         self.InternalWorldRefresh();
     }
     
-    private func SetWorldPosition(position: Vec2)
+    private func SetWorldPosition(position: Float2)
     {
         _worldPosition = position;
         self.InternalLocalRefresh();
@@ -102,25 +101,25 @@ public class Transform2D: Transform
         self.InternalLocalRefresh();
     }
     
-    private func SetLocalScale(scale: Vec2)
+    private func SetLocalScale(scale: Float2)
     {
         _localScale = scale;
         self.InternalWorldRefresh();
     }
     
-    private func SetWorldScale(scale: Vec2)
+    private func SetWorldScale(scale: Float2)
     {
         _worldScale = scale;
         self.InternalLocalRefresh();
     }
     
-    private func SetLocalShear(shear: Vec2)
+    private func SetLocalShear(shear: Float2)
     {
         _localShear = shear;
         self.InternalWorldRefresh();
     }
     
-    private func SetWorldShear(shear: Vec2)
+    private func SetWorldShear(shear: Float2)
     {
         _worldShear = shear;
         self.InternalLocalRefresh();
@@ -135,9 +134,9 @@ public class Transform2D: Transform
             //First, set the new matrix for our children to use...
             _cachedMatrix = self.LocalTRSS * _parent!.WorldTRSS;
             //Set new world data based on local data.
-            _worldPosition = Mat3x3.MultiplyVec2(m: _parent!.WorldTRSS, vec: _localPosition);
+            _worldPosition = Mat3x3.MultiplyFloat2(m: _parent!.WorldTRSS, vec: _localPosition);
             _worldRotation = _parent!._worldRotation + _localRotation;
-            _worldScale = Vec2.Scale(_parent!._worldScale, _localScale);
+            _worldScale = Float2.Scale(_parent!._worldScale, _localScale);
             _worldShear = _parent!._worldShear + _localShear;
 
         }
@@ -162,7 +161,7 @@ public class Transform2D: Transform
     {
         if (_parent != nil)
         {
-            _localPosition = Mat3x3.MultiplyVec2(m: try! _parent!._cachedMatrix.Invert(), vec: _worldPosition);
+            _localPosition = Mat3x3.MultiplyFloat2(m: try! _parent!._cachedMatrix.Invert(), vec: _worldPosition);
             _localRotation = _worldRotation - _parent!._worldRotation;
             _localScale = _worldScale - _parent!._worldScale;
             _localShear = _worldShear - _parent!._worldShear;

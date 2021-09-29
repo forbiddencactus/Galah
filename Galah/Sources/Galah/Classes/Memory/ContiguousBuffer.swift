@@ -17,15 +17,14 @@
 
 import GalahNative.Memory;
 
-public class ContiguousMutableBuffer: Sequence
+public class RawMutableBuffer
 {
-    private let type: GObject.Type;
-    private var buffer: NativeBuffer;
-    
+    fileprivate let type: Any.Type;
+    fileprivate var buffer: GBuffer;
     public var Count: Int { get { return Int(buffer.count); } }
     public var Capacity: UInt { get { return UInt(buffer.capacity); } };
     
-    public init(withType: GObject.Type, withInitialCapacity: Int) throws
+    public init(withInitialCapacity: Int, withType: Any.Type) throws
     {
         type = withType;
         let sizeOf: Int = SizeOf(withType);
@@ -35,61 +34,55 @@ public class ContiguousMutableBuffer: Sequence
         {
             throw ContiguousMutableBufferError.AllocError;
         }
-    }
+                
+        let callback : GBufferResizeCallback? =
+        { (target : UnsafeMutableRawPointer?) -> () in
+                
+            let swiftBuff: RawMutableBuffer = Cast(target);
+            swiftBuff.BufferResized();
+        }
         
-    public func GetType() -> GObject.Type
+        buffer_addresizecallback(&buffer, callback, Cast(self));
+    }
+    
+    public func GetType() -> Any.Type
     {
         return type;
     }
     
-    public func ItemAt(_ index: Int) throws -> GObject?
+    public func PtrAt(_ index: Int) throws -> Ptr<VoidPtr>
     {
         if (index < Count)
         {
-            let ret: GObject? = GetRefFromPointer(buffer_get(&buffer, GUInt(index)));
-            return ret;
+            return Ptr<VoidPtr>(buffer_get(&buffer, GUInt(index)));
         }
            
         throw ContiguousMutableBufferError.OutOfRange;
     }
        
-    public func AddNew() throws
+    public func AddPtr(_ ptr: Ptr<VoidPtr>) throws -> Int
     {
-        let ptr = try MakeSpace(Count);
-           
-        GObject.Construct(type: type, ptr: ptr);
-    }
-       
-    public func Add(_ element: GObject) throws
-    {
-        let ptr = GetPointerFromObject(element);
-           
-        if(buffer_add(&buffer, ptr) == -1)
+        if(buffer_add(&buffer, ptr.raw) == -1)
         {
             throw ContiguousMutableBufferError.AllocError;
         }
+        
+        return Count - 1;
     }
        
-    public func InsertNew(_ index: Int) throws
-    {
-        let ptr = try MakeSpace(index);
-        GObject.Construct(type: type, ptr: ptr);
-    }
-       
-    public func Insert(_ index: Int, _ element: GObject) throws
+    public func InsertPtr(_ index: Int, _ ptr: Ptr<VoidPtr>) throws
     {
         if (index >= Count)
         {
             throw ContiguousMutableBufferError.OutOfRange;
         }
-           
-        let ptr = GetPointerFromObject(element);
-        if(buffer_insert(&buffer, ptr, GUInt(index)) == -1)
+        
+        if(buffer_insert(&buffer, ptr.raw, GUInt(index)) == -1)
         {
             throw ContiguousMutableBufferError.AllocError;
         }
     }
-       
+    
     public func Remove(_ index: Int) throws
     {
         if (index < Count)
@@ -97,10 +90,15 @@ public class ContiguousMutableBuffer: Sequence
             buffer_remove(&buffer, GUInt(index));
             return;
         }
-           
+            
         throw ContiguousMutableBufferError.OutOfRange;
     }
-       
+    
+    public func Clear()
+    {
+        buffer_remove_range(&buffer, 0, GUInt(Count - 1));
+    }
+        
     public func MakeSpace(_ index: Int) throws -> Ptr<VoidPtr>
     {
         if (index <= Count)
@@ -108,15 +106,11 @@ public class ContiguousMutableBuffer: Sequence
             let returnPtr = Ptr<VoidPtr>(buffer_makespace(&buffer, GUInt(index))!);
             return returnPtr;
         }
-           
+            
         throw ContiguousMutableBufferError.OutOfRange;
     }
     
-    // Sequence protocol:
-    public func makeIterator() -> ContiguousMutableBufferIterator<GObject>
-    {
-        return ContiguousMutableBufferIterator(buffer: self, elementIndex: 0);
-    }
+    internal func BufferResized() { }
     
     deinit
     {
@@ -124,52 +118,70 @@ public class ContiguousMutableBuffer: Sequence
     }
 }
 
-public class ContiguousMutableBufferT<T>: ContiguousMutableBuffer where T: GObject
+public class MutableBuffer<T>: RawMutableBuffer, Sequence
 {
-    public init(withInitialCapacity: Int) throws
+    public init(withInitialCapacity: Int, withType: T.Type = T.self) throws
     {
-        try super.init(withType: T.self, withInitialCapacity: withInitialCapacity);
+        try super.init(withInitialCapacity: withInitialCapacity, withType: withType);
     }
-    
+        
     public func ItemAt(_ index: Int) throws -> T?
     {
-        return try super.ItemAt(index) as! T?;
+        return try GetRefFromPointer(super.PtrAt(index));
     }
-    
-    public func Add(_ element: T) throws
+       
+    public func Add(_ element: inout T) throws -> Int
     {
-        try super.Add(element);
+        return try super.AddPtr(Ptr<VoidPtr>(&element));
     }
-    
-    public func Insert(_ index: Int, _ element: T) throws
+       
+    public func Insert(_ index: Int, _ element: inout T) throws
     {
-        try super.Insert(index, element);
+        try super.InsertPtr(index, Ptr<VoidPtr>(&element));
     }
-    
-    public func MakeSpace(_ index: Int) throws -> Ptr<T>
-    {
-        return try Ptr<T>(super.MakeSpace(index));
-    }
-    
+       
     // Sequence protocol:
-    public func makeIteratorT() -> ContiguousMutableBufferIterator<T>
+    public func makeIterator() -> MutableBufferIterator<T>
     {
-        return ContiguousMutableBufferIterator<T>(buffer: self, elementIndex: 0);
+        return MutableBufferIterator(buffer: self, elementIndex: 0);
     }
-        
-        /*let test: (ContiguousMutableBuffer<BufferElement>) ->() ->() = ContiguousMutableBuffer<BufferElement>.AddNew;
-        
-        let hullo: ContiguousMutableBuffer<BufferElement> = ContiguousMutableBuffer<BufferElement>(withInitialCapacity: 5);
-        
-        test(hullo)();*/
 }
 
-public struct ContiguousMutableBufferIterator<T>: IteratorProtocol where T: GObject
+public class RefMutableBuffer<T>: RawMutableBuffer, Sequence where T: GObject
 {
-    let buffer: ContiguousMutableBuffer;
+    public init(withInitialCapacity: Int, withType: T.Type = T.self) throws
+    {
+        try super.init(withInitialCapacity: withInitialCapacity, withType: withType);
+    }
+        
+    internal func ItemAt(_ index: Int) throws -> Ref<T>
+    {
+        return try Ref<T>(super.PtrAt(index));
+    }
+       
+    internal func Add(_ element: inout Ref<T>) throws -> Int
+    {
+        return try super.AddPtr(Ptr<VoidPtr>(&element._ref));
+    }
+       
+    internal func Insert(_ index: Int, _ element: inout Ref<T>) throws
+    {
+        try super.InsertPtr(index, Ptr<VoidPtr>(&element._ref));
+    }
+       
+    // Sequence protocol:
+    public func makeIterator() -> RefMutableBufferIterator<T>
+    {
+        return RefMutableBufferIterator(buffer: self, elementIndex: 0);
+    }
+}
+
+public struct MutableBufferIterator<T>: IteratorProtocol
+{
+    let buffer: MutableBuffer<T>;
     var elementIndex: Int;
     
-    public init(buffer: ContiguousMutableBuffer, elementIndex: Int)
+    public init(buffer: MutableBuffer<T>, elementIndex: Int)
     {
         self.buffer = buffer;
         self.elementIndex = elementIndex;
@@ -181,7 +193,7 @@ public struct ContiguousMutableBufferIterator<T>: IteratorProtocol where T: GObj
         {
             do
             {
-                let ret: T? = try buffer.ItemAt(elementIndex) as! T?;
+                let ret: T? = try buffer.ItemAt(elementIndex);
                 elementIndex += 1;
                 return ret;
             }
@@ -195,7 +207,36 @@ public struct ContiguousMutableBufferIterator<T>: IteratorProtocol where T: GObj
     }
 }
 
-
+public struct RefMutableBufferIterator<T>: IteratorProtocol where T: GObject
+{
+    let buffer: RefMutableBuffer<T>;
+    var elementIndex: Int;
+    
+    public init(buffer: RefMutableBuffer<T>, elementIndex: Int)
+    {
+        self.buffer = buffer;
+        self.elementIndex = elementIndex;
+    }
+    
+    public mutating func next() -> Ref<T>?
+    {
+        if(elementIndex < buffer.Count)
+        {
+            do
+            {
+                let ret: Ref<T>? = try buffer.ItemAt(elementIndex);
+                elementIndex += 1;
+                return ret;
+            }
+            catch
+            {
+                return nil;
+            }
+        }
+        
+        return nil;
+    }
+}
 
 public enum ContiguousMutableBufferError: Error
 {

@@ -17,15 +17,17 @@
 #include "Memory/Buffer.h"
 #include "Memory/Alloc.h"
 
-// Allocs a NativeBuffer that will hold capacity amount of elements of elementSize.
-NativeBuffer buffer_create(MemSize elementSize, GUInt capacity, bool isAutoResize)
+// Allocs a GBuffer that will hold capacity amount of elements of elementSize.
+GBuffer buffer_create(MemSize elementSize, GUInt capacity, bool isAutoResize)
 {
-    NativeBuffer buf;
+    GBuffer buf;
     buf.bufferSize = elementSize * capacity;
     buf.buffer = glh_malloc(buf.bufferSize);
     buf.elementSize = elementSize;
     buf.capacity = capacity;
     buf.isAutoResize = isAutoResize;
+    buf.bufferResizeCallbackTarget = NULL;
+    buf.bufferResizeCallback = NULL;
     
     buf.count = 0;
     
@@ -33,7 +35,7 @@ NativeBuffer buffer_create(MemSize elementSize, GUInt capacity, bool isAutoResiz
 }
 
 // Adds an element to the end of the buffer, and returns the index. -1 if add failed.
-int buffer_add(NativeBuffer* buf, const void* element)
+int buffer_add(GBuffer* buf, const void* element)
 {
     if(buffer_makespace(buf, buf->count) == NULL)
     {
@@ -46,7 +48,7 @@ int buffer_add(NativeBuffer* buf, const void* element)
 }
 
 // Inserts an element to index position in the buffer, and returns the index. -1 if insert failed.
-int buffer_insert(NativeBuffer* buf, const void* element, GUInt index)
+int buffer_insert(GBuffer* buf, const void* element, GUInt index)
 {
     if(buffer_makespace(buf, index) == NULL)
     {
@@ -60,7 +62,7 @@ int buffer_insert(NativeBuffer* buf, const void* element, GUInt index)
 }
 
 // Removes an element at the index position in the buffer, and returns the new count. -1 if remove failed.
-int buffer_remove(NativeBuffer* buf, GUInt index)
+int buffer_remove(GBuffer* buf, GUInt index)
 {
     if(index < buf->count)
     {
@@ -76,7 +78,7 @@ int buffer_remove(NativeBuffer* buf, GUInt index)
 }
 
 // Removes elements from startIndex to endIndex, including endIndex.
-int buffer_remove_range(NativeBuffer* buf, GUInt startIndex, GUInt endIndex)
+int buffer_remove_range(GBuffer* buf, GUInt startIndex, GUInt endIndex)
 {
     if(endIndex > startIndex && endIndex < buf->count)
     {
@@ -94,7 +96,7 @@ int buffer_remove_range(NativeBuffer* buf, GUInt startIndex, GUInt endIndex)
 }
 
 // Gets the element at position index. Returns null if failed.
-void* buffer_get(NativeBuffer* buf, GUInt index)
+void* buffer_get(GBuffer* buf, GUInt index)
 {
     if(index < buf->count)
     {
@@ -105,7 +107,7 @@ void* buffer_get(NativeBuffer* buf, GUInt index)
 }
 
 // Attempts to grow the buffer to newCapacity. Returns true if successful.
-bool buffer_grow(NativeBuffer* buf, GUInt newCapacity)
+bool buffer_grow(GBuffer* buf, GUInt newCapacity)
 {
     if(buf->capacity >= newCapacity)
     {
@@ -132,7 +134,7 @@ bool buffer_grow(NativeBuffer* buf, GUInt newCapacity)
 }
 
 // Makes space for an element and returns the pointer for that element's place in the buffer.
-void* buffer_makespace(NativeBuffer* buf, GUInt atIndex)
+void* buffer_makespace(GBuffer* buf, GUInt atIndex)
 {
     if(buf->count >= buf->capacity)
     {
@@ -166,7 +168,20 @@ void* buffer_makespace(NativeBuffer* buf, GUInt atIndex)
     return buf->buffer + (buf->elementSize * atIndex);
 }
 
-bool buffer_free(NativeBuffer* buf)
+// Sets a callback for the buffer to call whenever it resizes.
+bool buffer_addresizecallback(GBuffer* buf, GBufferResizeCallback callback, void* target)
+{
+    if( buf->bufferResizeCallback == NULL && buf->bufferResizeCallbackTarget == NULL)
+    {
+        buf->bufferResizeCallback = callback;
+        buf->bufferResizeCallbackTarget = target;
+        return true;
+    }
+    
+    return false;
+}
+
+bool buffer_free(GBuffer* buf)
 {
     glh_free(buf->buffer);
     buf->buffer = NULL;
