@@ -24,10 +24,5 @@
 #ifndef GSETTINGS_GFX_TARGETRESOLUTIONHEIGHT
 #define GSETTINGS_GFX_TARGETRESOLUTIONHEIGHT 1080.0f
 #endif
-/*typedef enum
-{
-    CullModeNone,
-    CullModeAABTree
-    //Potential compute based cull here?
-}*/
+
 #endif

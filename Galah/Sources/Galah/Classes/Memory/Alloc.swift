@@ -37,7 +37,7 @@ internal func galah_placementNew(type: Any.Type, ptr: Ptr<VoidPtr>) throws -> An
     // Not sure we need this alignment stuff for now...
     // let alignmentMask = Int32(md.pointer.pointee.instanceAlignmentMask)
 
-    let value: UnsafeMutableRawPointer = ptr.raw.ptr!;
+    let value: UnsafeMutableRawPointer = ptr.raw!;
 
     value.storeBytes(of: metadata, as: UnsafeRawPointer.self);
     try setProperties(typeInfo: info, pointer: UnsafeMutableRawPointer(mutating: value));

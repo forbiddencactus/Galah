@@ -12,7 +12,38 @@
 //
 // galah-engine.org | https://github.com/forbiddencactus/Galah
 //--------------------------------------------------------------------------//
-// Make Types hashable.
+// Extensions to make things hashable.
+
+public struct HashableRef<T>: Hashable where T: AnyObject
+{
+    public let Ref: T;
+    
+    public init(_ inRef: T)
+    {
+        Ref = inRef;
+    }
+    
+    public static func ==(lhs: HashableRef, rhs: HashableRef) -> Bool
+    {
+        return lhs.Ref === rhs.Ref;
+    }
+
+    public func hash(into hasher: inout Hasher)
+    {
+        let ptr: UnsafeMutableRawPointer = Cast(Ref);
+        hasher.combine(ptr);
+    }
+}
+
+extension Dictionary
+{
+  subscript<T>(key: T) -> Value? where Key == HashableRef<T>
+  {
+    get { return self[HashableRef(key)] }
+    set { self[HashableRef(key)] = newValue }
+  }
+}
+
 
 // Swiped from: https://stackoverflow.com/questions/42459484/make-a-swift-dictionary-where-the-key-is-type
 // This particular chunk of code is licenced according to stack overflow's terms, CC-BY-SA 4.0.
@@ -36,8 +67,10 @@ struct HashableType<T> : Hashable
   }
 }
 
-extension Dictionary {
-  subscript<T>(key: T.Type) -> Value? where Key == HashableType<T> {
+extension Dictionary
+{
+  subscript<T>(key: T.Type) -> Value? where Key == HashableType<T>
+  {
     get { return self[HashableType(key)] }
     set { self[HashableType(key)] = newValue }
   }

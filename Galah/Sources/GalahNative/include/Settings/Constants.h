@@ -12,8 +12,13 @@
 //
 // galah-engine.org | https://github.com/forbiddencactus/Galah
 //--------------------------------------------------------------------------//
-// A contiguous mutable dictionary allocated on the heap containing elements of a particular type.
+// Some constants.
 
-public struct ContiguousMutableDictionary<Key: Hashable, Value>
-{
-}
+#ifndef galah_nativetypes_constants
+#define galah_nativetypes_constants
+
+#ifndef GSETTINGS_CONSTANTS_DEFAULTBUFFERCAPACITY
+#define GSETTINGS_CONSTANTS_DEFAULTBUFFERCAPACITY 16
+#endif
+
+#endif

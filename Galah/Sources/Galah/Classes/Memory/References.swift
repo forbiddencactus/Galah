@@ -50,7 +50,6 @@ public struct Ref<T> where T: GObject
     }
 }
 
-
 internal func retainObject(_ object: AnyObject)
 {
     let ptr = GetPointerFromObject(object);

@@ -28,6 +28,7 @@ GBuffer buffer_create(MemSize elementSize, GUInt capacity, bool isAutoResize)
     buf.isAutoResize = isAutoResize;
     buf.bufferResizeCallbackTarget = NULL;
     buf.bufferResizeCallback = NULL;
+    buf.autoGrowAmount = 0;
     
     buf.count = 0;
     
@@ -89,7 +90,8 @@ int buffer_remove_range(GBuffer* buf, GUInt startIndex, GUInt endIndex)
         {
             glh_memmove(buf->buffer + (buf->elementSize * startIndex),buf->buffer + buf->elementSize * (endIndex + 1), moveSize);
         }
-        return buf->count - amount;
+        buf->count-= amount;
+        return buf->count;
     }
     
     return -1;
@@ -115,13 +117,14 @@ bool buffer_grow(GBuffer* buf, GUInt newCapacity)
     }
     
     Buff* oldBuffer = buf->buffer;
-    buf->buffer = glh_malloc(buf->elementSize * newCapacity);
+    MemSize newSize = buf->elementSize * newCapacity;
+    buf->buffer = glh_malloc(newSize);
     
     if(buf->buffer != NULL)
     {
         glh_memcpy(buf->buffer, oldBuffer, buf->bufferSize);
         buf->capacity = newCapacity;
-        buf->bufferSize = buf->elementSize * buf->capacity;
+        buf->bufferSize = newSize;
         glh_free(oldBuffer);
         
         if( buf->bufferResizeCallback != NULL)
@@ -139,6 +142,29 @@ bool buffer_grow(GBuffer* buf, GUInt newCapacity)
     return false;
 }
 
+// Sets whether the buffer should auto resize.
+void buffer_set_shouldautoresize(GBuffer* buf, bool shouldAutoResize)
+{
+    buf->isAutoResize = shouldAutoResize;
+}
+
+// Sets the buffer autogrow amount (0 means the buffer will duplicate in size)
+void buffer_set_autogrow_amount(GBuffer* buf, GUInt newAutoGrowAmount)
+{
+    buf->autoGrowAmount = newAutoGrowAmount;
+}
+
+// Returns the new size for the buffer should it autogrow.
+GUInt buffer_get_autogrow_amount(GBuffer* buf)
+{
+    if(buf->autoGrowAmount == 0)
+    {
+        return buf->capacity * 2;
+    }
+    
+    return buf->autoGrowAmount;
+}
+
 // Makes space for an element and returns the pointer for that element's place in the buffer.
 void* buffer_makespace(GBuffer* buf, GUInt atIndex)
 {
@@ -146,7 +172,7 @@ void* buffer_makespace(GBuffer* buf, GUInt atIndex)
     {
         if(buf->isAutoResize)
         {
-            if(!buffer_grow(buf, buf->capacity * 2))
+            if(!buffer_grow(buf, buffer_get_autogrow_amount(buf)))
             {
                 return NULL;
             }

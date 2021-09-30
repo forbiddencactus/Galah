@@ -16,13 +16,18 @@
 
 
 import GalahNative.Memory;
+import GalahNative.Settings;
 
-public class RawMutableBuffer
+// Mutable by default.
+public class RawBuffer
 {
     fileprivate let type: Any.Type;
     fileprivate var buffer: GBuffer;
-    public var Count: Int { get { return Int(buffer.count); } }
+    
+    public let AutoGrowEvent = Event<RawBuffer>();
+    public var Count: Int { get { return Int(buffer.count); } };
     public var Capacity: UInt { get { return UInt(buffer.capacity); } };
+    public var Mutable: Bool { get { return buffer.isAutoResize; } };
     
     public init(withInitialCapacity: Int, withType: Any.Type) throws
     {
@@ -38,18 +43,20 @@ public class RawMutableBuffer
         let callback : GBufferResizeCallback? =
         { (target : UnsafeMutableRawPointer?) -> () in
                 
-            let swiftBuff: RawMutableBuffer = Cast(target);
+            let swiftBuff: RawBuffer = Cast(target);
             swiftBuff.BufferResized();
         }
         
         buffer_addresizecallback(&buffer, callback, Cast(self));
     }
     
+    // Returns the type that this buffer stores.
     public func GetType() -> Any.Type
     {
         return type;
     }
     
+    // Returns the pointer for the position at index.
     public func PtrAt(_ index: Int) throws -> Ptr<VoidPtr>
     {
         if (index < Count)
@@ -60,6 +67,7 @@ public class RawMutableBuffer
         throw ContiguousMutableBufferError.OutOfRange;
     }
        
+    // Memcopies the specified pointer, by the size of the type of the buffer, into the end of the buffer. Auto grows. 
     public func AddPtr(_ ptr: Ptr<VoidPtr>) throws -> Int
     {
         if(buffer_add(&buffer, ptr.raw) == -1)
@@ -69,7 +77,8 @@ public class RawMutableBuffer
         
         return Count - 1;
     }
-       
+     
+    // Makes space for the element at index (by pushing existing elements further back), then Memcopies the specified pointer, by the size of the type of the buffer, into the end of the buffer. Auto grows.
     public func InsertPtr(_ index: Int, _ ptr: Ptr<VoidPtr>) throws
     {
         if (index >= Count)
@@ -83,6 +92,7 @@ public class RawMutableBuffer
         }
     }
     
+    // Removes the specified element from the buffer, and moves the leftover elements so there's no gaps.
     public func Remove(_ index: Int) throws
     {
         if (index < Count)
@@ -94,11 +104,13 @@ public class RawMutableBuffer
         throw ContiguousMutableBufferError.OutOfRange;
     }
     
+    // Clears the buffer.
     public func Clear()
     {
         buffer_remove_range(&buffer, 0, GUInt(Count - 1));
     }
         
+    // Makes space for an element at index, returns the pointer to that empty space.
     public func MakeSpace(_ index: Int) throws -> Ptr<VoidPtr>
     {
         if (index <= Count)
@@ -110,7 +122,28 @@ public class RawMutableBuffer
         throw ContiguousMutableBufferError.OutOfRange;
     }
     
-    internal func BufferResized() { }
+    // Sets whether the buffer should autoresize.
+    public func SetShouldAutoResize(_ shouldAutoResize: Bool)
+    {
+        buffer_set_shouldautoresize(&buffer, shouldAutoResize);
+    }
+    
+    // Sets the autoresize amount for the buffer, e.g, by how much should its capacity increase. The default (0) is its capacity will double.
+    public func SetAutoResizeAmount(_ autoResizeAmount: UInt)
+    {
+        buffer_set_autogrow_amount(&buffer, GUInt(autoResizeAmount));
+    }
+    
+    // Manually deallocs the buffer. This buffer won't work anymore afterwards.
+    public func DeallocBuffer()
+    {
+        buffer_free(&buffer);
+    }
+        
+    internal func BufferResized()
+    {
+        AutoGrowEvent.Broadcast(self);
+    }
     
     deinit
     {
@@ -118,9 +151,9 @@ public class RawMutableBuffer
     }
 }
 
-public class MutableBuffer<T>: RawMutableBuffer, Sequence
+public class Buffer<T>: RawBuffer, Sequence
 {
-    public init(withInitialCapacity: Int, withType: T.Type = T.self) throws
+    public init(withInitialCapacity: Int = Int(GSETTINGS_CONSTANTS_DEFAULTBUFFERCAPACITY), withType: T.Type = T.self) throws
     {
         try super.init(withInitialCapacity: withInitialCapacity, withType: withType);
     }
@@ -129,7 +162,8 @@ public class MutableBuffer<T>: RawMutableBuffer, Sequence
     {
         return try GetRefFromPointer(super.PtrAt(index));
     }
-       
+      
+    @discardableResult
     public func Add(_ element: inout T) throws -> Int
     {
         return try super.AddPtr(Ptr<VoidPtr>(&element));
@@ -141,15 +175,15 @@ public class MutableBuffer<T>: RawMutableBuffer, Sequence
     }
        
     // Sequence protocol:
-    public func makeIterator() -> MutableBufferIterator<T>
+    public func makeIterator() -> BufferIterator<T>
     {
-        return MutableBufferIterator(buffer: self, elementIndex: 0);
+        return BufferIterator(buffer: self, elementIndex: 0);
     }
 }
 
-public class RefMutableBuffer<T>: RawMutableBuffer, Sequence where T: GObject
+public class RefBuffer<T>: RawBuffer, Sequence where T: GObject
 {
-    public init(withInitialCapacity: Int, withType: T.Type = T.self) throws
+    public init(withInitialCapacity: Int = Int(GSETTINGS_CONSTANTS_DEFAULTBUFFERCAPACITY), withType: T.Type = T.self) throws
     {
         try super.init(withInitialCapacity: withInitialCapacity, withType: withType);
     }
@@ -170,18 +204,18 @@ public class RefMutableBuffer<T>: RawMutableBuffer, Sequence where T: GObject
     }
        
     // Sequence protocol:
-    public func makeIterator() -> RefMutableBufferIterator<T>
+    public func makeIterator() -> RefBufferIterator<T>
     {
-        return RefMutableBufferIterator(buffer: self, elementIndex: 0);
+        return RefBufferIterator(buffer: self, elementIndex: 0);
     }
 }
 
-public struct MutableBufferIterator<T>: IteratorProtocol
+public struct BufferIterator<T>: IteratorProtocol
 {
-    let buffer: MutableBuffer<T>;
+    let buffer: Buffer<T>;
     var elementIndex: Int;
     
-    public init(buffer: MutableBuffer<T>, elementIndex: Int)
+    public init(buffer: Buffer<T>, elementIndex: Int)
     {
         self.buffer = buffer;
         self.elementIndex = elementIndex;
@@ -207,12 +241,12 @@ public struct MutableBufferIterator<T>: IteratorProtocol
     }
 }
 
-public struct RefMutableBufferIterator<T>: IteratorProtocol where T: GObject
+public struct RefBufferIterator<T>: IteratorProtocol where T: GObject
 {
-    let buffer: RefMutableBuffer<T>;
+    let buffer: RefBuffer<T>;
     var elementIndex: Int;
     
-    public init(buffer: RefMutableBuffer<T>, elementIndex: Int)
+    public init(buffer: RefBuffer<T>, elementIndex: Int)
     {
         self.buffer = buffer;
         self.elementIndex = elementIndex;

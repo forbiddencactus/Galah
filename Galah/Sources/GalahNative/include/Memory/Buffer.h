@@ -31,6 +31,10 @@ typedef struct
     bool isAutoResize;
     void* bufferResizeCallbackTarget;
     GBufferResizeCallback bufferResizeCallback;
+    
+    //0 means the buffer will auto grow by just doubling its capacity, any other integer means the buffer will autoGrow by elementSize * the integer.
+    GUInt autoGrowAmount;
+    
 }   GBuffer;
 
 //Note: all of these will memcpy elements into buffer!
@@ -56,6 +60,15 @@ void* buffer_get(GBuffer* buf, GUInt index);
 
 // Attempts to grow the buffer to newCapacity. Returns true if successful.
 bool buffer_grow(GBuffer* buf, GUInt newCapacity);
+
+// Sets whether the buffer should auto resize.
+void buffer_set_shouldautoresize(GBuffer* buf, bool shouldAutoResize);
+
+// Sets the buffer autogrow amount (0 means the buffer will duplicate in size)
+void buffer_set_autogrow_amount(GBuffer* buf, GUInt newAutoGrowAmount);
+
+// Returns the new size for the buffer should it autogrow.
+GUInt buffer_get_autogrow_amount(GBuffer* buf);
 
 // Makes space for an element and returns the pointer for that element's place in the buffer.
 void* buffer_makespace(GBuffer* buf, GUInt atIndex);

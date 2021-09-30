@@ -21,3 +21,6 @@ Galah is a lovingly hand crafted Swift game engine for PC, Mac, Linux, and mobil
 - 3D Audio, and one day, support for MOD files?
 - An editor, built on top of Galah's own tech. 
   
+## Licence, contributors, and attributions
+
+They can all be found in LICENCE.MD, CONTRIBUTORS.MD, and ATTRIBUTIONS.MD, inside this package. Galah is licenced using the MIT Licence.
