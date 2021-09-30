@@ -106,6 +106,7 @@ public struct Ptr<T>
         size = GetSize<T>.SizeOf();
         ptr = pointer.ptr;
     }
+    
     // Usage: Ptr(obj), naturally no guarantee is made to the pointee's lifespan.
     // Creates a pointer from a pointer or reference. ptr* ptr = 
     public init(_ object: inout T)

@@ -17,6 +17,7 @@
 // Swiped from: https://stackoverflow.com/questions/42459484/make-a-swift-dictionary-where-the-key-is-type
 // This particular chunk of code is licenced according to stack overflow's terms, CC-BY-SA 4.0.
 // Hashable wrapper for a metatype value.
+
 struct HashableType<T> : Hashable
 {
 
