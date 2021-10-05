@@ -16,12 +16,6 @@
 
 open class GObject
 {
-    // Called whenever Galah constructs the instance.
-    public func OnConstruct() {}
-    
-    // Called whenever Galah destroys the instance.
-    public func OnDestroy() {}
-        
     // Construct an instance of the specified GObject.
     internal static func Construct<T>() -> T? where T: GObject
     {
@@ -32,22 +26,17 @@ open class GObject
     @discardableResult
     internal static func Construct<T>(_ ptr: Ptr<T>) -> T? where T: GObject
     {
-        return GObject.Construct(type: T.self, ptr: ptr.GetVoidPtr()) as? T;
+        return unsafeBitCast(GObject.Construct(type: T.self, ptr: ptr.GetVoidPtr()), to: T.self);
     }
     
     internal static func Construct(type: GObject.Type) -> GObject?
     {
-        internallyConstructed = true;
         let constr: GObject;
-        do
-        {
-            constr = try type.init();
-        }
-        catch
-        {
-            return nil;
-        }
-        
+
+        constr = try! unsafeBitCast(buildClass(type: type), to: GObject.self);
+        constr.internallyConstructed = true;
+        try constr.init();
+
         retainObject(constr);
         
         constr.internalConstruct();
@@ -58,11 +47,12 @@ open class GObject
     @discardableResult
     internal static func Construct(type: GObject.Type, ptr: Ptr<VoidPtr>) -> GObject?
     {
-        internallyConstructed = true;
         let constr: GObject;
         do
         {
             constr = try galah_placementNew(type: type, ptr: ptr) as! GObject;
+            constr.internallyConstructed = true;
+            try constr.init();
         }
         catch
         {
@@ -90,39 +80,27 @@ open class GObject
     
     private var objectIndex: GIndex = GIndex();
     private var willDestroy: Bool = false;
-    
-    private func internalConstruct()
-    {
-        objectIndex = GObjectTable.sharedInstance.GetNewGIndex();
-        GObjectTable.sharedInstance.UpdateObject(index: objectIndex, reference: self);
-        
-        self.OnConstruct();
-    }
-    
-    private func internalDestruct()
-    {
-        GObjectTable.sharedInstance.RemoveObject(objectIndex);
-        
-        self.OnDestroy();
-    }
 
-    private static var internallyConstructed: Bool = false;
+    private var internallyConstructed: Bool = false;
     
     // TODO: Investigate replacing OnConstruct with just the required init?
     public required init() throws
     {
-        if(GObject.internallyConstructed != true)
+        if(internallyConstructed != true)
         {
             // GObjects are manually managed by the engine. You can't construct them yourself!
             throw GObjectError.NotProperlyConstructed;
             return;
         }
-        GObject.internallyConstructed = false;
-    };
+        
+        objectIndex = GObjectTable.sharedInstance.GetNewGIndex();
+        GObjectTable.sharedInstance.UpdateObject(index: objectIndex, reference: self);
+    }
     
     deinit
     {
-        self.internalDestruct();
+        GObjectTable.sharedInstance.RemoveObject(objectIndex);
+
     }
 }
 

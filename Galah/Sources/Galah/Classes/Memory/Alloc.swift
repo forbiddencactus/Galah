@@ -23,6 +23,8 @@
  */
 // Cheers to Wes Wickwire for their awesome work opening up the Swift runtime! Functional swift here we come!
 
+import GalahNative.SwiftRuntime;
+
 internal func galah_placementNew<T>(_ ptr: Ptr<T>) throws -> T where T: AnyObject
 {
     return try galah_placementNew(type: T.self, ptr: ptr.GetVoidPtr()) as! T;
@@ -46,4 +48,16 @@ internal func galah_placementNew(type: Any.Type, ptr: Ptr<VoidPtr>) throws -> An
     value.assumingMemoryBound(to: ClassHeader.self).pointee.strongRetainCounts += 1;
 
     return unsafeBitCast(value, to: AnyObject.self);
+}
+
+internal func galah_runDestructor(obj: AnyObject)
+{
+    var md = ClassMetadata(type: type(of: obj).self);
+
+    let rawObjectRef = unsafeBitCast(obj, to: UnsafeMutableRawPointer.self);
+
+    // https://github.com/apple/swift/blob/main/docs/ABI/TypeMetadata.rst#common-metadata-layout
+    let destroyPtr = UnsafeRawPointer(md.pointer) - 16;
+    
+    glh_runSwiftDestructor(nil, nil);
 }
