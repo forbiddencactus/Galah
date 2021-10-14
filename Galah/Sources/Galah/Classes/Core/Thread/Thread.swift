@@ -22,21 +22,22 @@ public final class Thread: GObject
     
     public var HasJob: Bool { get { return internalThread.hasJob; }}
     
-    public override func OnConstruct()
+    /*public override func OnConstruct()
     {
         if(glh_thread_create(&internalThread) != 0)
         {
             // error here, todo.
         }
-    }
+    }*/
     
     public func SetJob(job: @escaping (Any) ->(), jobArg: Any) -> Bool
     {
         return glh_thread_setjob(&internalThread, unsafeBitCast(job, to: glh_thread_function?.self), unsafeBitCast(jobArg, to: UnsafeMutableRawPointer.self));
     }
-    
-    public override func OnDestroy()
+    /*
+    deinit()
     {
         glh_thread_killthread(&internalThread);
     }
+ */
 }

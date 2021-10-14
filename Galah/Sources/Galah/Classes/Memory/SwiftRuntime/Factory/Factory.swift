@@ -55,7 +55,7 @@ func buildStruct(type: Any.Type, constructor: ((PropertyInfo) throws -> Any)? = 
     return getters(type: type).get(from: pointer)
 }
 
-func buildClass(type: Any.Type) throws -> Any {
+func buildClass(type: Any.Type) throws -> AnyObject {
     var md = ClassMetadata(type: type)
     let info = md.toTypeInfo()
     let metadata = unsafeBitCast(type, to: UnsafeRawPointer.self)

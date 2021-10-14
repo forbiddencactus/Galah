@@ -25,10 +25,10 @@ public final class Node: GObject
     internal var
     components = Array<Component>();
     
-    public var Transform: Transform
+    /*public var Transform: Transform
     {
         get { return _transform; }
-    }
+    }*/
     
     internal var _depth: Int = 0;
     public var Depth: Int
@@ -44,7 +44,7 @@ public final class Node: GObject
         set(isEnabled) { self.SetEnabled(isEnabled: isEnabled)}
     }
     
-    public required init()
+    public required init() throws
     {
         components = Array<Component>();
     }
@@ -59,7 +59,7 @@ public final class Node: GObject
     // Gets the subarchetype batch for this node.
     public func GetSubArchetypeBatchIndex() -> String
     {
-        return "Default"
+        return "Default";
     }
     
     //public func AddComponent<T>() -> T where T: Component
@@ -77,7 +77,7 @@ public final class Node: GObject
     private func SetNewDepth(newDepth: Int)
     {
         _depth = newDepth;
-        NodePool.sharedInstance.MarkDirty(node: self);
+        // NodePool.sharedInstance.MarkDirty(node: self);
     }
         
     private func SetEnabled(isEnabled: Bool)

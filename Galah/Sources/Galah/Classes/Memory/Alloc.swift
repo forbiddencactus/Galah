@@ -50,14 +50,18 @@ internal func galah_placementNew(type: Any.Type, ptr: Ptr<VoidPtr>) throws -> An
     return unsafeBitCast(value, to: AnyObject.self);
 }
 
-internal func galah_runDestructor(obj: AnyObject)
+public func galah_runDestructor(obj: AnyObject)
 {
-    var md = ClassMetadata(type: type(of: obj).self);
+    let md = ClassMetadata(type: GObject.self);
 
     let rawObjectRef = unsafeBitCast(obj, to: UnsafeMutableRawPointer.self);
+    
+    let testRef = rawObjectRef;
+    let meta = testRef.load(as: UnsafePointer<ClassTypeDescriptor>.self);
 
     // https://github.com/apple/swift/blob/main/docs/ABI/TypeMetadata.rst#common-metadata-layout
-    let destroyPtr = UnsafeRawPointer(md.pointer) - 16;
+    let destroyPtr = UnsafeRawPointer(meta) - ( MemoryLayout<Int>.size  * 2);
     
-    glh_runSwiftDestructor(nil, nil);
+    
+    glh_runSwiftDestructor(unsafeBitCast(md.destructor, to: UnsafeMutablePointer<UnsafeMutableRawPointer?>?.self), rawObjectRef);
 }

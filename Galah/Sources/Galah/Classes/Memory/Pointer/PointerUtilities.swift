@@ -132,3 +132,8 @@ public func Cast<T>(_ input: Any?) -> T
 {
     return unsafeBitCast(input, to: T.self);
 }
+
+public func Cast<T>(_ input: AnyObject?) -> T
+{
+    return unsafeBitCast(input, to: T.self);
+}

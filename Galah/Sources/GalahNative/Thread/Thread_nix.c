@@ -39,7 +39,7 @@ void* glh_thread_rootthread(void* arg)
             thread->job = NULL;
             thread->jobArg = NULL;
             
-            glh_fence_release();
+            //glh_fence_release();
             thread->hasJob = false;
         }
     }
@@ -73,7 +73,7 @@ bool glh_thread_setjob(GThread* thread, glh_thread_function job, void* jobArg)
 {
     if(thread->nativethreadptr != NULL && !thread->hasJob && !thread->shouldExit)
     {
-        glh_fence_release();
+        //glh_fence_release();
         thread->hasJob = true;
         
         thread->job = job;

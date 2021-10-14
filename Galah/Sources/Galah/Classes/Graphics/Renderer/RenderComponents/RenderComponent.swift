@@ -16,9 +16,5 @@
 
 open class RenderComponent: Component
 {
-    public override func Construct()
-    {
-       //s 
-    }
     public func DepthWillChange(oldDepth: Int, newDepth: Int) {}
 }

@@ -35,12 +35,10 @@ open class GObject
 
         constr = try! unsafeBitCast(buildClass(type: type), to: GObject.self);
         constr.internallyConstructed = true;
-        try constr.init();
+        //try constr.init();
 
         retainObject(constr);
-        
-        constr.internalConstruct();
-        
+                
         return constr;
     }
     
@@ -52,7 +50,7 @@ open class GObject
         {
             constr = try galah_placementNew(type: type, ptr: ptr) as! GObject;
             constr.internallyConstructed = true;
-            try constr.init();
+            //try constr.init();
         }
         catch
         {
@@ -61,7 +59,7 @@ open class GObject
         
         retainObject(constr);
         
-        constr.internalConstruct();
+        //constr.internalConstruct();
         
         return constr;
     }
@@ -90,7 +88,6 @@ open class GObject
         {
             // GObjects are manually managed by the engine. You can't construct them yourself!
             throw GObjectError.NotProperlyConstructed;
-            return;
         }
         
         objectIndex = GObjectTable.sharedInstance.GetNewGIndex();
@@ -100,7 +97,6 @@ open class GObject
     deinit
     {
         GObjectTable.sharedInstance.RemoveObject(objectIndex);
-
     }
 }
 

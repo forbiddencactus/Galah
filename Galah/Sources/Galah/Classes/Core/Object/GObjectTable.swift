@@ -58,6 +58,8 @@ internal class GObjectTable
         {
             return item?.object;
         }
+        
+        return nil;
     }
     
     // Updates or adds an object in the lookup table.
@@ -110,7 +112,7 @@ internal class GObjectTable
             {
                 // Uh... you have WAY too many objects.
                 fatalError();
-                return GIndex();
+                //return GIndex();
             }
         }
         

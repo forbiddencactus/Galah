@@ -56,6 +56,12 @@ internal func retainObject(_ object: AnyObject)
     ptr.assumingMemoryBound(to: ClassHeader.self).pointee.strongRetainCounts += 1;
 }
 
+internal func setObjectRetain(_ object: AnyObject, _ newRetain: Int32)
+{
+    let ptr = GetPointerFromObject(object);
+    ptr.assumingMemoryBound(to: ClassHeader.self).pointee.strongRetainCounts = newRetain;
+}
+
 // Note that this won't, as of yet, dealloc the object if you decrease the refcount.
 // Also note you don't really wanna call this on manually allocated objects probably. 
 internal func releaseObject(_ object: AnyObject)

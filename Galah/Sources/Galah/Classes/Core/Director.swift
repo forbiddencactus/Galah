@@ -20,7 +20,7 @@ public class Director
 {
     public static let sharedInstance: Director = Director();
     
-    internal let nodePool: NodePool = NodePool();
+    //internal let nodePool: NodePool = NodePool();
     internal static var frameIndex: GUShort = 0;
 
 }

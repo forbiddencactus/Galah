@@ -17,10 +17,11 @@
 #include "SwiftRuntime/ObjectDealloc.h"
 #include "GalahNative.h"
 
-void glh_runSwiftDestructor( SwiftDestructor destructorRef, void *object)
+void glh_runSwiftDestructor( void** destructorRef, void *object)
 {
     if (destructorRef != NULL)
     {
-        destructorRef(object);
+        SwiftDestructor destructor = (SwiftDestructor)(*destructorRef);
+        destructor(object);
     }
 }

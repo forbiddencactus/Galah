@@ -1,6 +1,0 @@
-
-framework module Galah2DPlatforms {
-    header "Galah2DPlatforms.h"
-    
-    private header "Galah2DPlatformsC.h"
-}

@@ -19,6 +19,6 @@
 
 typedef void (*SwiftDestructor)();
 
-void glh_runSwiftDestructor( SwiftDestructor destructorRef, void *object);
+void glh_runSwiftDestructor( void** destructorRef, void *object);
 
 #endif

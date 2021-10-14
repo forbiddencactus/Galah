@@ -17,11 +17,11 @@
 #ifndef Barrier_h
 #define Barrier_h
 
-__attribute__((always_inline))
-inline void glh_fence_acquire();
+//__attribute__((always_inline))
+//inline void glh_fence_acquire();
 
-__attribute__((always_inline))
-inline void glh_fence_release();
+//__attribute__((always_inline))
+//inline void glh_fence_release();
 
 
 #endif /* Barrier.h */

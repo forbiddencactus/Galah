@@ -26,13 +26,13 @@ open class Component: GObject
     componentIndex: ComponentIndex = 0;
     
     internal var
-    node: Node;
+    node: Node? = nil;
     
     public var Node: Node
     {
         get
         {
-            return node;
+            return node!;
         }
     }
     

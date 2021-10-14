@@ -20,7 +20,7 @@ internal typealias NodeIndex = GIndex;
 
 // TODO: use the indices to pack a bitfield pointing directly to the data?
 // TODO: Rewrite this abomination in C, in Swift it's just horrendous and probably slow.
-internal class NodePool
+/*internal class NodePool
 {
     private static let poolSizes: Int = 16;
     static let sharedInstance: NodePool = Director.sharedInstance.nodePool;
@@ -43,11 +43,11 @@ internal class NodePool
     
     // Component scratch buffers are where newly created components go.
     private var
-    componentScratchBuffer: Dictionary<HashableType<Component>,ContiguousMutableBuffer>;
+    componentScratchBuffer: Dictionary<HashableType<Component>,RawBuffer>;
     
     // Node scratch buffers are where newly created nodes go.
     private let
-    nodeScratchBuffer: ContiguousMutableBufferT<Node>;
+    nodeScratchBuffer: RefBuffer<Node>;
     
     // Nodes whose depth or subarchetype types have changed get marked here.
     private var
@@ -65,7 +65,7 @@ internal class NodePool
         
         do
         {
-            ptr = try nodeScratchBuffer.MakeSpace(nodeScratchBuffer.Count);
+            ptr = try Cast(nodeScratchBuffer.MakeSpace(nodeScratchBuffer.Count));
         }
         catch
         {
@@ -177,7 +177,7 @@ internal class NodePool
         for i in 0..<nodeScratchBuffer.Count
         {
             // We'll use both the existing lookupTable and this scratch space to determine what lives where.
-            let node: Node = try! nodeScratchBuffer.ItemAt(i)!;
+            let node: Node = try! nodeScratchBuffer.ItemAt(i);
             updateScratchSpace[node.nodeIndex.index] = NodeTable(index: node.nodeIndex, node: node);
         }
                         
@@ -248,7 +248,7 @@ internal class NodePool
                 // The node lives in the scratch buffer.
             }
             
-            for component in masterTable.components
+            /*for component in masterTable.components
             {
                 // A horrendous brute force solution.
                 // TODO: In contiguousmutablebuffer, we can probably do some pointer magic to ameliorate this?
@@ -267,7 +267,7 @@ internal class NodePool
                     passBatches[passIndex]!.DepthBatches[depthIndex].ArchetypeBatch[masterTable.componentTypes]!.SubArchetypeBatch[subBatchIndex]!.BatchMembers[component.self].;
                     masterTable.nodeParentBuffer.RunFunc {$0.BatchMembers}
                 }
-            }
+            }*/
             
             nodeScratchBuffer.Clear();
             componentScratchBuffer.removeAll();
@@ -280,9 +280,9 @@ internal class NodePool
         nodeDirtyBucket.append(node);
     }
     
-    private func AllocContiguousBuffer(type: GObject.Type) throws -> ContiguousMutableBuffer
+    private func AllocContiguousBuffer(type: GObject.Type) throws -> RawBuffer
     {
-        return try ContiguousMutableBuffer(withType: type, withInitialCapacity: NodePool.poolSizes);
+        return try RawBuffer(withInitialCapacity: NodePool.poolSizes, withType: type);
     }
     
     // Returns a unique object index for a new object.
@@ -428,4 +428,4 @@ internal class NodePool
     
     
     
-}
+}*/

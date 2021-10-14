@@ -75,6 +75,14 @@ extension MetadataType {
             .pointee
     }
     
+    var destructor: UnsafeMutableRawPointer
+    {
+        return pointer
+        .raw
+        .advanced(by: -(MemoryLayout<UnsafeRawPointer>.size * 2))
+        //.pointee
+    }
+    
     mutating func toTypeInfo() -> TypeInfo {
         return TypeInfo(metadata: self)
     }

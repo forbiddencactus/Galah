@@ -13,7 +13,7 @@
 // galah-engine.org | https://github.com/forbiddencactus/Galah
 //--------------------------------------------------------------------------//
 // The Transform2D class. Has support for shear like the classics!
-
+/*
 
 public class Transform2D: Transform
 {    
@@ -179,6 +179,6 @@ public class Transform2D: Transform
             child.InternalWorldRefresh();
         }
     }
-}
+}*/
 
 // Created by Alex Griffin on 31/12/19.
