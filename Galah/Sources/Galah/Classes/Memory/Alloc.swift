@@ -52,16 +52,10 @@ internal func galah_placementNew(type: Any.Type, ptr: Ptr<VoidPtr>) throws -> An
 
 public func galah_runDestructor(obj: AnyObject)
 {
-    let md = ClassMetadata(type: GObject.self);
+    let md = ClassMetadata(pointer: Cast(obj));
 
     let rawObjectRef = unsafeBitCast(obj, to: UnsafeMutableRawPointer.self);
+    let rawDestructor = unsafeBitCast(md.destructor, to: UnsafeMutablePointer<UnsafeMutableRawPointer?>?.self);
     
-    let testRef = rawObjectRef;
-    let meta = testRef.load(as: UnsafePointer<ClassTypeDescriptor>.self);
-
-    // https://github.com/apple/swift/blob/main/docs/ABI/TypeMetadata.rst#common-metadata-layout
-    let destroyPtr = UnsafeRawPointer(meta) - ( MemoryLayout<Int>.size  * 2);
-    
-    
-    glh_runSwiftDestructor(unsafeBitCast(md.destructor, to: UnsafeMutablePointer<UnsafeMutableRawPointer?>?.self), rawObjectRef);
+    glh_runSwiftDestructor(rawDestructor, rawObjectRef);
 }
