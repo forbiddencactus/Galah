@@ -38,7 +38,6 @@ typedef struct
 }   GBuffer;
 
 //Note: all of these will memcpy elements into buffer!
-//Autoresize will always resize capacity * 2.
 
 // Allocs a GBuffer that will hold capacity amount of elements of elementSize.
 GBuffer buffer_create(MemSize elementSize, GUInt capacity, bool isAutoResize);
@@ -48,6 +47,9 @@ int buffer_add(GBuffer* buf, const void* element);
 
 // Inserts an element to index position in the buffer, and returns the index. -1 if insert failed.
 int buffer_insert(GBuffer* buf, const void* element, GUInt index);
+
+// Replaces the element at index with the specified element.
+int buffer_replace(GBuffer* buf, const void* element, GUInt index);
 
 // Removes an element at the index position in the buffer, and returns the new count. -1 if remove failed.
 int buffer_remove(GBuffer* buf, GUInt index);

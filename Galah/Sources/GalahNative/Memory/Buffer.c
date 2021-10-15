@@ -57,6 +57,12 @@ int buffer_insert(GBuffer* buf, const void* element, GUInt index)
     }
     
     //Copy the new element...
+    return buffer_replace(buf, element, index);
+}
+
+// Replaces the element at index with the specified element.
+int buffer_replace(GBuffer* buf, const void* element, GUInt index)
+{
     glh_memcpy(buf->buffer + (buf->elementSize * index), element, buf->elementSize);
     
     return index;
