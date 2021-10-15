@@ -18,7 +18,7 @@
 #define GalahTypes_h
 
 typedef void Buff;
-typedef size_t MemSize;
+typedef size_t GMemSize;
 typedef uint GUInt;
 typedef ushort GUShort;
 

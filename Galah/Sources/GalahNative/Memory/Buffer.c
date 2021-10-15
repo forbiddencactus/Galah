@@ -18,7 +18,7 @@
 #include "Memory/Alloc.h"
 
 // Allocs a GBuffer that will hold capacity amount of elements of elementSize.
-GBuffer buffer_create(MemSize elementSize, GUInt capacity, bool isAutoResize)
+GBuffer buffer_create(GMemSize elementSize, GUInt capacity, bool isAutoResize)
 {
     GBuffer buf;
     buf.bufferSize = elementSize * capacity;
@@ -75,7 +75,7 @@ int buffer_remove(GBuffer* buf, GUInt index)
     {
         if(index != (buf->count -1))
         {
-            MemSize size = buf->count - index;
+            GMemSize size = buf->count - index;
             glh_memmove(buf->buffer + (buf->elementSize * index), buf->buffer + (buf->elementSize * (index + 1)), size);
         }
         return --buf->count;
@@ -90,7 +90,7 @@ int buffer_remove_range(GBuffer* buf, GUInt startIndex, GUInt endIndex)
     if(endIndex > startIndex && endIndex < buf->count)
     {
         GUInt amount = (endIndex - startIndex) + 1;
-        MemSize moveSize = amount * buf->elementSize;
+        GMemSize moveSize = amount * buf->elementSize;
         
         if(endIndex != (buf->count -1))
         {
@@ -123,7 +123,7 @@ bool buffer_grow(GBuffer* buf, GUInt newCapacity)
     }
     
     Buff* oldBuffer = buf->buffer;
-    MemSize newSize = buf->elementSize * newCapacity;
+    GMemSize newSize = buf->elementSize * newCapacity;
     buf->buffer = glh_malloc(newSize);
     
     if(buf->buffer != NULL)
@@ -197,7 +197,7 @@ void* buffer_makespace(GBuffer* buf, GUInt atIndex)
     if(atIndex < (buf->count) )
     {
         //Make space for the element...
-        MemSize movesize = buf->count - atIndex;
+        GMemSize movesize = buf->count - atIndex;
         glh_memmove(buf->buffer + (buf->elementSize * (atIndex + 1)), buf->buffer + (buf->elementSize * atIndex),movesize * buf->elementSize);
     }
     

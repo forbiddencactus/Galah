@@ -44,11 +44,6 @@ public final class Node: GObject
         set(isEnabled) { self.SetEnabled(isEnabled: isEnabled)}
     }
     
-    public required init() throws
-    {
-        components = Array<Component>();
-    }
-    
     // Gets the pass this node belongs to.
     public func GetPassIndex() -> String
     {

@@ -16,6 +16,8 @@
 
 open class GObject
 {
+    public func OnConstruct() {}
+    
     // Construct an instance of the specified GObject.
     internal static func Construct<T>() -> T? where T: GObject
     {
@@ -33,13 +35,22 @@ open class GObject
     {
         let constr: GObject;
 
-        constr = try! unsafeBitCast(buildClass(type: type), to: GObject.self);
-        constr.internallyConstructed = true;
-        //try constr.init();
-
-        retainObject(constr);
-                
-        return constr;
+        do
+        {
+            constr = try unsafeBitCast(buildClass(type: type), to: GObject.self);
+            constr.internallyConstructed = true;
+            
+            // run our fake init
+            constr.internalConstructor();
+            
+            retainObject(constr);
+                    
+            return constr;
+        }
+        catch
+        {
+            return nil;
+        }
     }
     
     @discardableResult
@@ -78,20 +89,24 @@ open class GObject
     
     private var objectIndex: GIndex = GIndex();
     private var willDestroy: Bool = false;
-
     private var internallyConstructed: Bool = false;
     
-    // TODO: Investigate replacing OnConstruct with just the required init?
-    public required init() throws
+    // BIG NOTE: Unfortunately I couldn't (yet) figure out a way to run init() using our custom allocation stuff.
+    private init() throws
     {
         if(internallyConstructed != true)
         {
             // GObjects are manually managed by the engine. You can't construct them yourself!
             throw GObjectError.NotProperlyConstructed;
         }
-        
+    }
+    
+    private func internalConstructor()
+    {
         objectIndex = GObjectTable.sharedInstance.GetNewGIndex();
         GObjectTable.sharedInstance.UpdateObject(index: objectIndex, reference: self);
+        
+        self.OnConstruct();
     }
     
     deinit

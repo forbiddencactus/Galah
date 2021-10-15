@@ -17,14 +17,14 @@
 #include "Memory/Pointer.h"
 #include "Memory/Alloc.h"
 
-GPtr ptr_add(GPtr ptr, MemSize typesize, GUInt amount)
+GPtr ptr_add(GPtr ptr, GMemSize typesize, GUInt amount)
 {
     GPtr ret;
     ret.ptr = ptr.ptr + (amount * typesize);
     return ret;
 }
 
-GPtr ptr_sub(GPtr ptr, MemSize typesize, GUInt amount)
+GPtr ptr_sub(GPtr ptr, GMemSize typesize, GUInt amount)
 {
     GPtr ret;
     ret.ptr = ptr.ptr - (amount * typesize);
@@ -45,7 +45,7 @@ void ptr_set(GPtr* outptr, void* inptr)
 }
 
 // Assigns the value of inassignptr into the location pointed to by ptr.
-void ptr_assign(GPtr* ptr, void* inassignptr, MemSize size)
+void ptr_assign(GPtr* ptr, void* inassignptr, GMemSize size)
 {
     glh_memcpy(ptr->ptr, inassignptr, size);
 }

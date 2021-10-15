@@ -43,9 +43,6 @@ internal func galah_placementNew(type: Any.Type, ptr: Ptr<VoidPtr>) throws -> An
 
     value.storeBytes(of: metadata, as: UnsafeRawPointer.self);
     try setProperties(typeInfo: info, pointer: UnsafeMutableRawPointer(mutating: value));
-    
-    // Increment the strong retain by one because we want to manually manage this object.
-    value.assumingMemoryBound(to: ClassHeader.self).pointee.strongRetainCounts += 1;
 
     return unsafeBitCast(value, to: AnyObject.self);
 }

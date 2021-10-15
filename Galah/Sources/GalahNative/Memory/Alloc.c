@@ -16,12 +16,12 @@
 
 #include "Memory/Alloc.h"
 
-void* glh_malloc(MemSize size)
+void* glh_malloc(GMemSize size)
 {
     return malloc(size);
 }
 
-void* glh_alloca(MemSize size)
+void* glh_alloca(GMemSize size)
 {
     return alloca(size);
 }
@@ -31,17 +31,17 @@ void glh_free(void* ptr)
     free(ptr);
 }
 
-void* glh_memcpy(void* dest, const void* src, MemSize size)
+void* glh_memcpy(void* dest, const void* src, GMemSize size)
 {
     return memcpy(dest, src, size);
 }
 
-void* glh_memmove(void* dest, const void* src, MemSize size)
+void* glh_memmove(void* dest, const void* src, GMemSize size)
 {
     return memmove(dest, src, size);
 }
 
-void* glh_memset(void* dest, int value, MemSize size)
+void* glh_memset(void* dest, int value, GMemSize size)
 {
     return memset(dest, value, size);
 }

@@ -18,10 +18,11 @@ import GalahNative.Memory;
 
 public typealias VoidPtr = Int;
 
+// The difference between this and the swift stuff is that the swift stuff uses the size of a ref for any ref type, we use the actual size on the heap.
 public struct Ptr<T>
 {
     @usableFromInline
-    internal let size: MemSize;
+    internal let size: GMemSize;
     
     @usableFromInline
     internal var ptr: GPtr = GPtr(); //GPtr is basically our void*.
@@ -79,19 +80,19 @@ public struct Ptr<T>
     
     public init()
     {
-        size = GetSize<T>.SizeOf();
+        size = SizeOf(T.self);
         ptr_setnull(&ptr);
     }
     
     public init(_ rawPointer: UnsafeMutableRawPointer)
     {
-        size = GetSize<T>.SizeOf();
+        size = ExtentsOf(T.self);
         ptr.ptr = rawPointer;
     }
     
     public init(_ gPointer: GPtr)
     {
-        size = GetSize<T>.SizeOf();
+        size = ExtentsOf(T.self);
         ptr = gPointer;
     }
     
@@ -103,7 +104,7 @@ public struct Ptr<T>
     
     public init (_ pointer: Ptr<VoidPtr>)
     {
-        size = GetSize<T>.SizeOf();
+        size = ExtentsOf(T.self);
         ptr = pointer.ptr;
     }
     
@@ -111,13 +112,13 @@ public struct Ptr<T>
     // Creates a pointer from a pointer or reference. ptr* ptr = 
     public init(_ object: inout T)
     {
-        size = GetSize<T>.SizeOf();
+        size = ExtentsOf(T.self);
         ptr_set(&ptr, &object);
     }
     
     public init(_ anyObj: inout Any)
     {
-        size = GetSize<VoidPtr>.SizeOf();
+        size = ExtentsOf(T.self);
         ptr_set(&ptr, &anyObj);
     }
     
@@ -140,7 +141,7 @@ public struct Ptr<T>
     // Set the data pointed by ptr with the specified size.
     @inlinable
     @inline(__always)
-    public mutating func Set(ptr: inout Ptr<Any>, size: MemSize)
+    public mutating func Set(ptr: inout Ptr<Any>, size: GMemSize)
     {
         ptr_assign(&self.ptr, &ptr.ptr.ptr, size);
     }

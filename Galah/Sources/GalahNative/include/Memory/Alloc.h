@@ -19,17 +19,17 @@
 
 #include "GalahNative.h"
 
-void* glh_malloc(MemSize size);
+void* glh_malloc(GMemSize size);
 
 __attribute__((always_inline))
-void* glh_alloca(MemSize size);
+void* glh_alloca(GMemSize size);
 
 void glh_free(void* ptr);
 
-void* glh_memcpy(void* dest, const void* src, MemSize size);
+void* glh_memcpy(void* dest, const void* src, GMemSize size);
 
-void* glh_memmove(void* dest, const void* src, MemSize size);
+void* glh_memmove(void* dest, const void* src, GMemSize size);
 
-void* glh_memset(void* dest, int value, MemSize size);
+void* glh_memset(void* dest, int value, GMemSize size);
 
 #endif

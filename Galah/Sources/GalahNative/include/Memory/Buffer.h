@@ -23,8 +23,8 @@ typedef void (*GBufferResizeCallback)(void*);
 
 typedef struct
 {
-    MemSize elementSize;
-    MemSize bufferSize;
+    GMemSize elementSize;
+    GMemSize bufferSize;
     GUInt count;
     GUInt capacity;
     Buff* buffer;
@@ -40,7 +40,7 @@ typedef struct
 //Note: all of these will memcpy elements into buffer!
 
 // Allocs a GBuffer that will hold capacity amount of elements of elementSize.
-GBuffer buffer_create(MemSize elementSize, GUInt capacity, bool isAutoResize);
+GBuffer buffer_create(GMemSize elementSize, GUInt capacity, bool isAutoResize);
 
 // Adds an element to the end of the buffer, and returns the index. -1 if add failed.
 int buffer_add(GBuffer* buf, const void* element);

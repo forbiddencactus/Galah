@@ -63,7 +63,6 @@ internal func setObjectRetain(_ object: AnyObject, _ newRetain: Int32)
 }
 
 // Note that this won't, as of yet, dealloc the object if you decrease the refcount.
-// Also note you don't really wanna call this on manually allocated objects probably. 
 internal func releaseObject(_ object: AnyObject)
 {
     let ptr = GetPointerFromObject(object);

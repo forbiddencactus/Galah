@@ -26,10 +26,10 @@ typedef struct
 }   GPtr;
 
 // Returns a pointer added by amount*typesize. 
-GPtr ptr_add(GPtr ptr, MemSize typesize, GUInt amount);
+GPtr ptr_add(GPtr ptr, GMemSize typesize, GUInt amount);
 
 // Returns a pointer subtracted by amount*typesize.
-GPtr ptr_sub(GPtr ptr, MemSize typesize, GUInt amount);
+GPtr ptr_sub(GPtr ptr, GMemSize typesize, GUInt amount);
 
 // Returns a pointer pointing to sourcePtr. 
 GPtr ptr_get_ptr_to_ptr(GPtr sourcePtr);
@@ -38,7 +38,7 @@ GPtr ptr_get_ptr_to_ptr(GPtr sourcePtr);
 void ptr_set(GPtr* outptr, void* inptr);
 
 // Assigns the value of inassignptr into the location pointed to by ptr. 
-void ptr_assign(GPtr* ptr, void* inassignptr, MemSize size);
+void ptr_assign(GPtr* ptr, void* inassignptr, GMemSize size);
 
 // Sets the value of inptr to NULL.
 void ptr_setnull(GPtr* inptr);

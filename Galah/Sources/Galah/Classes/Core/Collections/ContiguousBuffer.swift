@@ -32,7 +32,7 @@ public class RawBuffer
     public init(withInitialCapacity: Int, withType: Any.Type) throws
     {
         type = withType;
-        let sizeOf: Int = SizeOf(withType);
+        let sizeOf: Int = ExtentsOf(withType);
         buffer = buffer_create(sizeOf, GUInt(withInitialCapacity), true);
         
         if(buffer.buffer == nil)
