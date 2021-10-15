@@ -38,19 +38,19 @@ open class GObject
         do
         {
             constr = try unsafeBitCast(buildClass(type: type), to: GObject.self);
-            constr.internallyConstructed = true;
+            //constr.internallyConstructed = true;
             
             // run our fake init
             constr.internalConstructor();
-            
-            retainObject(constr);
-                    
-            return constr;
         }
         catch
         {
             return nil;
         }
+        
+        retainObject(constr);
+                
+        return constr;
     }
     
     @discardableResult
@@ -59,9 +59,11 @@ open class GObject
         let constr: GObject;
         do
         {
-            constr = try galah_placementNew(type: type, ptr: ptr) as! GObject;
-            constr.internallyConstructed = true;
-            //try constr.init();
+            constr = try unsafeBitCast(galah_placementNew(type: type, ptr: ptr), to: GObject.self);
+            //constr.internallyConstructed = true;
+            
+            // run our fake init
+            constr.internalConstructor();
         }
         catch
         {
@@ -69,9 +71,7 @@ open class GObject
         }
         
         retainObject(constr);
-        
-        //constr.internalConstruct();
-        
+                
         return constr;
     }
         
@@ -88,17 +88,17 @@ open class GObject
     }
     
     private var objectIndex: GIndex = GIndex();
-    private var willDestroy: Bool = false;
-    private var internallyConstructed: Bool = false;
+    //private var internallyConstructed: Bool = false;
     
     // BIG NOTE: Unfortunately I couldn't (yet) figure out a way to run init() using our custom allocation stuff.
     private init() throws
     {
-        if(internallyConstructed != true)
-        {
+        // Don't think the internal constructed stuff is even needed.
+       // if(internallyConstructed != true)
+        //{
             // GObjects are manually managed by the engine. You can't construct them yourself!
             throw GObjectError.NotProperlyConstructed;
-        }
+        //}
     }
     
     private func internalConstructor()

@@ -17,6 +17,14 @@
 #include "Memory/Buffer.h"
 #include "Memory/Alloc.h"
 
+void buffer_runElementsMovedCallback(GBuffer* buf)
+{
+    if( buf->bufferElementsMovedCallback != NULL)
+    {
+        buf->bufferElementsMovedCallback(buf->bufferElementsMovedCallbackTarget);
+    }
+}
+
 // Allocs a GBuffer that will hold capacity amount of elements of elementSize.
 GBuffer buffer_create(GMemSize elementSize, GUInt capacity, bool isAutoResize)
 {
@@ -28,9 +36,14 @@ GBuffer buffer_create(GMemSize elementSize, GUInt capacity, bool isAutoResize)
     buf.isAutoResize = isAutoResize;
     buf.bufferResizeCallbackTarget = NULL;
     buf.bufferResizeCallback = NULL;
+    buf.bufferElementsMovedCallbackTarget = NULL;
+    buf.bufferElementsMovedCallback = NULL;
     buf.autoGrowAmount = 0;
     
     buf.count = 0;
+    
+    // Memset this friend.
+    glh_memset(buf.buffer, 0, buf.bufferSize);
     
     return buf;
 }
@@ -77,6 +90,7 @@ int buffer_remove(GBuffer* buf, GUInt index)
         {
             GMemSize size = buf->count - index;
             glh_memmove(buf->buffer + (buf->elementSize * index), buf->buffer + (buf->elementSize * (index + 1)), size);
+            buffer_runElementsMovedCallback(buf);
         }
         return --buf->count;
     }
@@ -95,6 +109,7 @@ int buffer_remove_range(GBuffer* buf, GUInt startIndex, GUInt endIndex)
         if(endIndex != (buf->count -1))
         {
             glh_memmove(buf->buffer + (buf->elementSize * startIndex),buf->buffer + buf->elementSize * (endIndex + 1), moveSize);
+            buffer_runElementsMovedCallback(buf);
         }
         buf->count-= amount;
         return buf->count;
@@ -199,6 +214,8 @@ void* buffer_makespace(GBuffer* buf, GUInt atIndex)
         //Make space for the element...
         GMemSize movesize = buf->count - atIndex;
         glh_memmove(buf->buffer + (buf->elementSize * (atIndex + 1)), buf->buffer + (buf->elementSize * atIndex),movesize * buf->elementSize);
+        glh_memset(buf->buffer + (buf->elementSize * atIndex), 0, atIndex);
+        buffer_runElementsMovedCallback(buf);
     }
     
     buf->count++;
@@ -207,12 +224,25 @@ void* buffer_makespace(GBuffer* buf, GUInt atIndex)
 }
 
 // Sets a callback for the buffer to call whenever it resizes.
-bool buffer_addresizecallback(GBuffer* buf, GBufferResizeCallback callback, void* target)
+bool buffer_addresizecallback(GBuffer* buf, GBufferCallback callback, void* target)
 {
     if( buf->bufferResizeCallback == NULL && buf->bufferResizeCallbackTarget == NULL)
     {
         buf->bufferResizeCallback = callback;
         buf->bufferResizeCallbackTarget = target;
+        return true;
+    }
+    
+    return false;
+}
+
+// Sets a callback for the buffer to call whenever the elements inside it are moved around.
+bool buffer_addelementsmovedcallback(GBuffer* buf, GBufferCallback callback, void* target)
+{
+    if( buf->bufferElementsMovedCallback == NULL && buf->bufferElementsMovedCallbackTarget == NULL)
+    {
+        buf->bufferElementsMovedCallback = callback;
+        buf->bufferElementsMovedCallbackTarget = target;
         return true;
     }
     

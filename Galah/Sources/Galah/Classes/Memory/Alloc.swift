@@ -1,4 +1,4 @@
-//---- Galah Engine---------------------------------------------------------//
+//---- Galah Engine --------------------------------------------------------//
 //
 // This source file is part of the Galah open source game engine. 
 //
@@ -35,9 +35,6 @@ internal func galah_placementNew(type: Any.Type, ptr: Ptr<VoidPtr>) throws -> An
     var md = ClassMetadata(type: type.self);
     let info = md.toTypeInfo();
     let metadata = unsafeBitCast(type.self, to: UnsafeRawPointer.self);
-
-    // Not sure we need this alignment stuff for now...
-    // let alignmentMask = Int32(md.pointer.pointee.instanceAlignmentMask)
 
     let value: UnsafeMutableRawPointer = ptr.raw!;
 

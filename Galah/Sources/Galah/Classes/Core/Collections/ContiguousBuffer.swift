@@ -24,11 +24,22 @@ public class RawBuffer
     fileprivate let type: Any.Type;
     fileprivate var buffer: GBuffer;
     
+    // Buffers sometimes autogrow and therefore all the pointers pointing to the buffer will go bad. Hook up to this to get notified when that happens.
     public let AutoGrowEvent = Event<RawBuffer>();
+    
+    // When an element is removed or inserted, the elements around it may have to be reshuffled. Therefore all the pointers pointing to the buffer will go bad. Hook up to this to get notified when that happens.
+    public let ElementsMovedEvent = Event<RawBuffer>();
+    
+    // The number of elements in the buffer.
     public var Count: Int { get { return Int(buffer.count); } };
+    
+    // The capacity of the buffer.
     public var Capacity: UInt { get { return UInt(buffer.capacity); } };
+    
+    // Whether the buffer full auto resize once it is at capacity.
     public var Mutable: Bool { get { return buffer.isAutoResize; } };
     
+    // Inits this buffer.
     public init(withInitialCapacity: Int, withType: Any.Type) throws
     {
         type = withType;
@@ -39,15 +50,9 @@ public class RawBuffer
         {
             throw ContiguousMutableBufferError.AllocError;
         }
-                
-        let callback : GBufferResizeCallback? =
-        { (target : UnsafeMutableRawPointer?) -> () in
-                
-            let swiftBuff: RawBuffer = Cast(target);
-            swiftBuff.BufferResized();
-        }
         
-        buffer_addresizecallback(&buffer, callback, Cast(self));
+        buffer_addresizecallback(&buffer, OnBufferResized, Cast(self));
+        buffer_addelementsmovedcallback(&buffer, OnBufferElementsMoved, Cast(self));
     }
     
     // Returns the type that this buffer stores.
@@ -140,9 +145,26 @@ public class RawBuffer
         buffer_free(&buffer);
     }
         
+    // Callback for when the C buffer resizes. 
     internal func BufferResized()
     {
         AutoGrowEvent.Broadcast(self);
+    }
+    
+    // Callback for when the C buffer moves elements around.
+    internal func BufferElementsMoved()
+    {
+        ElementsMovedEvent.Broadcast(self);
+    }
+    
+    // Runs the destructor for any object we're about to stomp on / delete.
+    private func ReleaseAtIndex(_ index: Int)
+    {
+        if(type is AnyObject)
+        {
+            let obj = buffer_get(&buffer, GUInt(index));
+            galah_runDestructor(obj: Cast(obj));
+        }
     }
     
     deinit
@@ -276,4 +298,16 @@ public enum ContiguousMutableBufferError: Error
 {
     case OutOfRange;
     case AllocError;
+}
+
+private func OnBufferResized(_ target: UnsafeMutableRawPointer?)
+{
+    let swiftBuff: RawBuffer = Cast(target);
+    swiftBuff.BufferResized();
+}
+
+private func OnBufferElementsMoved(_ target: UnsafeMutableRawPointer?)
+{
+    let swiftBuff: RawBuffer = Cast(target);
+    swiftBuff.BufferElementsMoved();
 }

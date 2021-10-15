@@ -19,7 +19,7 @@
 
 #include "GalahNative.h"
 
-typedef void (*GBufferResizeCallback)(void*);
+typedef void (*GBufferCallback)(void*);
 
 typedef struct
 {
@@ -30,7 +30,9 @@ typedef struct
     Buff* buffer;
     bool isAutoResize;
     void* bufferResizeCallbackTarget;
-    GBufferResizeCallback bufferResizeCallback;
+    GBufferCallback bufferResizeCallback;
+    void* bufferElementsMovedCallbackTarget;
+    GBufferCallback bufferElementsMovedCallback;
     
     //0 means the buffer will auto grow by just doubling its capacity, any other integer means the buffer will autoGrow by elementSize * the integer.
     GUInt autoGrowAmount;
@@ -76,7 +78,10 @@ GUInt buffer_get_autogrow_amount(GBuffer* buf);
 void* buffer_makespace(GBuffer* buf, GUInt atIndex);
 
 // Sets a callback for the buffer to call whenever it resizes. 
-bool buffer_addresizecallback(GBuffer* buf, GBufferResizeCallback callback, void* target);
+bool buffer_addresizecallback(GBuffer* buf, GBufferCallback callback, void* target);
+
+// Sets a callback for the buffer to call whenever the elements inside it are moved around. 
+bool buffer_addelementsmovedcallback(GBuffer* buf, GBufferCallback callback, void* target);
 
 // Attempts to free the buffer. Returns true if success.
 bool buffer_free(GBuffer* buf);

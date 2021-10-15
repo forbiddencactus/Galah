@@ -18,6 +18,9 @@
 // typealias this so we can potentially change the type easily if needed.
 internal typealias NodeIndex = GIndex;
 
+
+// NEW IDEA: contiguous buffers still, but this time only organised by 'tag'. There can be a tag for depth, material texture, whatever.
+
 // TODO: use the indices to pack a bitfield pointing directly to the data?
 // TODO: Rewrite this abomination in C, in Swift it's just horrendous and probably slow.
 /*internal class NodePool
