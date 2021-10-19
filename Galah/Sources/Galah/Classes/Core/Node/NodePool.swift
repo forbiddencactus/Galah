@@ -13,13 +13,39 @@
 // galah-engine.org | https://github.com/forbiddencactus/Galah
 //--------------------------------------------------------------------------//
 // NodePool is the class in charge of organising node batches to iterate over.
-// Inspired by: https://docs.rs/hecs/0.6.4/hecs/struct.Archetype.html
+// Inspired by all the various archetype based entity component systems.
 
-// typealias this so we can potentially change the type easily if needed.
-internal typealias NodeIndex = GIndex;
 
+// Index for Nodes. Used by handles. Inspo from: https://gamesfromwithin.com/managing-data-relationships
+internal struct NodeIndex
+{
+    internal var counter: UInt16; // The number of times this particular index has been reused.
+    internal var archetypeBufferIndex: UInt8 // Which buffer in the archetype this instance belongs to.
+    internal var archetypeIndex: UInt8; // Which archetype this instance belongs to.
+    internal var instanceIndex: UInt32; //The index of the instance, inside the buffer.
+    
+    init()
+    {
+        counter = UInt16.max;
+        archetypeBufferIndex = UInt8.max;
+        archetypeIndex = UInt8.max;
+        instanceIndex = UInt32.max;
+    }
+}
+
+public protocol NodePoolObject: AnyObject
+{
+    
+}
 
 // NEW IDEA: contiguous buffers still, but this time only organised by 'tag'. There can be a tag for depth, material texture, whatever.
+internal class NodePool
+{
+    internal func GetInstance<T>(handle: Hnd<T>) -> T?
+    {
+        return nil;
+    }
+}
 
 // TODO: use the indices to pack a bitfield pointing directly to the data?
 // TODO: Rewrite this abomination in C, in Swift it's just horrendous and probably slow.

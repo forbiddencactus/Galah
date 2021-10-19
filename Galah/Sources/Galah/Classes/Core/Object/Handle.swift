@@ -12,25 +12,26 @@
 //
 // galah-engine.org | https://github.com/forbiddencactus/Galah
 //--------------------------------------------------------------------------//
-// A 'smart pointer' that points to a GObject irregardless of where it gets shuffled to in memory.
+// A 'smart pointer' that points to an object irregardless of where it gets shuffled to in memory.
 
 import GalahNative.Types;
 
-public struct Hnd<T> where T: GObject
+public struct Hnd<T> where T: NodePoolObject
 {
-    private let index: GIndex;
-    private var currentFrameCache: GUShort;
-    private unowned(unsafe) var refCache: T?;
+    private let handleIndex: NodeIndex;
     
     public unowned(unsafe) var ref: T?
     {
-        mutating get
+        get
         {
-            if(Director.frameIndex != currentFrameCache)
-            {
-                refCache = GObjectTable.sharedInstance.GetObject(index) as! T?;
-            }
-            return refCache;
+            return nil;
         }
     }
+    
+    internal init(handleIndex: NodeIndex)
+    {
+        self.handleIndex = handleIndex;
+    }
 }
+
+

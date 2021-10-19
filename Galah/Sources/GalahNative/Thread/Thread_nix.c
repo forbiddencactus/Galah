@@ -15,7 +15,7 @@
 // PThread implementation for Galah. For the unix systems!
 
 #include "Thread/Thread.h"
-#include "Thread/Barrier.h"
+#include "Thread/Atomic.h"
 #include <pthread.h>
 #include <unistd.h>
 
@@ -39,8 +39,7 @@ void* glh_thread_rootthread(void* arg)
             thread->job = NULL;
             thread->jobArg = NULL;
             
-            //glh_fence_release();
-            thread->hasJob = false;
+            glh_atomic_set_bool(thread->hasJob, false);
         }
     }
         
@@ -71,19 +70,21 @@ int glh_thread_create(GThread* thread)
 // Sets the job to the specified thread and wakes the thread.
 bool glh_thread_setjob(GThread* thread, glh_thread_function job, void* jobArg)
 {
-    if(thread->nativethreadptr != NULL && !thread->hasJob && !thread->shouldExit)
+    if(thread->nativethreadptr != NULL && !thread->shouldExit)
     {
-        //glh_fence_release();
-        thread->hasJob = true;
-        
-        thread->job = job;
-        thread->jobArg = jobArg;
-        
-        // Wakey wakey.
-        // TODO: A job stack so we don't have to be waiting or sleeping the threads. 
-        pthread_kill(thread->nativethreadptr, SIGCONT);
-        
-        return true;
+       if(!glh_atomic_fetch_bool(thread->hasJob))
+       {
+            glh_atomic_set_bool(thread->hasJob, true);
+            
+            thread->job = job;
+            thread->jobArg = jobArg;
+            
+            // Wakey wakey.
+            // TODO: A job stack so we don't have to be waiting or sleeping the threads.
+            pthread_kill(thread->nativethreadptr, SIGCONT);
+            
+            return true;
+       }
     }
     
     return false;

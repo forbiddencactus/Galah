@@ -92,6 +92,7 @@ int buffer_remove(GBuffer* buf, GUInt index)
             glh_memmove(buf->buffer + (buf->elementSize * index), buf->buffer + (buf->elementSize * (index + 1)), size);
             buffer_runElementsMovedCallback(buf);
         }
+        glh_memset(buf + (buf->elementSize * (buf->count - 1)), 0, buf->elementSize);
         return --buf->count;
     }
     
@@ -137,7 +138,7 @@ bool buffer_grow(GBuffer* buf, GUInt newCapacity)
         return false;
     }
     
-    Buff* oldBuffer = buf->buffer;
+    GBuff* oldBuffer = buf->buffer;
     GMemSize newSize = buf->elementSize * newCapacity;
     buf->buffer = glh_malloc(newSize);
     

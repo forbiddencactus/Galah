@@ -14,12 +14,13 @@
 //--------------------------------------------------------------------------//
 // Pointer utilities.
 
-// Some useful links RE how Swift allocates heap memory:
+// Some useful links RE how Swift allocates memory:
 // https://github.com/apple/swift/blob/main/stdlib/public/runtime/HeapObject.cpp
 // https://github.com/apple/swift/blob/main/stdlib/public/runtime/Heap.cpp
 // https://github.com/apple/swift/blob/main/include/swift/Basic/Malloc.h
 // https://belkadan.com/blog/2020/08/Swift-Runtime-Heap-Objects/
 // https://swiftunboxed.com/internals/size-stride-alignment/
+// https://github.com/apple/swift/blob/main/docs/ABI/TypeLayout.rst
 
 import GalahNative.Memory;
 
@@ -124,44 +125,31 @@ public func GetPointer<T>(_ value: inout T) -> UnsafeMutableRawPointer
 // Gets the pointer to an object without retaining it.
 public func GetPointerFromObject(_ object: AnyObject) -> UnsafeMutableRawPointer
 {
-    let ret: UnsafeMutableRawPointer = Cast(object);
-    return ret;
-}
-
-// Gets the pointer to an object whilst retaining it.
-public func GetRetainedPointerFromObject(_ object: AnyObject) -> UnsafeMutableRawPointer
-{
-    return UnsafeMutableRawPointer(Unmanaged.passRetained(object).toOpaque());
+    return Cast(object);
 }
 
 // Gets an unretained ref to a pointer.
 public func GetRefFromPointer(_ pointer: UnsafeMutableRawPointer?) -> AnyObject?
 {
-    return unsafeBitCast(pointer, to: AnyObject.self)
+    return Cast(pointer);
 }
 
 // Gets an unretained ref to a pointer of type T.
 public func GetRefFromPointer<T>(_ pointer: UnsafeMutableRawPointer) ->T?
 {
-    return unsafeBitCast(pointer, to: T.self)
+    return Cast(pointer);
 }
 
 // Gets an unretained ref to a pointer of type T.
 public func GetRefFromPointer<T>(_ pointer: Ptr<T>) ->T?
 {
-    return unsafeBitCast(pointer.raw, to: T.self);
+    return Cast(pointer.raw);
 }
 
 // Gets an unretained ref to a pointer of type T.
 public func GetRefFromPointer<T>(_ pointer: Ptr<VoidPtr>) ->T?
 {
-    return unsafeBitCast(pointer.raw, to: T.self);
-}
-
-// Releases a pointer
-public func ReleasePointer(_ pointer: UnsafeMutableRawPointer)
-{
-    Unmanaged<AnyObject>.fromOpaque(pointer).release();
+    return Cast(pointer.raw);
 }
 
 // Casts the object into T

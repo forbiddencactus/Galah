@@ -102,6 +102,7 @@ public class RawBuffer
     {
         if (index < Count)
         {
+            self.ReleaseAtIndex(index);
             buffer_remove(&buffer, GUInt(index));
             return;
         }
@@ -112,6 +113,10 @@ public class RawBuffer
     // Clears the buffer.
     public func Clear()
     {
+        for i in 0..<Count
+        {
+            self.ReleaseAtIndex(i);
+        }
         buffer_remove_range(&buffer, 0, GUInt(Count - 1));
     }
         
@@ -157,14 +162,16 @@ public class RawBuffer
         ElementsMovedEvent.Broadcast(self);
     }
     
-    // Runs the destructor for any object we're about to stomp on / delete.
+    // Runs the destructor for any object we're about to stomp on / delete, so it can safely release any memory it's holding on to. 
     private func ReleaseAtIndex(_ index: Int)
     {
-        if(type is AnyObject)
+        if(type == AnyObject.self)
         {
             let obj = buffer_get(&buffer, GUInt(index));
             galah_runDestructor(obj: Cast(obj));
         }
+        
+        // TODO: structs! :D
     }
     
     deinit

@@ -14,8 +14,15 @@
 //--------------------------------------------------------------------------//
 // An object which is manually managed by the Galah engine. Base object for most Galah things.
 
+import GalahNative;
+
+internal typealias GIndex = UInt64;
+
 open class GObject
 {
+    private static var objectIndexCount: GVolatileUInt64 = 0;
+    internal var objectIndex: GIndex = GIndex.max;
+    
     public func OnConstruct() {}
     
     // Construct an instance of the specified GObject.
@@ -75,43 +82,22 @@ open class GObject
         return constr;
     }
         
-    // Call this to indicate to the object to no longer update its position with the object table.
-    internal func HasBeenCopied()
-    {
-        objectIndex = GIndex();
-    }
-    
-    // Call this after the object copy, on the object's copy, so that the object table is updated.
-    internal func IsCopied()
-    {
-        GObjectTable.sharedInstance.UpdateObject(index: objectIndex, reference: self);
-    }
-    
-    private var objectIndex: GIndex = GIndex();
-    //private var internallyConstructed: Bool = false;
     
     // BIG NOTE: Unfortunately I couldn't (yet) figure out a way to run init() using our custom allocation stuff.
     private init() throws
     {
-        // Don't think the internal constructed stuff is even needed.
-       // if(internallyConstructed != true)
-        //{
-            // GObjects are manually managed by the engine. You can't construct them yourself!
-            throw GObjectError.NotProperlyConstructed;
-        //}
+        throw GObjectError.NotProperlyConstructed;
     }
     
     private func internalConstructor()
     {
-        objectIndex = GObjectTable.sharedInstance.GetNewGIndex();
-        GObjectTable.sharedInstance.UpdateObject(index: objectIndex, reference: self);
+        objectIndex = glh_atomic_add_uint64(&GObject.objectIndexCount, 1);
         
         self.OnConstruct();
     }
     
     deinit
     {
-        GObjectTable.sharedInstance.RemoveObject(objectIndex);
     }
 }
 

@@ -20,6 +20,7 @@
 #include "GalahNative.h"
 
 typedef void (*GBufferCallback)(void*);
+typedef void GBuff;
 
 typedef struct
 {
@@ -27,7 +28,7 @@ typedef struct
     GMemSize bufferSize;
     GUInt count;
     GUInt capacity;
-    Buff* buffer;
+    GBuff* buffer;
     bool isAutoResize;
     void* bufferResizeCallbackTarget;
     GBufferCallback bufferResizeCallback;

@@ -17,9 +17,20 @@
 #ifndef GalahTypes_h
 #define GalahTypes_h
 
-typedef void Buff;
+#include <stdint.h>
+
 typedef size_t GMemSize;
+
+// Integers...
 typedef uint GUInt;
 typedef ushort GUShort;
+typedef uint8_t GUInt8;
+typedef uint16_t GUInt16;
+typedef uint32_t GUInt32;
+typedef uint64_t GUInt64;
+
+// Volatile types...
+typedef volatile bool GVolatileBool;
+typedef volatile GUInt64 GVolatileUInt64;
 
 #endif

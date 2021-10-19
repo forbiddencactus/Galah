@@ -23,10 +23,10 @@ typedef void (*glh_thread_function)(void*);
 typedef struct
 {
     void* nativethreadptr;
-    bool hasJob;
-    glh_thread_function job;
     void* jobArg;
-    bool shouldExit;
+    glh_thread_function job;
+    GVolatileBool hasJob;
+    GVolatileBool shouldExit;
 } GThread;
 
 /*
