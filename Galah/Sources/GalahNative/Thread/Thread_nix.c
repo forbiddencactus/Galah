@@ -72,10 +72,9 @@ bool glh_thread_setjob(GThread* thread, glh_thread_function job, void* jobArg)
 {
     if(thread->nativethreadptr != NULL && !thread->shouldExit)
     {
-       if(!glh_atomic_fetch_bool(thread->hasJob))
+        
+       if(glh_compare_and_swap_bool(thread->hasJob, false, true))
        {
-            glh_atomic_set_bool(thread->hasJob, true);
-            
             thread->job = job;
             thread->jobArg = jobArg;
             
