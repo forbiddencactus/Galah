@@ -19,7 +19,8 @@ import GalahNative.Memory;
 import GalahNative.Settings;
 
 // Mutable by default.
-public class RawBuffer
+// TODO: need to implement copy on write for this, as well as for the Events, like Swift arrays. 
+public struct RawBuffer
 {
     fileprivate let type: Any.Type;
     fileprivate var buffer: GBuffer;
@@ -51,8 +52,8 @@ public class RawBuffer
             throw ContiguousMutableBufferError.AllocError;
         }
         
-        buffer_addresizecallback(&buffer, OnBufferResized, Cast(self));
-        buffer_addelementsmovedcallback(&buffer, OnBufferElementsMoved, Cast(self));
+        //buffer_addresizecallback(&buffer, OnBufferResized, Cast(self));
+        //buffer_addelementsmovedcallback(&buffer, OnBufferElementsMoved, Cast(self));
     }
     
     // Returns the type that this buffer stores.
@@ -66,14 +67,15 @@ public class RawBuffer
     {
         if (index < Count)
         {
-            return Ptr<VoidPtr>(buffer_get(&buffer, GUInt(index)));
+            var buf = buffer; // work around Swift's silly restrictions.
+            return Ptr<VoidPtr>(buffer_get(&buf, GUInt(index)));
         }
            
         throw ContiguousMutableBufferError.OutOfRange;
     }
        
     // Memcopies the specified pointer, by the size of the type of the buffer, into the end of the buffer. Auto grows. 
-    public func AddPtr(_ ptr: Ptr<VoidPtr>) throws -> Int
+    public mutating func AddPtr(_ ptr: Ptr<VoidPtr>) throws -> Int
     {
         if(buffer_add(&buffer, ptr.raw) == -1)
         {
@@ -84,7 +86,7 @@ public class RawBuffer
     }
      
     // Makes space for the element at index (by pushing existing elements further back), then Memcopies the specified pointer, by the size of the type of the buffer, into the end of the buffer. Auto grows.
-    public func InsertPtr(_ index: Int, _ ptr: Ptr<VoidPtr>) throws
+    public mutating func InsertPtr(_ index: Int, _ ptr: Ptr<VoidPtr>) throws
     {
         if (index >= Count)
         {
@@ -98,7 +100,7 @@ public class RawBuffer
     }
     
     // Removes the specified element from the buffer, and moves the leftover elements so there's no gaps.
-    public func Remove(_ index: Int) throws
+    public mutating func Remove(_ index: Int) throws
     {
         if (index < Count)
         {
@@ -111,7 +113,7 @@ public class RawBuffer
     }
     
     // Clears the buffer.
-    public func Clear()
+    public mutating func Clear()
     {
         for i in 0..<Count
         {
@@ -121,7 +123,7 @@ public class RawBuffer
     }
         
     // Makes space for an element at index, returns the pointer to that empty space.
-    public func MakeSpace(_ index: Int) throws -> Ptr<VoidPtr>
+    public mutating func MakeSpace(_ index: Int) throws -> Ptr<VoidPtr>
     {
         if (index <= Count)
         {
@@ -133,19 +135,19 @@ public class RawBuffer
     }
     
     // Sets whether the buffer should autoresize.
-    public func SetShouldAutoResize(_ shouldAutoResize: Bool)
+    public mutating func SetShouldAutoResize(_ shouldAutoResize: Bool)
     {
         buffer_set_shouldautoresize(&buffer, shouldAutoResize);
     }
     
     // Sets the autoresize amount for the buffer, e.g, by how much should its capacity increase. The default (0) is its capacity will double.
-    public func SetAutoResizeAmount(_ autoResizeAmount: UInt)
+    public mutating func SetAutoResizeAmount(_ autoResizeAmount: UInt)
     {
         buffer_set_autogrow_amount(&buffer, GUInt(autoResizeAmount));
     }
     
     // Manually deallocs the buffer. This buffer won't work anymore afterwards.
-    public func DeallocBuffer()
+    public mutating func DeallocBuffer()
     {
         buffer_free(&buffer);
     }
@@ -163,7 +165,7 @@ public class RawBuffer
     }
     
     // Runs the destructor for any object we're about to stomp on / delete, so it can safely release any memory it's holding on to. 
-    private func ReleaseAtIndex(_ index: Int)
+    private mutating func ReleaseAtIndex(_ index: Int)
     {
         if(type == AnyObject.self)
         {
@@ -173,34 +175,46 @@ public class RawBuffer
         
         // TODO: structs! :D
     }
-    
-    deinit
-    {
-        buffer_free(&buffer);
-    }
 }
 
-public class Buffer<T>: RawBuffer, Sequence
+public struct Buffer<T>: Sequence
 {
+    private var internalBuffer: RawBuffer;
+    
+    // Buffers sometimes autogrow and therefore all the pointers pointing to the buffer will go bad. Hook up to this to get notified when that happens.
+    public var AutoGrowEvent: Event<RawBuffer> { get { return internalBuffer.AutoGrowEvent; } }
+    
+    // When an element is removed or inserted, the elements around it may have to be reshuffled. Therefore all the pointers pointing to the buffer will go bad. Hook up to this to get notified when that happens.
+    public var ElementsMovedEvent: Event<RawBuffer> { get { return internalBuffer.ElementsMovedEvent; } }
+    
+    // The number of elements in the buffer.
+    public var Count: Int { get { return internalBuffer.Count; } };
+    
+    // The capacity of the buffer.
+    public var Capacity: UInt { get { return internalBuffer.Capacity; } };
+    
+    // Whether the buffer full auto resize once it is at capacity.
+    public var Mutable: Bool { get { return internalBuffer.Mutable; } };
+    
     public init(withInitialCapacity: Int = Int(GSETTINGS_CONSTANTS_DEFAULTBUFFERCAPACITY), withType: T.Type = T.self) throws
     {
-        try super.init(withInitialCapacity: withInitialCapacity, withType: withType);
+         internalBuffer = try RawBuffer.init(withInitialCapacity: withInitialCapacity, withType: withType);
     }
         
     public func ItemAt(_ index: Int) throws -> T?
     {
-        return try GetRefFromPointer(super.PtrAt(index));
+        return try GetRefFromPointer(internalBuffer.PtrAt(index));
     }
       
     @discardableResult
-    public func Add(_ element: inout T) throws -> Int
+    public mutating func Add(_ element: inout T) throws -> Int
     {
-        return try super.AddPtr(Ptr<VoidPtr>(&element));
+        return try internalBuffer.AddPtr(Ptr<VoidPtr>(&element));
     }
        
-    public func Insert(_ index: Int, _ element: inout T) throws
+    public mutating func Insert(_ index: Int, _ element: inout T) throws
     {
-        try super.InsertPtr(index, Ptr<VoidPtr>(&element));
+        try internalBuffer.InsertPtr(index, Ptr<VoidPtr>(&element));
     }
        
     // Sequence protocol:
@@ -210,26 +224,43 @@ public class Buffer<T>: RawBuffer, Sequence
     }
 }
 
-public class RefBuffer<T>: RawBuffer, Sequence where T: GObject
+public struct RefBuffer<T>: Sequence where T: GObject
 {
+    private var internalBuffer: RawBuffer;
+    
+    // Buffers sometimes autogrow and therefore all the pointers pointing to the buffer will go bad. Hook up to this to get notified when that happens.
+    public var AutoGrowEvent: Event<RawBuffer> { get { return internalBuffer.AutoGrowEvent; } }
+    
+    // When an element is removed or inserted, the elements around it may have to be reshuffled. Therefore all the pointers pointing to the buffer will go bad. Hook up to this to get notified when that happens.
+    public var ElementsMovedEvent: Event<RawBuffer> { get { return internalBuffer.ElementsMovedEvent; } }
+    
+    // The number of elements in the buffer.
+    public var Count: Int { get { return internalBuffer.Count; } };
+    
+    // The capacity of the buffer.
+    public var Capacity: UInt { get { return internalBuffer.Capacity; } };
+    
+    // Whether the buffer full auto resize once it is at capacity.
+    public var Mutable: Bool { get { return internalBuffer.Mutable; } };
+
     public init(withInitialCapacity: Int = Int(GSETTINGS_CONSTANTS_DEFAULTBUFFERCAPACITY), withType: T.Type = T.self) throws
     {
-        try super.init(withInitialCapacity: withInitialCapacity, withType: withType);
+        internalBuffer = try RawBuffer.init(withInitialCapacity: withInitialCapacity, withType: withType);
     }
         
-    internal func ItemAt(_ index: Int) throws -> Ref<T>
+    public func ItemAt(_ index: Int) throws -> Ref<T>
     {
-        return try Ref<T>(super.PtrAt(index));
+        return try Ref<T>(internalBuffer.PtrAt(index));
     }
        
-    internal func Add(_ element: inout Ref<T>) throws -> Int
+    public mutating func Add(_ element: inout Ref<T>) throws -> Int
     {
-        return try super.AddPtr(Ptr<VoidPtr>(&element._ref));
+        return try internalBuffer.AddPtr(Ptr<VoidPtr>(&element._ref));
     }
        
-    internal func Insert(_ index: Int, _ element: inout Ref<T>) throws
+    public mutating func Insert(_ index: Int, _ element: inout Ref<T>) throws
     {
-        try super.InsertPtr(index, Ptr<VoidPtr>(&element._ref));
+        try internalBuffer.InsertPtr(index, Ptr<VoidPtr>(&element._ref));
     }
        
     // Sequence protocol:

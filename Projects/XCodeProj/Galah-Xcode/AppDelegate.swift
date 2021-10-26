@@ -8,6 +8,20 @@
 import Cocoa
 import Galah;
 
+public class Deinit
+{
+    deinit
+    {
+        // This shouldn't run.
+        print("It deinit!");
+    }
+}
+
+public struct Test
+{
+    let theDeinit = Deinit();
+}
+
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
     
@@ -17,6 +31,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     {
         let extents = ExtentsOf(GObject.self);
         print(extents);
+        
+        var doTest = Test();
+        var buf = try! Buffer<Test>();
+        try! buf.Add(doTest);
+        // I don't want ARC to release the reference to theDeinit here because buf now has a copy of doTest. 
     }
 
     func applicationWillTerminate(_ aNotification: Notification) {

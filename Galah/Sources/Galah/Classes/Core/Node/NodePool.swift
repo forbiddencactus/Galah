@@ -35,13 +35,24 @@ internal struct NodeIndex
 
 public protocol NodePoolObject: AnyObject {}
 
-internal class NodeArchetype: GObject
+/*internal class NodeArchetype: GObject
 {
-    internal var ComponentTypes: Dictionary<HashableType<Component>, Int>;
-    internal var ComponentTypeArray: Array<HashableType<Component>>;
-    internal var ArchetypeTags: Dictionary<HashableType<Component>, String>;
-    internal var Depth: Int;
-}
+    internal var ComponentTypes = Dictionary<HashableType<Component>, Int>();
+    internal var ComponentTypeArray = Array<HashableType<Component>>();
+    internal var ArchetypeTags = Dictionary<HashableType<Component>, String>();
+    internal var Depth: Int = 0;
+    internal var Tag: String = "NULL";
+    
+    internal var Nodes = try! Buffer<Node>();
+    internal var Components = ContiguousDictionary<HashableType<Component>,Buffer<Component>>();
+    
+    @discardableResult
+    public static func ConstructArchetype(nodeForArchetype: Node, constructAt: Ptr<NodeArchetype>) -> NodeArchetype
+    {
+        
+    }
+    
+}*/
 
 // NEW IDEA: contiguous buffers still, but this time only organised by 'tag'. There can be a tag for depth, material texture, whatever.
 internal class NodePool

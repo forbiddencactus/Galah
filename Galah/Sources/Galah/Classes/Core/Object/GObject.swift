@@ -55,11 +55,13 @@ open class GObject
             return nil;
         }
         
-        retainObject(constr);
+        //Don't retain for objects we're not placement new'ing.
+        //retainObject(constr);
                 
         return constr;
     }
     
+    // This type of placement new will increase the ref count by 1 because we're assuming this will be placed in a contiguous buffer or something like that. 
     @discardableResult
     internal static func Construct(type: GObject.Type, ptr: Ptr<VoidPtr>) -> GObject?
     {

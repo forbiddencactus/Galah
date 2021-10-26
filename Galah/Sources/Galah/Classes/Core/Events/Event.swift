@@ -14,7 +14,7 @@
 //--------------------------------------------------------------------------//
 // A simple event class.
 
-public struct Event<T>
+public struct Event<Sender>
 {
     private struct Subscriber<S>
     {
@@ -22,12 +22,12 @@ public struct Event<T>
         public let callback: (S) -> ();
     }
 
-    private var subscribers = Dictionary<HashableRef<AnyObject>, Subscriber<T>>();
+    private var subscribers = Dictionary<HashableRef<AnyObject>, Subscriber<Sender>>();
     
-    public func Subscribe(_ subscriber: AnyObject, _ callback: @escaping (T) -> ())
+    public func Subscribe(_ subscriber: AnyObject, _ callback: @escaping (Sender) -> ())
     {
         var theSelf = self;
-        theSelf.subscribers[subscriber] = Subscriber<T>(subscriber: subscriber, callback: callback);
+        theSelf.subscribers[subscriber] = Subscriber<Sender>(subscriber: subscriber, callback: callback);
     }
     
     public func Unsubscribe(_ subscriber: AnyObject)
@@ -36,7 +36,7 @@ public struct Event<T>
         theSelf.subscribers.removeValue(forKey: HashableRef<AnyObject>(subscriber));
     }
     
-    public func Broadcast(_ input: T)
+    public func Broadcast(_ input: Sender)
     {
         for theSubscriber in subscribers.values
         {

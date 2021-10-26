@@ -26,7 +26,7 @@ fileprivate struct Bucket
     }
 }
 
-public class ContiguousDictionary<Key: Hashable, Value>
+/*public struct ContiguousDictionary<Key: Hashable, Value>
 {
     // Split the buffers to achieve better cache efficiency.
     private var _keyBuffer: Buffer<Key>;
@@ -46,7 +46,7 @@ public class ContiguousDictionary<Key: Hashable, Value>
         _keyBuffer.AutoGrowEvent.Subscribe(self, self.KeyBufferDidResize);
     }
     
-    public func AddKey(_ key: inout Key, _ value: inout Value)
+    public mutating func AddKey(_ key: inout Key, _ value: inout Value)
     {
         let keyIndex = self.GetIndexForKey(key)
         if(keyIndex == -1)
@@ -60,7 +60,7 @@ public class ContiguousDictionary<Key: Hashable, Value>
         }
     }
     
-    public func RemoveKey(_ key: Key)
+    public mutating func RemoveKey(_ key: Key)
     {
         let index = GetIndexForKey(key);
         try! _keyBuffer.Remove(index);
@@ -80,7 +80,7 @@ public class ContiguousDictionary<Key: Hashable, Value>
     }
     
     // TODO: See how fast this is.
-    public func GetIndexForKey(_ key: Key) -> Int
+    public mutating func GetIndexForKey(_ key: Key) -> Int
     {
         let bucketIndex: Int = GetBucketIndex(key);
 
@@ -105,7 +105,7 @@ public class ContiguousDictionary<Key: Hashable, Value>
     }
     
     // TODO: Make this faster.
-    private func RefreshBuckets()
+    private mutating func RefreshBuckets()
     {
         _bucketArray = Array<Bucket>(repeating:Bucket(), count: Int(_keyBuffer.Capacity));
 
@@ -118,8 +118,9 @@ public class ContiguousDictionary<Key: Hashable, Value>
         }
     }
     
-    private func KeyBufferDidResize(_ buffer: RawBuffer)
+    private mutating func KeyBufferDidResize(_ buffer: RawBuffer)
     {
         self.RefreshBuckets();
     }
 }
+*/
