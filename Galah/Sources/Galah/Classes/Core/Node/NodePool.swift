@@ -33,9 +33,14 @@ internal struct NodeIndex
     }
 }
 
-public protocol NodePoolObject: AnyObject
+public protocol NodePoolObject: AnyObject {}
+
+internal class NodeArchetype: GObject
 {
-    
+    internal var ComponentTypes: Dictionary<HashableType<Component>, Int>;
+    internal var ComponentTypeArray: Array<HashableType<Component>>;
+    internal var ArchetypeTags: Dictionary<HashableType<Component>, String>;
+    internal var Depth: Int;
 }
 
 // NEW IDEA: contiguous buffers still, but this time only organised by 'tag'. There can be a tag for depth, material texture, whatever.
@@ -45,6 +50,8 @@ internal class NodePool
     {
         return nil;
     }
+    
+
 }
 
 // TODO: use the indices to pack a bitfield pointing directly to the data?
