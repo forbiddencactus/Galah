@@ -14,7 +14,7 @@
 //--------------------------------------------------------------------------//
 // A contiguous buffer allocated on the heap containing elements of a particular type.
 
-
+import Swift;
 import GalahNative.Memory;
 import GalahNative.Settings;
 
@@ -73,20 +73,42 @@ public struct RawBuffer
            
         throw ContiguousMutableBufferError.OutOfRange;
     }
-       
+    
+    // Makes space for the element at index (by pushing existing elements further back), then Memcopies the specified pointer, by the size of the type of the buffer, into the end of the buffer. Auto grows.
+    public mutating func Add<T>(_ obj: T) throws -> Int
+    {
+        var mutate = obj;
+        return try self.Add(&mutate);
+    }
+    
+    // Makes space for the element at index (by pushing existing elements further back), then Memcopies the specified pointer, by the size of the type of the buffer, into the end of the buffer. Auto grows.
+    public mutating func Add(_ obj: UnsafeRawPointer) throws -> Int
+    {
+        if(buffer_add(&buffer, obj) == -1)
+        {
+            throw ContiguousMutableBufferError.AllocError;
+        }
+        
+        let index = Count - 1;
+        RetainAtIndex(index);
+        return index;
+    }
+    
     // Memcopies the specified pointer, by the size of the type of the buffer, into the end of the buffer. Auto grows. 
-    public mutating func AddPtr(_ ptr: Ptr<VoidPtr>) throws -> Int
+    public mutating func Add(_ ptr: Ptr<VoidPtr>) throws -> Int
     {
         if(buffer_add(&buffer, ptr.raw) == -1)
         {
             throw ContiguousMutableBufferError.AllocError;
         }
         
-        return Count - 1;
+        let index = Count - 1;
+        RetainAtIndex(index);
+        return index;
     }
      
     // Makes space for the element at index (by pushing existing elements further back), then Memcopies the specified pointer, by the size of the type of the buffer, into the end of the buffer. Auto grows.
-    public mutating func InsertPtr(_ index: Int, _ ptr: Ptr<VoidPtr>) throws
+    public mutating func Insert(_ index: Int, _ ptr: Ptr<VoidPtr>) throws
     {
         if (index >= Count)
         {
@@ -97,6 +119,8 @@ public struct RawBuffer
         {
             throw ContiguousMutableBufferError.AllocError;
         }
+        
+        RetainAtIndex(index);
     }
     
     // Removes the specified element from the buffer, and moves the leftover elements so there's no gaps.
@@ -164,6 +188,15 @@ public struct RawBuffer
         ElementsMovedEvent.Broadcast(self);
     }
     
+    private mutating func RetainAtIndex(_ index: Int)
+    {
+        if(type != AnyObject.self)
+        {
+            let obj = buffer_get(&buffer, GUInt(index));
+        }
+
+    }
+    
     // Runs the destructor for any object we're about to stomp on / delete, so it can safely release any memory it's holding on to. 
     private mutating func ReleaseAtIndex(_ index: Int)
     {
@@ -207,14 +240,14 @@ public struct Buffer<T>: Sequence
     }
       
     @discardableResult
-    public mutating func Add(_ element: inout T) throws -> Int
+    public mutating func Add(_ element: T) throws -> Int
     {
-        return try internalBuffer.AddPtr(Ptr<VoidPtr>(&element));
+        return try internalBuffer.Add(element);
     }
        
     public mutating func Insert(_ index: Int, _ element: inout T) throws
     {
-        try internalBuffer.InsertPtr(index, Ptr<VoidPtr>(&element));
+        try internalBuffer.Insert(index, Ptr<VoidPtr>(&element));
     }
        
     // Sequence protocol:
@@ -255,12 +288,12 @@ public struct RefBuffer<T>: Sequence where T: GObject
        
     public mutating func Add(_ element: inout Ref<T>) throws -> Int
     {
-        return try internalBuffer.AddPtr(Ptr<VoidPtr>(&element._ref));
+        return try internalBuffer.Add(element._ref);
     }
        
     public mutating func Insert(_ index: Int, _ element: inout Ref<T>) throws
     {
-        try internalBuffer.InsertPtr(index, Ptr<VoidPtr>(&element._ref));
+        try internalBuffer.Insert(index, Ptr<VoidPtr>(&element._ref));
     }
        
     // Sequence protocol:

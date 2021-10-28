@@ -17,7 +17,7 @@
 
 open class MObject
 {
-    public func OnConstruct() {}
+    open func OnConstruct() {}
     
     // Construct an instance of the specified MObject.
     public static func Construct<T>() -> T? where T: MObject
@@ -48,7 +48,7 @@ open class MObject
             return nil;
         }
         
-        retainObject(constr);
+        //retainObject(constr);
                 
         return constr;
     }
@@ -69,7 +69,7 @@ open class MObject
             return nil;
         }
         
-        retainObject(constr);
+       // retainObject(constr);
                 
         return constr;
     }

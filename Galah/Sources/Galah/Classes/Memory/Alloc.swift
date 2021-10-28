@@ -46,7 +46,7 @@ internal func galah_placementNew(type: Any.Type, ptr: Ptr<VoidPtr>) throws -> An
 
 public func galah_runDestructor(obj: AnyObject)
 {
-    let md = ClassMetadata(pointer: Cast(obj));
+    let md = ClassMetadata(type: type(of: obj));
 
     let rawObjectRef = unsafeBitCast(obj, to: UnsafeMutableRawPointer.self);
     let rawDestructor = unsafeBitCast(md.destructor, to: UnsafeMutablePointer<UnsafeMutableRawPointer?>?.self);

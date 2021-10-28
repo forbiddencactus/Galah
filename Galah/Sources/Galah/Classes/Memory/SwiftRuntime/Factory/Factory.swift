@@ -76,10 +76,10 @@ func buildClass(type: Any.Type) throws -> AnyObject {
     return unsafeBitCast(value, to: AnyObject.self)
 }
 
-func setProperties(typeInfo: TypeInfo,
-                   pointer: UnsafeMutableRawPointer,
-                   constructor: ((PropertyInfo) throws -> Any)? = nil) throws {
-    for property in typeInfo.properties {
+func setProperties(typeInfo: TypeInfo, pointer: UnsafeMutableRawPointer, constructor: ((PropertyInfo) throws -> Any)? = nil) throws
+{
+    for property in typeInfo.properties
+    {
         let value = try constructor.map { (resolver) -> Any in
             return try resolver(property)
         } ?? defaultValue(of: property.type)

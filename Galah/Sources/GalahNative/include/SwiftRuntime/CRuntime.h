@@ -28,4 +28,8 @@ const void * _Nullable swift_allocObject(
                     int requiredSize,
                     int requiredAlignmentMask);
 
+void* swift_retain(void* object);
+void swift_release(void* object);
+
+
 #endif /* File_h */
