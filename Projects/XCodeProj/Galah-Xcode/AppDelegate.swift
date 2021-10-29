@@ -53,14 +53,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let extents = ExtentsOf(GObject.self);
         print(extents);
         
-        //let doTest = Test();
-        //var buf = try! Buffer<Test>();
-        //try! buf.Add(doTest);
+        var doTest = Test();
+        // var buf = try! Buffer<Test>();
+       // try! buf.Add(doTest);
+        var buf = try! RawBuffer(withInitialCapacity: 16, withType: Test.self);
+        let space = try! buf.MakeSpace(0);
+        let source = Ptr<VoidPtr>(&doTest);
+        galah_copyValue(dest: space, source: source, type: Test.self);
         
-        var buf = try! RawBuffer(withInitialCapacity: 16, withType: Deinit2.self);
+        /*var buf = try! RawBuffer(withInitialCapacity: 16, withType: Deinit2.self);
         let obj = try! MObject.Construct(type: Deinit2.self, ptr: buf.MakeSpace(0));
         var ptr = Unmanaged.passUnretained(obj!);
-        ptr.release();
+        ptr.release();*/
         //setObjectRetain(obj!, 1);
         // I don't want ARC to release the reference to theDeinit here because buf now has a copy of doTest. 
     }

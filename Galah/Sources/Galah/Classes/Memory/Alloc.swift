@@ -44,6 +44,17 @@ internal func galah_placementNew(type: Any.Type, ptr: Ptr<VoidPtr>) throws -> An
     return unsafeBitCast(value, to: AnyObject.self);
 }
 
+public func galah_copyValue(dest: Ptr<VoidPtr>, source: Ptr<VoidPtr>, type: Any.Type)
+{
+    let typeMetadata = try! metadata(of: type);
+    
+    if(typeMetadata.kind == .struct)
+    {
+        let structMeta: StructMetadata = StructMetadata(type: type);
+        structMeta.valueWitnessTable.pointee.assignWithCopy(dest.raw!, source.raw!, structMeta.pointer);
+    }
+}
+
 public func galah_runDestructor(obj: AnyObject)
 {
     let md = ClassMetadata(type: type(of: obj));

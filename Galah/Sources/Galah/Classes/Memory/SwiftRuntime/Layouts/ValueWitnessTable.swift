@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-struct ValueWitnessTable {
+/*struct ValueWitnessTable {
     var initializeBufferWithCopyOfBuffer: UnsafeRawPointer
     var destroy: UnsafeRawPointer
     var initializeWithCopy: UnsafeRawPointer
@@ -29,6 +29,21 @@ struct ValueWitnessTable {
     var assignWithTake: UnsafeRawPointer
     var getEnumTagSinglePayload: UnsafeRawPointer
     var storeEnumTagSinglePayload: UnsafeRawPointer
+    var size: Int
+    var stride: Int
+    var flags: Int
+}*/
+
+struct ValueWitnessTable
+{
+    var initializeBufferWithCopyOfBuffer: @convention(c) (UnsafeMutableRawPointer, UnsafeRawPointer, UnsafeRawPointer) -> UnsafeMutableRawPointer;
+    var destroy: @convention(c) (UnsafeMutableRawPointer, UnsafeRawPointer) -> Void;
+    var initializeWithCopy: @convention(c) (UnsafeMutableRawPointer, UnsafeRawPointer, UnsafeRawPointer) -> UnsafeMutableRawPointer;
+    var assignWithCopy: @convention(c) (UnsafeMutableRawPointer, UnsafeRawPointer, UnsafeRawPointer) -> UnsafeMutableRawPointer;
+    var initializeWithTake: @convention(c) (UnsafeMutableRawPointer, UnsafeMutableRawPointer, UnsafeRawPointer) -> UnsafeMutableRawPointer;
+    var assignWithTake: @convention(c) (UnsafeMutableRawPointer, UnsafeMutableRawPointer, UnsafeRawPointer) -> UnsafeMutableRawPointer;
+    var getEnumTagSinglePayload: @convention(c) (UnsafeRawPointer, UInt32, UnsafeRawPointer) -> UInt32;
+    var storeEnumTagSinglePayload: @convention(c) (UnsafeMutableRawPointer, UInt32, UInt32, UnsafeRawPointer) -> Void;
     var size: Int
     var stride: Int
     var flags: Int
@@ -43,3 +58,5 @@ struct ValueWitnessFlags {
     static let isNonBitwiseTakable = 0x00100000
     static let hasEnumWitnesses = 0x00200000
 }
+
+

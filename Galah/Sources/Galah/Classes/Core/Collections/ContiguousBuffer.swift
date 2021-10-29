@@ -75,7 +75,7 @@ public struct RawBuffer
     }
     
     // Makes space for the element at index (by pushing existing elements further back), then Memcopies the specified pointer, by the size of the type of the buffer, into the end of the buffer. Auto grows.
-    public mutating func Add<T>(_ obj: T) throws -> Int
+    public mutating func Add<T>(_ obj: __owned T) throws -> Int
     {
         var mutate = obj;
         return try self.Add(&mutate);
@@ -240,7 +240,7 @@ public struct Buffer<T>: Sequence
     }
       
     @discardableResult
-    public mutating func Add(_ element: T) throws -> Int
+    public mutating func Add(_ element: __owned T) throws -> Int
     {
         return try internalBuffer.Add(element);
     }
