@@ -24,12 +24,8 @@ public class Deinit
 
 public class Deinit2: MObject
 {
+    let test = "Hihi";
     var firstClass = Deinit();
-    
-    open override func OnConstruct()
-    {
-        //firstClass = Deinit();
-    }
     
     deinit
     {
@@ -39,6 +35,7 @@ public class Deinit2: MObject
 
 public struct Test
 {
+    let test = "Hihi";
     let theDeinit = Deinit();
 }
 
@@ -53,18 +50,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let extents = ExtentsOf(GObject.self);
         print(extents);
         
-        var doTest = Test();
+        // Verified this seems to work!!
+        /*var doTest = Test();
         // var buf = try! Buffer<Test>();
        // try! buf.Add(doTest);
         var buf = try! RawBuffer(withInitialCapacity: 16, withType: Test.self);
         let space = try! buf.MakeSpace(0);
         let source = Ptr<VoidPtr>(&doTest);
         galah_copyValue(dest: space, source: source, type: Test.self);
+        */
         
-        /*var buf = try! RawBuffer(withInitialCapacity: 16, withType: Deinit2.self);
+        var buf = try! RawBuffer(withInitialCapacity: 16, withType: Deinit2.self);
         let obj = try! MObject.Construct(type: Deinit2.self, ptr: buf.MakeSpace(0));
-        var ptr = Unmanaged.passUnretained(obj!);
-        ptr.release();*/
+        //var ptr = Unmanaged.passUnretained(obj!);
+        //ptr.release();
         //setObjectRetain(obj!, 1);
         // I don't want ARC to release the reference to theDeinit here because buf now has a copy of doTest. 
     }

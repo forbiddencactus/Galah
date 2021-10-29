@@ -14,18 +14,17 @@
 //--------------------------------------------------------------------------//
 // A manually allocated object. Yours to go nuts with.
 
+import GalahNative;
 
 open class MObject
 {
-    open func OnConstruct() {}
-    
     // Construct an instance of the specified MObject.
     public static func Construct<T>() -> T? where T: MObject
     {
         return MObject.Construct(type: T.self) as? T;
     }
     
-    // Construct into the specified pointer.
+    // Construct the specified MObject into the specified pointer. This object's retain count will be increased by 1.
     @discardableResult
     public static func Construct<T>(_ ptr: Ptr<T>) -> T? where T: MObject
     {
@@ -34,32 +33,21 @@ open class MObject
     
     public static func Construct(type: MObject.Type) -> MObject?
     {
-        let constr: MObject;
-
-        do
-        {
-            constr = try unsafeBitCast(buildClass(type: type), to: MObject.self);
-            
-            // run our fake init
-            constr.internalConstructor();
-        }
-        catch
-        {
-            return nil;
-        }
-        
-        //retainObject(constr);
-                
+        let constr = type.init();
         return constr;
     }
     
+    // Construct into the specified pointer. This object's retain count will be increased by 1.
     @discardableResult
     public static func Construct(type: MObject.Type, ptr: Ptr<VoidPtr>) -> MObject?
     {
-        let constr: MObject;
-        do
+        // I couldn't figure out how to get placement new working without a copy like the one that's happening here.
+        // galah_placementNew lays out the instance just fine, but I haven't figured out how to run the initialiser for it. :P
+        // So we'll just have to live with this less than ideal method for now.
+       /* do
         {
-            constr = try unsafeBitCast(galah_placementNew(type: type, ptr: ptr), to: MObject.self);
+            constr = try unsafeBitCast(galah_placementNew(type: type, ptr: ptr), to: GObject.self);
+            //constr.internallyConstructed = true;
             
             // run our fake init
             constr.internalConstructor();
@@ -69,13 +57,37 @@ open class MObject
             return nil;
         }
         
-       // retainObject(constr);
-                
-        return constr;
+        retainObject(constr);*/
+        
+        // Our less than ideal method...
+        let constr = type.init();
+        let extents = ExtentsOf(constr);
+        
+        // Increase the ref count once...
+        let garbage = Unmanaged.passRetained(constr);
+        
+        // Copy the object into our buffer...
+        let newRawRef = glh_memcpy(ptr.raw, Cast(constr), extents);
+        let test = newRawRef!.bindMemory(to: type, capacity: extents);
+        var retRef: MObject = Cast(newRawRef);
+        
+        // Mark a copy here in the hopes ARC doesn't destroy our copied data when we go on to release the original object...
+        //galah_copyValue(dest: Ptr<VoidPtr>(&retRef), source: Ptr<VoidPtr>(newRawRef!), type: type);
+        
+        // Release the original object...
+        garbage.release();
+        
+        // Return.
+        return retRef;
+    }
+        
+    
+    // BIG NOTE: Unfortunately I couldn't (yet) figure out a way to run init() using our custom allocation stuff.
+    public required init()
+    {
     }
     
-    private func internalConstructor()
+    deinit
     {
-        self.OnConstruct();
     }
 }

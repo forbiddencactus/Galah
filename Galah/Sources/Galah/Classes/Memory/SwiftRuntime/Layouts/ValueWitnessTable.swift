@@ -20,20 +20,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-/*struct ValueWitnessTable {
-    var initializeBufferWithCopyOfBuffer: UnsafeRawPointer
-    var destroy: UnsafeRawPointer
-    var initializeWithCopy: UnsafeRawPointer
-    var assignWithCopy: UnsafeRawPointer
-    var initializeWithTake: UnsafeRawPointer
-    var assignWithTake: UnsafeRawPointer
-    var getEnumTagSinglePayload: UnsafeRawPointer
-    var storeEnumTagSinglePayload: UnsafeRawPointer
-    var size: Int
-    var stride: Int
-    var flags: Int
-}*/
-
 struct ValueWitnessTable
 {
     var initializeBufferWithCopyOfBuffer: @convention(c) (UnsafeMutableRawPointer, UnsafeRawPointer, UnsafeRawPointer) -> UnsafeMutableRawPointer;

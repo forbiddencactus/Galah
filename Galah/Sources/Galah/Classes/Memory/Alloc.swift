@@ -48,10 +48,19 @@ public func galah_copyValue(dest: Ptr<VoidPtr>, source: Ptr<VoidPtr>, type: Any.
 {
     let typeMetadata = try! metadata(of: type);
     
-    if(typeMetadata.kind == .struct)
+    switch typeMetadata.kind
     {
-        let structMeta: StructMetadata = StructMetadata(type: type);
-        structMeta.valueWitnessTable.pointee.assignWithCopy(dest.raw!, source.raw!, structMeta.pointer);
+    
+    case .struct:
+    let structMeta: StructMetadata = StructMetadata(type: type);
+    _ = structMeta.valueWitnessTable.pointee.assignWithCopy(dest.raw!, source.raw!, structMeta.pointer);
+        
+    case .class:
+    let classMeta = ClassMetadata(type: type);
+    _ = classMeta.valueWitnessTable.pointee.assignWithCopy(dest.raw!, source.raw!, classMeta.pointer);
+    
+    default:
+        return;
     }
 }
 

@@ -113,7 +113,7 @@ public func ExtentsOf(_ type: AnyClass) -> GMemSize
 // Gets the size on the heap of an object ref.
 public func ExtentsOf(_ obj: AnyObject) -> GMemSize
 {
-    let md = ClassMetadata(pointer: Cast(obj));
+    let md = ClassMetadata(type: type(of: obj));
     return ExtentsOf(md);
 }
 
@@ -154,6 +154,11 @@ public func GetRefFromPointer<T>(_ pointer: Ptr<VoidPtr>) ->T?
 
 // Casts the object into T
 public func Cast<T>(_ input: Any?) -> T
+{
+    return unsafeBitCast(input, to: T.self);
+}
+
+public func Cast<T>(_ input: UnsafeMutableRawPointer?) -> T
 {
     return unsafeBitCast(input, to: T.self);
 }

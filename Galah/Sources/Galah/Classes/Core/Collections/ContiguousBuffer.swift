@@ -240,7 +240,7 @@ public struct Buffer<T>: Sequence
     }
       
     @discardableResult
-    public mutating func Add(_ element: __owned T) throws -> Int
+    public mutating func Add(_ element: T) throws -> Int
     {
         return try internalBuffer.Add(element);
     }
