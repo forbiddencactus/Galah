@@ -53,27 +53,11 @@ public struct Ref<T> where T: GObject
 
 internal func retainObject(_ object: AnyObject)
 {
-    let ptr = GetPointerFromObject(object);
-    ptr.assumingMemoryBound(to: ClassHeader.self).pointee.strongRetainCounts += 1;
+    _ = Unmanaged.passRetained(object);
 }
 
-public func setObjectRetain(_ object: AnyObject, _ newRetain: Int32)
-{
-    let ptr = GetPointerFromObject(object);
-    //ptr.assumingMemoryBound(to: ClassHeader.self).pointee.strongRetainCounts = newRetain;
-    var mutate = object;
-    
-    //(ptr + 8).assumingMemoryBound(to: Int64.self).pointee = Int64(newRetain);
-    
-    return try! withValuePointer(of: &mutate) { pointer in
-        pointer.assumingMemoryBound(to: ClassHeader.self).pointee.strongRetainCounts = newRetain;
-    }
-    //galah_set_refcount(&mutate, 1);
-}
-
-// Note that this won't, as of yet, dealloc the object if you decrease the refcount.
 internal func releaseObject(_ object: AnyObject)
 {
-    let ptr = GetPointerFromObject(object);
-    ptr.assumingMemoryBound(to: ClassHeader.self).pointee.strongRetainCounts -= 1;
+    let release = Unmanaged.passUnretained(object);
+    release.release();
 }

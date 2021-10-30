@@ -39,12 +39,12 @@ internal func galah_placementNew(type: Any.Type, ptr: Ptr<VoidPtr>) throws -> An
     let value: UnsafeMutableRawPointer = ptr.raw!;
 
     value.storeBytes(of: metadata, as: UnsafeRawPointer.self);
-    try setProperties(typeInfo: info, pointer: UnsafeMutableRawPointer(mutating: value));
+    //try setProperties(typeInfo: info, pointer: UnsafeMutableRawPointer(mutating: value));
 
     return unsafeBitCast(value, to: AnyObject.self);
 }
 
-public func galah_copyValue(dest: Ptr<VoidPtr>, source: Ptr<VoidPtr>, type: Any.Type)
+internal func galah_copyValue(dest: Ptr<VoidPtr>, source: Ptr<VoidPtr>, type: Any.Type)
 {
     let typeMetadata = try! metadata(of: type);
     
@@ -64,7 +64,7 @@ public func galah_copyValue(dest: Ptr<VoidPtr>, source: Ptr<VoidPtr>, type: Any.
     }
 }
 
-public func galah_runDestructor(obj: AnyObject)
+internal func galah_runDestructor(obj: AnyObject)
 {
     let md = ClassMetadata(type: type(of: obj));
 

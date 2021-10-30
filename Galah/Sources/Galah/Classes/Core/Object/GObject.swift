@@ -49,41 +49,24 @@ open class GObject
         // I couldn't figure out how to get placement new working without a copy like the one that's happening here.
         // galah_placementNew lays out the instance just fine, but I haven't figured out how to run the initialiser for it. :P
         // So we'll just have to live with this less than ideal method for now.
-       /* do
-        {
-            constr = try unsafeBitCast(galah_placementNew(type: type, ptr: ptr), to: GObject.self);
-            //constr.internallyConstructed = true;
-            
-            // run our fake init
-            constr.internalConstructor();
-        }
-        catch
-        {
-            return nil;
-        }
-        
-        retainObject(constr);*/
-        
+
         // Our less than ideal method...
-        let constr = type.init();
-        let extents = ExtentsOf(constr);
-        
+        let copyFrom = type.init();
+        var constr = try! unsafeBitCast(galah_placementNew(type: type, ptr: ptr), to: GObject.self);
+
         // Increase the ref count once...
-        let garbage = Unmanaged.passRetained(constr);
+        // TODO: It seems our instance by default already has a strong retain?
+        //_ = Unmanaged.passRetained(constr);
         
-        // Copy the object into our buffer...
-        let newRawRef = glh_memcpy(ptr.raw, Cast(constr), extents);
-        
-        var retRef: GObject? = nil;
-        
-        // Mark a copy here in the hopes ARC doesn't destroy our copied data when we go on to release the original object...
-        retRef = Cast(galah_copyValue(dest: Ptr<VoidPtr>(&retRef), source: Ptr<VoidPtr>(newRawRef!), type: type));
-        
-        // Release the original object...
-        garbage.release();
-        
-        // Return.
-        return retRef;
+        // We need to copy all the properties from our copyFrom class into our constructed class, so as to play nice with ARC and avoid dangling pointers.
+        let info = try! typeInfo(of: type);
+        for property in info.properties
+        {
+            try! property.set(value: property.get(from: copyFrom), on: &constr);
+        }
+                
+        // Return. copyFrom should also get released here. Waste of an alloc, really want to optimise this, but it works!
+        return constr;
     }
         
     

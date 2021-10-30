@@ -25,7 +25,7 @@ public class Deinit
 public class Deinit2: MObject
 {
     let test = "Hihi";
-    var firstClass = Deinit();
+    var firstClass = Test();
     
     deinit
     {
@@ -60,8 +60,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         galah_copyValue(dest: space, source: source, type: Test.self);
         */
         
+        // Allocate the object and then immediately destroy it as a test. The destructor should run twice on Deinit2,
+        // (once for the copyFrom throwaway, once for the actual instance, but Deinit's destructor will just run once. :)
+        // If you don't call that release, then only the destructor for the throwaway will run, so the throwaway was successfully cloned and ARC's happy.
         var buf = try! RawBuffer(withInitialCapacity: 16, withType: Deinit2.self);
-        let obj = try! MObject.Construct(type: Deinit2.self, ptr: buf.MakeSpace(0));
+        var obj = try! MObject.Construct(type: Deinit2.self, ptr: buf.MakeSpace(0));
+        obj = nil;
+        try! Unmanaged<MObject>.fromOpaque(buf.PtrAt(0).raw!).release();
+
+
         //var ptr = Unmanaged.passUnretained(obj!);
         //ptr.release();
         //setObjectRetain(obj!, 1);
