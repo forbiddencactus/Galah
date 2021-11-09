@@ -20,6 +20,9 @@
 #include "GalahNative.h"
 
 // Compare and swap.
+bool glh_compare_and_swap_uint(GVolatileUInt* ptr, GUInt old, GVolatileUInt new);
+
+// Compare and swap.
 bool glh_compare_and_swap_uint64(GVolatileUInt64* ptr, GUInt64 old, GVolatileUInt64 new);
 
 // Compare and swap.

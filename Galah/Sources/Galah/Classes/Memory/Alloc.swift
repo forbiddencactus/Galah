@@ -39,7 +39,7 @@ internal func galah_placementNew(type: Any.Type, ptr: Ptr<VoidPtr>) throws -> An
     let value: UnsafeMutableRawPointer = ptr.raw!;
 
     value.storeBytes(of: metadata, as: UnsafeRawPointer.self);
-    //try setProperties(typeInfo: info, pointer: UnsafeMutableRawPointer(mutating: value));
+    try setProperties(typeInfo: info, pointer: UnsafeMutableRawPointer(mutating: value));
 
     return unsafeBitCast(value, to: AnyObject.self);
 }

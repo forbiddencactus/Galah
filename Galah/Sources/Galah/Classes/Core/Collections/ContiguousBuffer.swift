@@ -192,7 +192,8 @@ public struct RawBuffer
     {
         if(type != AnyObject.self)
         {
-            let obj = buffer_get(&buffer, GUInt(index));
+            let ptr = buffer_get(&buffer, Cast(index));
+            _ = Unmanaged<GObject>.fromOpaque(ptr!).retain();
         }
 
     }
@@ -202,8 +203,8 @@ public struct RawBuffer
     {
         if(type == AnyObject.self)
         {
-            let obj = buffer_get(&buffer, GUInt(index));
-            galah_runDestructor(obj: Cast(obj));
+            let ptr = buffer_get(&buffer, Cast(index));
+            Unmanaged<GObject>.fromOpaque(ptr!).release();
         }
         
         // TODO: structs! :D

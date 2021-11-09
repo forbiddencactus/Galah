@@ -28,6 +28,11 @@
 #include <stdatomic.h>
 
 // Compare and swap.
+bool glh_compare_and_swap_uint(GVolatileUInt* ptr, GUInt old, GVolatileUInt new)
+{
+    return __atomic_compare_exchange(ptr, &old, &new, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
+}
+
 bool glh_compare_and_swap_uint64(GVolatileUInt64* ptr, GUInt64 old, GVolatileUInt64 new)
 {
     return __atomic_compare_exchange(ptr, &old, &new, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
