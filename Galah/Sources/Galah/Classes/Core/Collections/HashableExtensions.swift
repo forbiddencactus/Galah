@@ -16,21 +16,20 @@
 
 public struct HashableRef<T>: Hashable where T: AnyObject
 {
-    public let Ref: T;
+    internal let ptr: UnsafeMutableRawPointer;
     
     public init(_ inRef: T)
     {
-        Ref = inRef;
+        ptr = Cast(inRef);
     }
     
     public static func ==(lhs: HashableRef, rhs: HashableRef) -> Bool
     {
-        return lhs.Ref === rhs.Ref;
+        return lhs.ptr == rhs.ptr;
     }
 
     public func hash(into hasher: inout Hasher)
     {
-        let ptr: UnsafeMutableRawPointer = Cast(Ref);
         hasher.combine(ptr);
     }
 }

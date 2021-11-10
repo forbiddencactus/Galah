@@ -26,6 +26,7 @@ public struct Event<Sender>
     
     public func Subscribe(_ subscriber: AnyObject, _ callback: @escaping (Sender) -> ())
     {
+        // Lol this won't work this 'aint a ref type. 
         var theSelf = self;
         theSelf.subscribers[subscriber] = Subscriber<Sender>(subscriber: subscriber, callback: callback);
     }
@@ -42,5 +43,15 @@ public struct Event<Sender>
         {
             theSubscriber.callback(input);
         }
+    }
+    
+    public mutating func Clear()
+    {
+        subscribers.removeAll();
+    }
+    
+    public func ReplaceSubscribers(fromEvent: Event)
+    {
+        subscribers.removeAll();
     }
 }

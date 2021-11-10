@@ -20,6 +20,7 @@ internal protocol Boxable
     func ReturnCopy() -> TheBoxable;
     func UpdateData(data: TheBoxable);
     func GetBox() -> Box<TheBoxable>;
+    func Dealloc();
 }
 
 internal class Box<T> where T: Boxable
@@ -33,11 +34,15 @@ internal class Box<T> where T: Boxable
         semaphore = Semaphore();
     }
     
-    // Checks to see if this box is uniquely referenced.
+    deinit
+    {
+        value.Dealloc();
+    }
+    
+    // Checks to see if this box is uniquely referenced. Thread safe.
     public func IsUnique(_ toCheck: inout T) -> Bool
     {
         semaphore.Enter(max: 1);
-        
         var theSelf = self;
         let isUnique = isKnownUniquelyReferenced(&theSelf);
         semaphore.Exit();

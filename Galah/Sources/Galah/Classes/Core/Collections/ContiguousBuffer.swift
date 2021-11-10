@@ -20,16 +20,19 @@ import GalahNative.Settings;
 
 // Mutable by default.
 // TODO: need to implement copy on write for this, as well as for the Events, like Swift arrays. 
-public struct RawBuffer
+public struct RawBuffer: Boxable
 {
+    typealias TheBoxable = RawBuffer;
+    
     fileprivate let type: Any.Type;
     fileprivate var buffer: GBuffer;
+    fileprivate var box: Box<RawBuffer>? = nil;
     
     // Buffers sometimes autogrow and therefore all the pointers pointing to the buffer will go bad. Hook up to this to get notified when that happens.
-    public let AutoGrowEvent = Event<RawBuffer>();
+    public let AutoGrowEvent: Event<RawBuffer>;
     
     // When an element is removed or inserted, the elements around it may have to be reshuffled. Therefore all the pointers pointing to the buffer will go bad. Hook up to this to get notified when that happens.
-    public let ElementsMovedEvent = Event<RawBuffer>();
+    public let ElementsMovedEvent: Event<RawBuffer>;
     
     // The number of elements in the buffer.
     public var Count: Int { get { return Int(buffer.count); } };
@@ -51,6 +54,34 @@ public struct RawBuffer
         {
             throw ContiguousMutableBufferError.AllocError;
         }
+        
+        AutoGrowEvent = Event<RawBuffer>();
+        ElementsMovedEvent = Event<RawBuffer>();
+        
+        box = Box<RawBuffer>(self);
+        //buffer_addresizecallback(&buffer, OnBufferResized, Cast(self));
+        //buffer_addelementsmovedcallback(&buffer, OnBufferElementsMoved, Cast(self));
+    }
+    
+    // Inits this buffer with a copy of the supplied buffer. Events are copied as-is.
+    public init(withCopyOf: RawBuffer, withExtraCapacityCount: Int = 0) throws
+    {
+        type = withCopyOf.type;
+        buffer = buffer_create(withCopyOf.buffer.elementSize, withCopyOf.buffer.capacity + GUInt(withExtraCapacityCount), withCopyOf.buffer.isAutoResize);
+        buffer.autoGrowAmount = withCopyOf.buffer.autoGrowAmount;
+        buffer.count = withCopyOf.buffer.count;
+        
+        if(buffer.buffer == nil)
+        {
+            throw ContiguousMutableBufferError.AllocError;
+        }
+        
+        glh_memcpy(buffer.buffer, withCopyOf.buffer.buffer, withCopyOf.buffer.bufferSize);
+        
+        AutoGrowEvent = withCopyOf.AutoGrowEvent;
+        ElementsMovedEvent = withCopyOf.ElementsMovedEvent;
+        
+        box = Box<RawBuffer>(self);
         
         //buffer_addresizecallback(&buffer, OnBufferResized, Cast(self));
         //buffer_addelementsmovedcallback(&buffer, OnBufferElementsMoved, Cast(self));
@@ -172,6 +203,30 @@ public struct RawBuffer
     
     // Manually deallocs the buffer. This buffer won't work anymore afterwards.
     public mutating func DeallocBuffer()
+    {
+        buffer_free(&buffer);
+    }
+    
+    // Boxable protocol
+    func ReturnCopy() -> RawBuffer
+    {
+        return try! RawBuffer(withCopyOf: self);
+    }
+    
+    mutating func UpdateData(data: RawBuffer)
+    {
+        self.buffer = data.buffer;
+        
+        AutoGrowEvent.ReplaceSubscribers(fromEvent: data.AutoGrowEvent);
+        ElementsMovedEvent.ReplaceSubscribers(fromEvent: data.ElementsMovedEvent);
+    }
+    
+    func GetBox() -> Box<RawBuffer>
+    {
+        return box!;
+    }
+    
+    mutating func Dealloc()
     {
         buffer_free(&buffer);
     }
