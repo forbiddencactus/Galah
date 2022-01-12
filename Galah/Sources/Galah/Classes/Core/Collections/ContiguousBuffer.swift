@@ -18,33 +18,40 @@ import Swift;
 import GalahNative.Memory;
 import GalahNative.Settings;
 
-// Mutable by default.
-// TODO: need to implement copy on write for this, as well as for the Events, like Swift arrays. 
-public struct RawBuffer: Boxable
+internal protocol GBufferProtocol: Boxable
 {
-    typealias TheBoxable = RawBuffer;
-    
+    // The type the buffer will work with. Not always the type of the object contained!
+    associatedtype WorkingBufferType;
+}
+
+internal extension GBufferProtocol
+{
+    typealias TheBoxable = GBufferProtocol;
+
     fileprivate let type: Any.Type;
     fileprivate var buffer: GBuffer;
-    fileprivate var box: Box<RawBuffer>? = nil;
+    fileprivate var box: Box<WorkingBufferType>? = nil;
     
     // Buffers sometimes autogrow and therefore all the pointers pointing to the buffer will go bad. Hook up to this to get notified when that happens.
-    public let AutoGrowEvent: Event<RawBuffer>;
+    let AutoGrowEvent: Event<GBufferProtocol>;
     
     // When an element is removed or inserted, the elements around it may have to be reshuffled. Therefore all the pointers pointing to the buffer will go bad. Hook up to this to get notified when that happens.
-    public let ElementsMovedEvent: Event<RawBuffer>;
+    let ElementsMovedEvent: Event<GBufferProtocol>;
     
     // The number of elements in the buffer.
-    public var Count: Int { get { return Int(buffer.count); } };
+    var Count: Int { get { return Int(buffer.count); } };
     
     // The capacity of the buffer.
-    public var Capacity: UInt { get { return UInt(buffer.capacity); } };
+    var Capacity: UInt { get { return UInt(buffer.capacity); } };
     
     // Whether the buffer full auto resize once it is at capacity.
-    public var Mutable: Bool { get { return buffer.isAutoResize; } };
+    var Mutable: Bool { get { return buffer.isAutoResize; } };
+    
+    // Returns the type that this buffer stores.
+    var Type: Any.Type { get { return type; } }
     
     // Inits this buffer.
-    public init(withInitialCapacity: Int, withType: Any.Type) throws
+    init(withInitialCapacity: Int, withType: Any.Type) throws
     {
         type = withType;
         let sizeOf: Int = ExtentsOf(withType);
@@ -64,7 +71,7 @@ public struct RawBuffer: Boxable
     }
     
     // Inits this buffer with a copy of the supplied buffer. Events are copied as-is.
-    public init(withCopyOf: RawBuffer, withExtraCapacityCount: Int = 0) throws
+    init(withCopyOf: GBufferProtocol, withExtraCapacityCount: Int = 0) throws
     {
         type = withCopyOf.type;
         buffer = buffer_create(withCopyOf.buffer.elementSize, withCopyOf.buffer.capacity + GUInt(withExtraCapacityCount), withCopyOf.buffer.isAutoResize);
@@ -87,71 +94,45 @@ public struct RawBuffer: Boxable
         //buffer_addelementsmovedcallback(&buffer, OnBufferElementsMoved, Cast(self));
     }
     
-    // Returns the type that this buffer stores.
-    public func GetType() -> Any.Type
-    {
-        return type;
-    }
-    
-    // Returns the pointer for the position at index.
-    public func PtrAt(_ index: Int) throws -> Ptr<VoidPtr>
+    // Returns the object for the position at index.
+    public func ElementAt(_ index: Int) throws -> WorkingBufferType
     {
         if (index < Count)
         {
             var buf = buffer; // work around Swift's silly restrictions.
-            return Ptr<VoidPtr>(buffer_get(&buf, GUInt(index)));
+            return Cast(buffer_get(&buf, GUInt(index)));
         }
            
         throw ContiguousMutableBufferError.OutOfRange;
     }
     
-    // Makes space for the element at index (by pushing existing elements further back), then Memcopies the specified pointer, by the size of the type of the buffer, into the end of the buffer. Auto grows.
-    public mutating func Add<T>(_ obj: __owned T) throws -> Int
-    {
-        var mutate = obj;
-        return try self.Add(&mutate);
-    }
     
-    // Makes space for the element at index (by pushing existing elements further back), then Memcopies the specified pointer, by the size of the type of the buffer, into the end of the buffer. Auto grows.
-    public mutating func Add(_ obj: UnsafeRawPointer) throws -> Int
+    // Copies the object into the end of the buffer.
+    public mutating func Add(_ obj: WorkingBufferType) throws -> Int
     {
-        if(buffer_add(&buffer, obj) == -1)
+        var toC = obj;
+        if(buffer_add(&buffer, &obj) == -1)
         {
             throw ContiguousMutableBufferError.AllocError;
         }
         
         let index = Count - 1;
-        RetainAtIndex(index);
-        return index;
-    }
-    
-    // Memcopies the specified pointer, by the size of the type of the buffer, into the end of the buffer. Auto grows. 
-    public mutating func Add(_ ptr: Ptr<VoidPtr>) throws -> Int
-    {
-        if(buffer_add(&buffer, ptr.raw) == -1)
-        {
-            throw ContiguousMutableBufferError.AllocError;
-        }
-        
-        let index = Count - 1;
-        RetainAtIndex(index);
         return index;
     }
      
-    // Makes space for the element at index (by pushing existing elements further back), then Memcopies the specified pointer, by the size of the type of the buffer, into the end of the buffer. Auto grows.
-    public mutating func Insert(_ index: Int, _ ptr: Ptr<VoidPtr>) throws
+    // Makes space for the element at index (by pushing existing elements further back), then copies the object into the position at index.
+    public mutating func Insert(_ index: Int, _ obj: WorkingBufferType) throws
     {
         if (index >= Count)
         {
             throw ContiguousMutableBufferError.OutOfRange;
         }
         
-        if(buffer_insert(&buffer, ptr.raw, GUInt(index)) == -1)
+        var toC = obj;
+        if(buffer_insert(&buffer, &obj, GUInt(index)) == -1)
         {
             throw ContiguousMutableBufferError.AllocError;
         }
-        
-        RetainAtIndex(index);
     }
     
     // Removes the specified element from the buffer, and moves the leftover elements so there's no gaps.
@@ -206,11 +187,23 @@ public struct RawBuffer: Boxable
     {
         buffer_free(&buffer);
     }
+        
+    // Callback for when the C buffer resizes.
+    internal func BufferResized()
+    {
+        AutoGrowEvent.Broadcast(self);
+    }
+    
+    // Callback for when the C buffer moves elements around.
+    internal func BufferElementsMoved()
+    {
+        ElementsMovedEvent.Broadcast(self);
+    }
     
     // Boxable protocol
     func ReturnCopy() -> RawBuffer
     {
-        return try! RawBuffer(withCopyOf: self);
+        return try! GBufferProtocol(withCopyOf: self);
     }
     
     mutating func UpdateData(data: RawBuffer)
@@ -230,40 +223,13 @@ public struct RawBuffer: Boxable
     {
         buffer_free(&buffer);
     }
-        
-    // Callback for when the C buffer resizes. 
-    internal func BufferResized()
-    {
-        AutoGrowEvent.Broadcast(self);
-    }
-    
-    // Callback for when the C buffer moves elements around.
-    internal func BufferElementsMoved()
-    {
-        ElementsMovedEvent.Broadcast(self);
-    }
-    
-    private mutating func RetainAtIndex(_ index: Int)
-    {
-        if(type != AnyObject.self)
-        {
-            let ptr = buffer_get(&buffer, Cast(index));
-            _ = Unmanaged<GObject>.fromOpaque(ptr!).retain();
-        }
+}
 
-    }
-    
-    // Runs the destructor for any object we're about to stomp on / delete, so it can safely release any memory it's holding on to. 
-    private mutating func ReleaseAtIndex(_ index: Int)
-    {
-        if(type == AnyObject.self)
-        {
-            let ptr = buffer_get(&buffer, Cast(index));
-            Unmanaged<GObject>.fromOpaque(ptr!).release();
-        }
-        
-        // TODO: structs! :D
-    }
+// Mutable by default.
+// TODO: need to implement copy on write for this, as well as for the Events, like Swift arrays. 
+public struct RawBuffer: GBufferProtocol
+{
+    typealias WorkingBufferType = UnsafeMutableRawPointer;
 }
 
 public struct Buffer<T>: Sequence

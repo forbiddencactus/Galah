@@ -1,6 +1,6 @@
 # MIT Licence
 
-Copyright © 2020, 2021, the Galah contributors.
+Copyright © 2020 - 2022, the Galah contributors.
 You can find a list of Galah's contributors in CONTRIBUTORS.MD
 
 Permission is hereby granted, free of charge, to any person obtaining a copy

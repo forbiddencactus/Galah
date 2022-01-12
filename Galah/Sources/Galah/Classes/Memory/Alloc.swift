@@ -46,22 +46,42 @@ internal func galah_placementNew(type: Any.Type, ptr: Ptr<VoidPtr>) throws -> An
 
 internal func galah_copyValue(dest: Ptr<VoidPtr>, source: Ptr<VoidPtr>, type: Any.Type)
 {
-    let typeMetadata = try! metadata(of: type);
+    let kind = Kind(type: type)
     
-    switch typeMetadata.kind
+    var metadataPtr: UnsafeRawPointer;
+    var valueWitnessPtr: UnsafeMutablePointer<ValueWitnessTable>;
+    switch kind
     {
-    
-    case .struct:
-    let structMeta: StructMetadata = StructMetadata(type: type);
-    _ = structMeta.valueWitnessTable.pointee.assignWithCopy(dest.raw!, source.raw!, structMeta.pointer);
-        
-    case .class:
-    let classMeta = ClassMetadata(type: type);
-    _ = classMeta.valueWitnessTable.pointee.assignWithCopy(dest.raw!, source.raw!, classMeta.pointer);
-    
-    default:
-        return;
+        case .struct:
+            let meta = StructMetadata(type: type);
+            metadataPtr = meta.pointer;
+            valueWitnessPtr = meta.valueWitnessTable;
+            break;
+        case .class:
+            let meta = ClassMetadata(type: type);
+            metadataPtr = meta.pointer;
+            valueWitnessPtr = meta.valueWitnessTable;
+            break;
+        case .existential:
+            let meta = ProtocolMetadata(type: type);
+            metadataPtr = meta.pointer;
+            valueWitnessPtr = meta.valueWitnessTable;
+            break;
+        case .tuple:
+            let meta = TupleMetadata(type: type);
+            metadataPtr = meta.pointer;
+            valueWitnessPtr = meta.valueWitnessTable;
+            break;
+        case .enum:
+            let meta = EnumMetadata(type: type);
+            metadataPtr = meta.pointer;
+            valueWitnessPtr = meta.valueWitnessTable;
+            break;
+        default:
+            //shrug.
     }
+    
+    valueWitnessPtr.pointee.assignWithCopy(dest.raw!, source.raw!, metadataPtr);
 }
 
 internal func galah_runDestructor(obj: AnyObject)

@@ -20,21 +20,39 @@
 internal struct NodeIndex
 {
     internal var counter: UInt16; // The number of times this particular index has been reused.
-    internal var archetypeBufferIndex: UInt8 // Which buffer in the archetype this instance belongs to.
-    internal var archetypeIndex: UInt8; // Which archetype this instance belongs to.
+    internal var archetypeIndex: UInt16; // Which archetype this instance belongs to.
     internal var instanceIndex: UInt32; //The index of the instance, inside the buffer.
     
     init()
     {
         counter = UInt16.max;
-        archetypeBufferIndex = UInt8.max;
-        archetypeIndex = UInt8.max;
+        archetypeIndex = UInt16.max;
         instanceIndex = UInt32.max;
+    }
+    
+    IsValid() -> Bool
+    {
+        if(counter == UInt16.max || archetypeIndex == UInt16.max || instanceIndex == UInt32.max)
+        {
+            return false;
+        }
+        
+        return true;
     }
 }
 
 public protocol NodePoolObject: AnyObject {}
 
+internal struct NodeArchetype
+{
+    // The component types that live in this archetype. 
+    internal var ComponentTypes = Dictionary<HashableType<Component>, Int>();
+    internal var ComponentTypeArray = Array<HashableType<Component>>();
+    internal var ArchetypeTags = Dictionary<String, String>();
+    
+    internal var Nodes = try! Buffer<Node>();
+    internal var Components = ContiguousDictionary<HashableType<Component>,Buffer<Component>>();
+}
 /*internal class NodeArchetype: GObject
 {
     internal var ComponentTypes = Dictionary<HashableType<Component>, Int>();
@@ -43,8 +61,7 @@ public protocol NodePoolObject: AnyObject {}
     internal var Depth: Int = 0;
     internal var Tag: String = "NULL";
     
-    internal var Nodes = try! Buffer<Node>();
-    internal var Components = ContiguousDictionary<HashableType<Component>,Buffer<Component>>();
+
     
     @discardableResult
     public static func ConstructArchetype(nodeForArchetype: Node, constructAt: Ptr<NodeArchetype>) -> NodeArchetype
