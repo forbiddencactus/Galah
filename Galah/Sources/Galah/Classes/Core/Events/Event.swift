@@ -2,7 +2,7 @@
 //
 // This source file is part of the Galah open source game engine.
 //
-// Copyright © 2020, 2021, the Galah contributors.
+// Copyright © 2020 - 2022, the Galah contributors.
 //
 // Licensed under the MIT Licence.
 //
@@ -14,30 +14,27 @@
 //--------------------------------------------------------------------------//
 // A simple event class.
 
-public struct Event<Sender>
+public class Event
 {
-    private struct Subscriber<S>
+    private struct Subscriber
     {
         public let subscriber: AnyObject;
-        public let callback: (S) -> ();
+        public let callback: (AnyObject) -> ();
     }
 
-    private var subscribers = Dictionary<HashableRef<AnyObject>, Subscriber<Sender>>();
+    private var subscribers = Dictionary<HashableRef<AnyObject>, Subscriber>();
     
-    public func Subscribe(_ subscriber: AnyObject, _ callback: @escaping (Sender) -> ())
+    public func Subscribe(_ subscriber: AnyObject, _ callback: @escaping (AnyObject) -> ())
     {
-        // Lol this won't work this 'aint a ref type. 
-        var theSelf = self;
-        theSelf.subscribers[subscriber] = Subscriber<Sender>(subscriber: subscriber, callback: callback);
+        self.subscribers[subscriber] = Subscriber(subscriber: subscriber, callback: callback);
     }
     
     public func Unsubscribe(_ subscriber: AnyObject)
     {
-        var theSelf = self;
-        theSelf.subscribers.removeValue(forKey: HashableRef<AnyObject>(subscriber));
+        self.subscribers.removeValue(forKey: HashableRef<AnyObject>(subscriber));
     }
     
-    public func Broadcast(_ input: Sender)
+    public func Broadcast(_ input: AnyObject)
     {
         for theSubscriber in subscribers.values
         {
@@ -45,7 +42,7 @@ public struct Event<Sender>
         }
     }
     
-    public mutating func Clear()
+    public func Clear()
     {
         subscribers.removeAll();
     }

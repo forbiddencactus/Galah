@@ -2,7 +2,7 @@
 //
 // This source file is part of the Galah open source game engine.
 //
-// Copyright © 2020, 2021, the Galah contributors.
+// Copyright © 2020 - 2022, the Galah contributors.
 //
 // Licensed under the MIT Licence.
 //
@@ -17,15 +17,74 @@
 internal protocol Boxable
 {
     associatedtype TheBoxable: Boxable;
-    func ReturnCopy() -> TheBoxable;
-    func UpdateData(data: TheBoxable);
+    mutating func ReturnCopy() -> TheBoxable;
+    mutating func UpdateData(data: TheBoxable);
     func GetBox() -> Box<TheBoxable>;
-    func Dealloc();
+    mutating func GuaranteeUnique();
+    mutating func UpdateBox();
+    mutating func Dealloc();
 }
 
 internal class Box<T> where T: Boxable
 {
     private var value: T;
+    private var semaphore: Semaphore;
+    
+    init(_ val: T)
+    {
+        value = val;
+        semaphore = Semaphore();
+    }
+    
+    deinit
+    {
+        value.Dealloc();
+    }
+    
+    // Checks to see if this box is uniquely referenced. Thread safe.
+    public func IsUnique() -> Bool
+    {
+        semaphore.Enter(max: 1);
+        var theSelf = self;
+        let isUnique = isKnownUniquelyReferenced(&theSelf);
+        semaphore.Exit();
+
+        if( !isUnique )
+        {
+            return false;
+        }
+        
+        return true;
+    }
+    
+    public func GuaranteeUnique(_ toCheck: inout T)
+    {
+        if(!IsUnique() && toCheck.GetBox() === self)
+        {
+            // Don't update this box because some stale struct somewhere is holding it.
+            // Create new data instead.
+            let newValue = value.ReturnCopy() as! T;
+            toCheck.UpdateData(data: newValue as! T.TheBoxable);
+        }
+    }
+    
+    // Updates the passed toUpdate value, without checking for uniqueness (always check for uniqueness first or you may lose data!
+    public func Update(_ toUpdate: inout T)
+    {
+        value = toUpdate;
+    }
+}
+
+internal protocol DeallocListener
+{
+    func Dealloc();
+}
+
+// A more simple box that just keeps a dumb copy of its parent. The idea here is to run code on final dealloc.
+// If you need the internal boxed copy to not be 'dumb' then be sure to update this whenever something changes. 
+internal class DeallocBox<T> where T: DeallocListener
+{
+    var value: T;
     private var semaphore: Semaphore;
     
     init(_ val: T)
@@ -46,20 +105,8 @@ internal class Box<T> where T: Boxable
         var theSelf = self;
         let isUnique = isKnownUniquelyReferenced(&theSelf);
         semaphore.Exit();
-
-        if( !isUnique )
-        {
-            value = value.ReturnCopy() as! T;
-            self.Update(&toCheck);
-            return false;
-        }
         
-        return true;
-    }
-    
-    // Updates the passed toUpdate value, without checking for uniqueness (always check for uniqueness first or you may lose data!
-    public func Update(_ toUpdate: inout T)
-    {
-        toUpdate.UpdateData(data: toUpdate as! T.TheBoxable);
+        return isUnique;
     }
 }
+

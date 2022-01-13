@@ -2,7 +2,7 @@
 //
 // This source file is part of the Galah open source game engine.
 //
-// Copyright © 2020, 2021, the Galah contributors.
+// Copyright © 2020 - 2022, the Galah contributors.
 //
 // Licensed under the MIT Licence.
 //
@@ -20,15 +20,23 @@
 #include "GalahNative.h"
 
 typedef void (*GBufferCallback)(void*);
-typedef void GBuff;
+typedef void GBufferBody;
+typedef void GBufferPtr;
+
+// We are wrapping the pointer to the actual buffer data in a struct (which should also be pointed to in any function that takes the buffer as an input). The idea is that if the bufferPtr needs to change, things won't get too hairy in the owner data in Swift. The struct syntax just makes the Swift syntax less hairy.
+typedef struct
+{
+    GBufferPtr* bufferPtr;
+} GBuffer;
 
 typedef struct
 {
     GMemSize elementSize;
     GMemSize bufferSize;
+    GMemSize bufferBodySize;
     GUInt count;
     GUInt capacity;
-    GBuff* buffer;
+    GBufferBody* bufferBody;
     bool isAutoResize;
     void* bufferResizeCallbackTarget;
     GBufferCallback bufferResizeCallback;
@@ -38,12 +46,18 @@ typedef struct
     //0 means the buffer will auto grow by just doubling its capacity, any other integer means the buffer will autoGrow by elementSize * the integer.
     GUInt autoGrowAmount;
     
-}   GBuffer;
+}   GBufferData;
 
 //Note: all of these will memcpy elements into buffer!
 
 // Allocs a GBuffer that will hold capacity amount of elements of elementSize.
 GBuffer buffer_create(GMemSize elementSize, GUInt capacity, bool isAutoResize);
+
+// Allocs a GBuffer using an existing GBuffer.
+GBuffer buffer_create_with_copy(GBuffer* buf);
+
+// Returns a pointer to the buffer data struct in the buffer. 
+GBufferData* buffer_get_data(GBuffer* buffer);
 
 // Adds an element to the end of the buffer, and returns the index. -1 if add failed.
 int buffer_add(GBuffer* buf, const void* element);
@@ -64,7 +78,7 @@ int buffer_remove_range(GBuffer* buf, GUInt startIndex, GUInt endIndex);
 void* buffer_get(GBuffer* buf, GUInt index);
 
 // Attempts to grow the buffer to newCapacity. Returns true if successful.
-bool buffer_grow(GBuffer* buf, GUInt newCapacity);
+GBuffer* buffer_grow(GBuffer* buf, GUInt newCapacity);
 
 // Sets whether the buffer should auto resize.
 void buffer_set_shouldautoresize(GBuffer* buf, bool shouldAutoResize);

@@ -30,7 +30,7 @@ internal struct NodeIndex
         instanceIndex = UInt32.max;
     }
     
-    IsValid() -> Bool
+    func IsValid() -> Bool
     {
         if(counter == UInt16.max || archetypeIndex == UInt16.max || instanceIndex == UInt32.max)
         {
@@ -51,7 +51,7 @@ internal struct NodeArchetype
     internal var ArchetypeTags = Dictionary<String, String>();
     
     internal var Nodes = try! Buffer<Node>();
-    internal var Components = ContiguousDictionary<HashableType<Component>,Buffer<Component>>();
+    //internal var Components = ContiguousDictionary<HashableType<Component>,Buffer<Component>>();
 }
 /*internal class NodeArchetype: GObject
 {

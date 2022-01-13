@@ -58,7 +58,7 @@ public func SizeOf(_ value: inout Any) -> GMemSize
 {
     if (value is AnyClass)
     {
-        let md = ClassMetadata(pointer: Cast(value));
+        let md = ClassMetadata(pointer: Cast(&value));
         return SizeOf(md);
     }
     else
@@ -94,7 +94,7 @@ public func ExtentsOf(_ value: inout Any) -> GMemSize
 {
     if (value is AnyClass)
     {
-        let md = ClassMetadata(pointer: Cast(value));
+        let md = ClassMetadata(pointer: Cast(&value));
         return ExtentsOf(md);
     }
     else
@@ -119,7 +119,7 @@ public func ExtentsOf(_ obj: AnyObject) -> GMemSize
 
 public func GetPointer<T>(_ value: inout T) -> UnsafeMutableRawPointer
 {
-    return Cast(value);
+    return Cast(&value);
 }
 
 // Gets the pointer to an object without retaining it.
@@ -153,7 +153,7 @@ public func GetRefFromPointer<T>(_ pointer: Ptr<VoidPtr>) ->T?
 }
 
 // Casts the object into T
-public func Cast<T>(_ input: Any?) -> T
+public func Cast<T>(_ input: inout Any?) -> T
 {
     return unsafeBitCast(input, to: T.self);
 }

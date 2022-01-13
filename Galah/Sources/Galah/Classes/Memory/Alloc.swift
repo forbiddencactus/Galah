@@ -48,40 +48,40 @@ internal func galah_copyValue(dest: Ptr<VoidPtr>, source: Ptr<VoidPtr>, type: An
 {
     let kind = Kind(type: type)
     
-    var metadataPtr: UnsafeRawPointer;
-    var valueWitnessPtr: UnsafeMutablePointer<ValueWitnessTable>;
+    var metadataPtr: UnsafeRawPointer? = nil;
+    var valueWitnessPtr: UnsafeMutablePointer<ValueWitnessTable>? = nil;
     switch kind
     {
         case .struct:
             let meta = StructMetadata(type: type);
-            metadataPtr = meta.pointer;
+            metadataPtr = Cast(meta.pointer);
             valueWitnessPtr = meta.valueWitnessTable;
             break;
         case .class:
             let meta = ClassMetadata(type: type);
-            metadataPtr = meta.pointer;
+            metadataPtr = Cast(meta.pointer);
             valueWitnessPtr = meta.valueWitnessTable;
             break;
         case .existential:
             let meta = ProtocolMetadata(type: type);
-            metadataPtr = meta.pointer;
+            metadataPtr = Cast(meta.pointer);
             valueWitnessPtr = meta.valueWitnessTable;
             break;
         case .tuple:
             let meta = TupleMetadata(type: type);
-            metadataPtr = meta.pointer;
+            metadataPtr = Cast(meta.pointer);
             valueWitnessPtr = meta.valueWitnessTable;
             break;
         case .enum:
             let meta = EnumMetadata(type: type);
-            metadataPtr = meta.pointer;
+            metadataPtr = Cast(meta.pointer);
             valueWitnessPtr = meta.valueWitnessTable;
             break;
         default:
-            //shrug.
+            break; // Do nothing?
     }
     
-    valueWitnessPtr.pointee.assignWithCopy(dest.raw!, source.raw!, metadataPtr);
+    _ = valueWitnessPtr!.pointee.assignWithCopy(dest.raw!, source.raw!, metadataPtr!);
 }
 
 internal func galah_runDestructor(obj: AnyObject)

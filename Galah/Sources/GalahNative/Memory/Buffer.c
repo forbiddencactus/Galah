@@ -2,7 +2,7 @@
 //
 // This source file is part of the Galah open source game engine.
 //
-// Copyright © 2020, 2021, the Galah contributors.
+// Copyright © 2020 - 2022, the Galah contributors.
 //
 // Licensed under the MIT Licence.
 //
@@ -17,48 +17,85 @@
 #include "Memory/Buffer.h"
 #include "Memory/Alloc.h"
 
-void buffer_runElementsMovedCallback(GBuffer* buf)
-{
-    if( buf->bufferElementsMovedCallback != NULL)
-    {
-        buf->bufferElementsMovedCallback(buf->bufferElementsMovedCallbackTarget);
-    }
-}
+#define data(_buf_) buffer_get_data(_buf_)
 
 // Allocs a GBuffer that will hold capacity amount of elements of elementSize.
 GBuffer buffer_create(GMemSize elementSize, GUInt capacity, bool isAutoResize)
 {
-    GBuffer buf;
-    buf.bufferSize = elementSize * capacity;
-    buf.buffer = glh_malloc(buf.bufferSize);
-    buf.elementSize = elementSize;
-    buf.capacity = capacity;
-    buf.isAutoResize = isAutoResize;
-    buf.bufferResizeCallbackTarget = NULL;
-    buf.bufferResizeCallback = NULL;
-    buf.bufferElementsMovedCallbackTarget = NULL;
-    buf.bufferElementsMovedCallback = NULL;
-    buf.autoGrowAmount = 0;
+    GBuffer buffer;
+    GBufferPtr* bufPtr = NULL;
+    GMemSize dataSize = sizeof(GBufferBody);
     
-    buf.count = 0;
+    GBufferData bufData;
+    bufData.bufferSize = dataSize + bufData.bufferBodySize;
+    bufData.bufferBodySize = elementSize * capacity;
+    bufData.elementSize = elementSize;
+    bufData.capacity = capacity;
+    bufData.isAutoResize = isAutoResize;
+    bufData.bufferResizeCallbackTarget = NULL;
+    bufData.bufferResizeCallback = NULL;
+    bufData.bufferElementsMovedCallbackTarget = NULL;
+    bufData.bufferElementsMovedCallback = NULL;
+    bufData.autoGrowAmount = 0;
+    bufData.count = 0;
     
-    // Memset this friend.
-    glh_memset(buf.buffer, 0, buf.bufferSize);
+    bufPtr = glh_malloc(bufData.bufferSize);
     
-    return buf;
+    if(bufPtr != NULL)
+    {
+        bufData.bufferBody = bufPtr + dataSize;
+    
+        // Memset this friend.
+        glh_memset(bufData.bufferBody, 0, dataSize + bufData.bufferBodySize);
+    
+        // Memcpy the data to the beginning of the buffer
+        glh_memcpy(bufPtr, &bufData, dataSize);
+    }
+    
+    buffer.bufferPtr = bufPtr;
+    
+    return buffer;
+}
+
+// Allocs a GBuffer using an existing GBuffer.
+GBuffer buffer_create_with_copy(GBuffer* buf)
+{
+    GBuffer returnBuf;
+    GBufferData* bufData = data(buf);
+    returnBuf.bufferPtr = NULL;
+    
+    returnBuf.bufferPtr = glh_malloc(bufData->bufferSize);
+    
+    if( returnBuf.bufferPtr != NULL )
+    {
+        glh_memcpy(returnBuf.bufferPtr, buf->bufferPtr, bufData->bufferSize);
+    }
+
+    return returnBuf;
+}
+
+// Returns a pointer to the buffer data struct in the buffer.
+GBufferData* buffer_get_data(GBuffer* buffer)
+{
+    return (GBufferData*)buffer->bufferPtr;
 }
 
 // Adds an element to the end of the buffer, and returns the index. -1 if add failed.
 int buffer_add(GBuffer* buf, const void* element)
 {
-    if(buffer_makespace(buf, buf->count) == NULL)
+    GBufferData* bufData = data(buf);
+    if(buffer_makespace(buf, bufData->count) == NULL)
     {
         return -1;
     }
+    else
+    {
+        bufData = data(buf);
+    }
     
-    glh_memcpy(buf->buffer + (buf->elementSize * buf->count - 1), element, buf->elementSize);
+    glh_memcpy(bufData->bufferBody + (bufData->elementSize * bufData->count - 1), element, bufData->elementSize);
     
-    return buf->count - 1;
+    return bufData->count - 1;
 }
 
 // Inserts an element to index position in the buffer, and returns the index. -1 if insert failed.
@@ -76,7 +113,8 @@ int buffer_insert(GBuffer* buf, const void* element, GUInt index)
 // Replaces the element at index with the specified element.
 int buffer_replace(GBuffer* buf, const void* element, GUInt index)
 {
-    glh_memcpy(buf->buffer + (buf->elementSize * index), element, buf->elementSize);
+    GBufferData* bufData = data(buf);
+    glh_memcpy(bufData->bufferBody + (bufData->elementSize * index), element, bufData->elementSize);
     
     return index;
 }
@@ -84,16 +122,19 @@ int buffer_replace(GBuffer* buf, const void* element, GUInt index)
 // Removes an element at the index position in the buffer, and returns the new count. -1 if remove failed.
 int buffer_remove(GBuffer* buf, GUInt index)
 {
-    if(index < buf->count)
+    GBufferData* bufData = data(buf);
+    if(index < bufData->count)
     {
-        if(index != (buf->count -1))
+        if(index != (bufData->count -1))
         {
-            GMemSize size = buf->count - index;
-            glh_memmove(buf->buffer + (buf->elementSize * index), buf->buffer + (buf->elementSize * (index + 1)), size);
-            buffer_runElementsMovedCallback(buf);
+            GMemSize size = bufData->count - index;
+            glh_memmove(bufData->bufferBody + (bufData->elementSize * index), bufData->bufferBody + (bufData->elementSize * (index + 1)), size);
+            if( bufData->bufferElementsMovedCallback != NULL)
+            {
+                bufData->bufferElementsMovedCallback(bufData->bufferElementsMovedCallbackTarget);
+            }
         }
-        glh_memset(buf + (buf->elementSize * (buf->count - 1)), 0, buf->elementSize);
-        return --buf->count;
+        return --bufData->count;
     }
     
     return -1;
@@ -102,18 +143,22 @@ int buffer_remove(GBuffer* buf, GUInt index)
 // Removes elements from startIndex to endIndex, including endIndex.
 int buffer_remove_range(GBuffer* buf, GUInt startIndex, GUInt endIndex)
 {
-    if(endIndex > startIndex && endIndex < buf->count)
+    GBufferData* bufData = data(buf);
+    if(endIndex > startIndex && endIndex < bufData->count)
     {
         GUInt amount = (endIndex - startIndex) + 1;
-        GMemSize moveSize = amount * buf->elementSize;
+        GMemSize moveSize = amount * bufData->elementSize;
         
-        if(endIndex != (buf->count -1))
+        if(endIndex != (bufData->count -1))
         {
-            glh_memmove(buf->buffer + (buf->elementSize * startIndex),buf->buffer + buf->elementSize * (endIndex + 1), moveSize);
-            buffer_runElementsMovedCallback(buf);
+            glh_memmove(bufData->bufferBody + (bufData->elementSize * startIndex),bufData->bufferBody + bufData->elementSize * (endIndex + 1), moveSize);
+            if( bufData->bufferElementsMovedCallback != NULL)
+            {
+                bufData->bufferElementsMovedCallback(bufData->bufferElementsMovedCallbackTarget);
+            }
         }
-        buf->count-= amount;
-        return buf->count;
+        bufData->count-= amount;
+        return bufData->count;
     }
     
     return -1;
@@ -122,43 +167,59 @@ int buffer_remove_range(GBuffer* buf, GUInt startIndex, GUInt endIndex)
 // Gets the element at position index. Returns null if failed.
 void* buffer_get(GBuffer* buf, GUInt index)
 {
-    if(index < buf->count)
+    GBufferData* bufData = data(buf);
+    if(index < bufData->count)
     {
-        return buf->buffer + (buf->elementSize * index);
+        return bufData->bufferBody + (bufData->elementSize * index);
     }
     
     return NULL;
 }
 
-// Attempts to grow the buffer to newCapacity. Returns true if successful.
-bool buffer_grow(GBuffer* buf, GUInt newCapacity)
+// Attempts to grow the buffer to newCapacity. Returns true to new buffer if successful.
+GBuffer* buffer_grow(GBuffer* buf, GUInt newCapacity)
 {
-    if(buf->capacity >= newCapacity)
+    GBufferData* oldBufData = data(buf);
+
+    if(oldBufData->capacity >= newCapacity)
     {
         return false;
     }
     
-    GBuff* oldBuffer = buf->buffer;
-    GMemSize newSize = buf->elementSize * newCapacity;
-    buf->buffer = glh_malloc(newSize);
+    GMemSize dataSize = sizeof(GBufferData);
+    GBufferPtr* oldBuffer = buf->bufferPtr;
+    GBufferPtr* newBuffer = NULL;
+    GMemSize newBufferBodySize = oldBufData->elementSize * newCapacity;
+    GMemSize newSize = dataSize + newBufferBodySize;
+    newBuffer = glh_malloc(newSize);
     
-    if(buf->buffer != NULL)
+    if(newBuffer != NULL)
     {
-        glh_memcpy(buf->buffer, oldBuffer, buf->bufferSize);
-        buf->capacity = newCapacity;
-        buf->bufferSize = newSize;
+        // Memcpy the new data...
+        glh_memcpy(newBuffer, oldBufData, dataSize);
+        
+        GBufferData* newBufData = data(newBuffer);
+        newBufData->capacity = newCapacity;
+        newBufData->bufferBodySize = newBufferBodySize;
+        newBufData->bufferBody = newBuffer + dataSize;
+        newBufData->bufferSize = newSize;
+        
+        // Memset this friend.
+        glh_memset(newBufData->bufferBody, 0, newBufData->bufferBodySize);
+    
+        // Memcpy the old buffer body to the new buffer body.
+        glh_memcpy(newBufData->bufferBody, oldBufData->bufferBody, oldBufData->bufferBodySize);
+
         glh_free(oldBuffer);
         
-        if( buf->bufferResizeCallback != NULL)
+        buf->bufferPtr = newBuffer;
+        
+        if( newBufData->bufferResizeCallback != NULL)
         {
-            buf->bufferResizeCallback(buf->bufferResizeCallbackTarget);
+            newBufData->bufferResizeCallback(newBufData->bufferResizeCallbackTarget);
         }
         
         return true;
-    }
-    else
-    {
-        buf->buffer = oldBuffer;
     }
     
     return false;
@@ -167,36 +228,44 @@ bool buffer_grow(GBuffer* buf, GUInt newCapacity)
 // Sets whether the buffer should auto resize.
 void buffer_set_shouldautoresize(GBuffer* buf, bool shouldAutoResize)
 {
-    buf->isAutoResize = shouldAutoResize;
+    GBufferData* bufData = data(buf);
+    bufData->isAutoResize = shouldAutoResize;
 }
 
 // Sets the buffer autogrow amount (0 means the buffer will duplicate in size)
 void buffer_set_autogrow_amount(GBuffer* buf, GUInt newAutoGrowAmount)
 {
-    buf->autoGrowAmount = newAutoGrowAmount;
+    GBufferData* bufData = data(buf);
+    bufData->autoGrowAmount = newAutoGrowAmount;
 }
 
 // Returns the new size for the buffer should it autogrow.
 GUInt buffer_get_autogrow_amount(GBuffer* buf)
 {
-    if(buf->autoGrowAmount == 0)
+    GBufferData* bufData = data(buf);
+    if(bufData->autoGrowAmount == 0)
     {
-        return buf->capacity * 2;
+        return bufData->capacity * 2;
     }
     
-    return buf->autoGrowAmount;
+    return bufData->autoGrowAmount;
 }
 
 // Makes space for an element and returns the pointer for that element's place in the buffer.
 void* buffer_makespace(GBuffer* buf, GUInt atIndex)
 {
-    if(buf->count >= buf->capacity)
+    GBufferData* bufData = data(buf);
+    if(bufData->count >= bufData->capacity)
     {
-        if(buf->isAutoResize)
+        if(bufData->isAutoResize)
         {
             if(!buffer_grow(buf, buffer_get_autogrow_amount(buf)))
             {
                 return NULL;
+            }
+            else
+            {
+                bufData = data(buf); // Ptr to the data changed!
             }
         }
         else
@@ -205,32 +274,37 @@ void* buffer_makespace(GBuffer* buf, GUInt atIndex)
         }
     }
     
-    if(atIndex > buf->count)
+    if(atIndex > bufData->count)
     {
         return NULL;
     }
     
-    if(atIndex < (buf->count) )
+    if(atIndex < (bufData->count) )
     {
         //Make space for the element...
-        GMemSize movesize = buf->count - atIndex;
-        glh_memmove(buf->buffer + (buf->elementSize * (atIndex + 1)), buf->buffer + (buf->elementSize * atIndex),movesize * buf->elementSize);
-        glh_memset(buf->buffer + (buf->elementSize * atIndex), 0, atIndex);
-        buffer_runElementsMovedCallback(buf);
+        GMemSize movesize = bufData->count - atIndex;
+        glh_memmove(bufData->bufferBody + (bufData->elementSize * (atIndex + 1)), bufData->bufferBody + (bufData->elementSize * atIndex),movesize * bufData->elementSize);
+        glh_memset(bufData->bufferBody + (bufData->elementSize * atIndex), 0, atIndex);
+        
+        if( bufData->bufferElementsMovedCallback != NULL)
+        {
+            bufData->bufferElementsMovedCallback(bufData->bufferElementsMovedCallbackTarget);
+        }
     }
     
-    buf->count++;
+    bufData->count++;
     
-    return buf->buffer + (buf->elementSize * atIndex);
+    return bufData->bufferBody + (bufData->elementSize * atIndex);
 }
 
 // Sets a callback for the buffer to call whenever it resizes.
 bool buffer_addresizecallback(GBuffer* buf, GBufferCallback callback, void* target)
 {
-    if( buf->bufferResizeCallback == NULL && buf->bufferResizeCallbackTarget == NULL)
+    GBufferData* bufData = data(buf);
+    if( bufData->bufferResizeCallback == NULL && bufData->bufferResizeCallbackTarget == NULL)
     {
-        buf->bufferResizeCallback = callback;
-        buf->bufferResizeCallbackTarget = target;
+        bufData->bufferResizeCallback = callback;
+        bufData->bufferResizeCallbackTarget = target;
         return true;
     }
     
@@ -240,10 +314,11 @@ bool buffer_addresizecallback(GBuffer* buf, GBufferCallback callback, void* targ
 // Sets a callback for the buffer to call whenever the elements inside it are moved around.
 bool buffer_addelementsmovedcallback(GBuffer* buf, GBufferCallback callback, void* target)
 {
-    if( buf->bufferElementsMovedCallback == NULL && buf->bufferElementsMovedCallbackTarget == NULL)
+    GBufferData* bufData = data(buf);
+    if( bufData->bufferElementsMovedCallback == NULL && bufData->bufferElementsMovedCallbackTarget == NULL)
     {
-        buf->bufferElementsMovedCallback = callback;
-        buf->bufferElementsMovedCallbackTarget = target;
+        bufData->bufferElementsMovedCallback = callback;
+        bufData->bufferElementsMovedCallbackTarget = target;
         return true;
     }
     
@@ -252,6 +327,12 @@ bool buffer_addelementsmovedcallback(GBuffer* buf, GBufferCallback callback, voi
 
 bool buffer_free(GBuffer* buf)
 {
-    glh_free(buf->buffer);
-    buf->buffer = NULL;
+    GBufferData* bufData = data(buf);
+    
+    // Memset so it's obvious when stuff is dealloc.
+#if GALAH_DEBUG
+    glh_memset(buf->bufferPtr, 0, bufData->bufferSize);
+#endif
+    glh_free(buf->bufferPtr);
+    buf->bufferPtr = NULL;
 }
