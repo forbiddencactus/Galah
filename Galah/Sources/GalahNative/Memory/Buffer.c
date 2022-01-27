@@ -301,12 +301,10 @@ void* buffer_makespace(GBuffer* buf, GUInt atIndex)
 bool buffer_addresizecallback(GBuffer* buf, GBufferCallback callback, void* target)
 {
     GBufferData* bufData = data(buf);
-    if( bufData->bufferResizeCallback == NULL && bufData->bufferResizeCallbackTarget == NULL)
-    {
-        bufData->bufferResizeCallback = callback;
-        bufData->bufferResizeCallbackTarget = target;
-        return true;
-    }
+
+    bufData->bufferResizeCallback = callback;
+    bufData->bufferResizeCallbackTarget = target;
+    return true;
     
     return false;
 }
@@ -315,12 +313,10 @@ bool buffer_addresizecallback(GBuffer* buf, GBufferCallback callback, void* targ
 bool buffer_addelementsmovedcallback(GBuffer* buf, GBufferCallback callback, void* target)
 {
     GBufferData* bufData = data(buf);
-    if( bufData->bufferElementsMovedCallback == NULL && bufData->bufferElementsMovedCallbackTarget == NULL)
-    {
-        bufData->bufferElementsMovedCallback = callback;
-        bufData->bufferElementsMovedCallbackTarget = target;
-        return true;
-    }
+
+    bufData->bufferElementsMovedCallback = callback;
+    bufData->bufferElementsMovedCallbackTarget = target;
+    return true;
     
     return false;
 }

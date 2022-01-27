@@ -33,9 +33,6 @@ struct BufferCore
         }
     }
     
-    let BufferResizedEvent = PtrEvent<BufferCore>();
-    let BufferElementsMovedEvent = PtrEvent<BufferCore>();
-    
     // Inits this buffer.
     init(withInitialCapacity: Int, withType: Any.Type) throws
     {
@@ -47,9 +44,6 @@ struct BufferCore
         {
             throw ContiguousMutableBufferError.AllocError;
         }
-
-        buffer_addresizecallback(&Buffer, OnBufferResized,  unsafeBitCast(self, to: UnsafeMutableRawPointer.self));
-        buffer_addelementsmovedcallback(&Buffer, OnBufferElementsMoved, unsafeBitCast(self, to: UnsafeMutableRawPointer.self));
     }
     
     // Inits this buffer with a copy of the supplied buffer. Events are copied as-is.
@@ -62,30 +56,24 @@ struct BufferCore
         {
             throw ContiguousMutableBufferError.AllocError;
         }
-        
-        buffer_addresizecallback(&Buffer, OnBufferResized, unsafeBitCast(self, to: UnsafeMutableRawPointer.self));
-        buffer_addelementsmovedcallback(&Buffer, OnBufferElementsMoved, unsafeBitCast(self, to: UnsafeMutableRawPointer.self));
-    }
-    
-    // Callback for when a buffer resizes.
-    func BufferResized()
-    {
-        
-    }
-    
-    // Callback for when a buffer's elements move.
-    func BufferElementsMoved()
-    {
-        
     }
 }
 
-internal protocol GBufferProtocol: Boxable
+internal protocol GBufferListenerProtocol
+{
+    // Callback for when a buffer resizes, should you choose to set it up.
+    func OnBufferResized();
+    
+    // Callback for when a buffer's elements move, should you choose to set it up.
+    func OnBufferElementsMoved();
+}
+
+internal protocol GBufferProtocol: GBufferListenerProtocol, Boxable
 {
     // The type the buffer will work with. Not always the type of the object contained!
     associatedtype WorkingBufferType;
     
-    var Base: BufferCore { get set}
+    var Base: BufferCore { get set }
 }
 
 internal extension GBufferProtocol
@@ -120,14 +108,17 @@ internal extension GBufferProtocol
     {
         GuaranteeUnique();
         
-        let index = Int(buffer_add(&Base.Buffer, &obj));
-        if(index == -1)
+        let ptr = buffer_makespace(&Base.Buffer, GUInt(Count));
+        
+        if(ptr == nil)
         {
             throw ContiguousMutableBufferError.AllocError;
         }
+
+        galah_copyValue(dest: ptr!, source: &obj, type: ElementType);
         
         UpdateBox();
-        return index;
+        return Count - 1;
     }
      
     // Makes space for the element at index (by pushing existing elements further back), then copies the object into the position at index.
@@ -139,10 +130,15 @@ internal extension GBufferProtocol
         }
         
         GuaranteeUnique();
-        if(buffer_insert(&Base.Buffer, &obj, GUInt(index)) == -1)
+        let ptr = buffer_makespace(&Base.Buffer, GUInt(index));
+        
+        if(ptr == nil)
         {
             throw ContiguousMutableBufferError.AllocError;
         }
+
+        galah_copyValue(dest: ptr!, source: &obj, type: ElementType);
+        
         UpdateBox();
     }
     
@@ -162,12 +158,7 @@ internal extension GBufferProtocol
     
     // Clears the buffer.
     mutating func Clear()
-    {
-        for i in 0..<Count
-        {
-            // self.ReleaseAtIndex(i);
-        }
-        
+    {        
         GuaranteeUnique();
         buffer_remove_range(&Base.Buffer, 0, GUInt(Count - 1));
         UpdateBox();
@@ -203,6 +194,12 @@ internal extension GBufferProtocol
         UpdateBox();
     }
     
+    mutating func SetupInternalCallbacks()
+    {
+        buffer_addresizecallback(&Base.Buffer, ExternBufferResized,  unsafeBitCast(self, to: UnsafeMutableRawPointer.self));
+        buffer_addelementsmovedcallback(&Base.Buffer, ExternBufferElementsMoved, unsafeBitCast(self, to: UnsafeMutableRawPointer.self));
+    }
+    
     // Manually deallocs the buffer. This buffer won't work anymore afterwards.
     mutating func DeallocBuffer()
     {
@@ -222,12 +219,16 @@ struct Buffer<T>: GBufferProtocol
     var Base: BufferCore { get { return Core; } set { Core = newValue; } }
     var BoxContainer: Box<Buffer<T>>? = nil;
 
+    var BufferResizedEvent = PtrEvent<Buffer<T>>();
+    var BufferElementsMovedEvent = PtrEvent<Buffer<T>>();
     
     // Inits this buffer.
     init(withInitialCapacity: Int = Int(GSETTINGS_CONSTANTS_DEFAULTBUFFERCAPACITY), withType: Any.Type = T.self) throws
     {
         Core = try BufferCore(withInitialCapacity: withInitialCapacity, withType: withType);
         BoxContainer = Box<Buffer<T>>(self);
+        
+        SetupInternalCallbacks();
     }
     
     // Inits this buffer with a copy of the supplied buffer. Events are copied as-is.
@@ -235,6 +236,20 @@ struct Buffer<T>: GBufferProtocol
     {
         Core = try BufferCore(withCopyOf: &withCopyOf.Core);
         BoxContainer = Box<Buffer<T>>(self);
+        
+        SetupInternalCallbacks();
+    }
+    
+    // Callback for when a buffer resizes, should you choose to set it up.
+    func OnBufferResized()
+    {
+        
+    }
+    
+    // Callback for when a buffer's elements move, should you choose to set it up.
+    func OnBufferElementsMoved()
+    {
+        
     }
     
     // Boxable.
@@ -252,6 +267,8 @@ struct Buffer<T>: GBufferProtocol
     {
         Core = data.Core;
         BoxContainer = data.BoxContainer;
+        
+        SetupInternalCallbacks();
     }
     
     func GetBox() -> Box<Buffer<T>>
@@ -272,7 +289,6 @@ struct Buffer<T>: GBufferProtocol
     mutating func Dealloc()
     {
         buffer_free(&Core.Buffer);
-
     }
 }
 
@@ -295,6 +311,7 @@ public struct RawBuffer: GBufferProtocol
         Core = try BufferCore(withInitialCapacity: withInitialCapacity, withType: withType);
         BoxContainer = Box<RawBuffer>(self);
 
+        SetupInternalCallbacks();
     }
     
     // Inits this buffer with a copy of the supplied buffer. Events are copied as-is.
@@ -302,6 +319,20 @@ public struct RawBuffer: GBufferProtocol
     {
         Core = try BufferCore(withCopyOf: &withCopyOf.Core);
         BoxContainer = Box<RawBuffer>(self);
+        
+        SetupInternalCallbacks();
+    }
+    
+    // Callback for when a buffer resizes, should you choose to set it up.
+    func OnBufferResized()
+    {
+        
+    }
+    
+    // Callback for when a buffer's elements move, should you choose to set it up.
+    func OnBufferElementsMoved()
+    {
+        
     }
     
     // Boxable.
@@ -319,6 +350,8 @@ public struct RawBuffer: GBufferProtocol
     {
         Core = data.Core;
         BoxContainer = data.BoxContainer;
+        
+        SetupInternalCallbacks();
     }
     
     func GetBox() -> Box<RawBuffer>
@@ -343,16 +376,16 @@ public struct RawBuffer: GBufferProtocol
     }
 }
 
-private func OnBufferResized(_ target: UnsafeMutableRawPointer?)
+private func ExternBufferResized(_ target: UnsafeMutableRawPointer?)
 {
-    let swiftBuff: UnsafeMutablePointer<BufferCore> = Cast(target);
-    swiftBuff.pointee.BufferResized();
+    let swiftBuff: GBufferListenerProtocol = Cast(target);
+    swiftBuff.OnBufferResized();
 }
 
-private func OnBufferElementsMoved(_ target: UnsafeMutableRawPointer?)
+private func ExternBufferElementsMoved(_ target: UnsafeMutableRawPointer?)
 {
-    let swiftBuff: UnsafeMutablePointer<BufferCore> = Cast(target);
-    swiftBuff.pointee.BufferElementsMoved();
+    let swiftBuff: GBufferListenerProtocol = Cast(target);
+    swiftBuff.OnBufferElementsMoved();
 }
 
 public enum ContiguousMutableBufferError: Error

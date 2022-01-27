@@ -19,8 +19,8 @@ public final class Node: GObject
     public var
     name: String = "Node";
     
-    internal var
-    nodeIndex = NodeIndex();
+    //internal var
+    //nodeIndex = NodeIndex();
     
     internal var
     components = Array<Component>();

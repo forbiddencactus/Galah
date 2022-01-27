@@ -44,7 +44,7 @@ internal func galah_placementNew(type: Any.Type, ptr: Ptr<VoidPtr>) throws -> An
     return unsafeBitCast(value, to: AnyObject.self);
 }
 
-internal func galah_copyValue(dest: Ptr<VoidPtr>, source: Ptr<VoidPtr>, type: Any.Type)
+internal func galah_copyValue(dest: UnsafeMutableRawPointer, source: UnsafeMutableRawPointer, type: Any.Type)
 {
     let kind = Kind(type: type)
     
@@ -81,7 +81,7 @@ internal func galah_copyValue(dest: Ptr<VoidPtr>, source: Ptr<VoidPtr>, type: An
             break; // Do nothing?
     }
     
-    _ = valueWitnessPtr!.pointee.assignWithCopy(dest.raw!, source.raw!, metadataPtr!);
+    _ = valueWitnessPtr!.pointee.assignWithCopy(dest, source, metadataPtr!);
 }
 
 internal func galah_runDestructor(obj: AnyObject)

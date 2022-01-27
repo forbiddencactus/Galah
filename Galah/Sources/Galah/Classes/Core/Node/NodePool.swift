@@ -2,7 +2,7 @@
 //
 // This source file is part of the Galah open source game engine.
 //
-// Copyright © 2020, 2021, the Galah contributors.
+// Copyright © 2020 - 2022, the Galah contributors.
 //
 // Licensed under the MIT Licence.
 //
@@ -13,31 +13,124 @@
 // galah-engine.org | https://github.com/forbiddencactus/Galah
 //--------------------------------------------------------------------------//
 // NodePool is the class in charge of organising node batches to iterate over.
-// Inspired by all the various archetype based entity component systems.
+// Inspired by all the awesome work on ECS systems out there.
 
-
-// Index for Nodes. Used by handles. Inspo from: https://gamesfromwithin.com/managing-data-relationships
-internal struct NodeIndex
+// Unique id for a node. Packed into a convenient word sized package!
+internal struct NodeID
 {
-    internal var counter: UInt16; // The number of times this particular index has been reused.
-    internal var archetypeIndex: UInt16; // Which archetype this instance belongs to.
-    internal var instanceIndex: UInt32; //The index of the instance, inside the buffer.
+    internal let id: UInt32;
+    internal let reuseCounter: UInt16; // The number of times this index has been reused.
+    internal let componentIndex: UInt8; // The index of the component we're pointing to, if we're pointing to one. Otherwise, 0.
+    internal let metadata: UInt8; // ??? 8 bits of empty space for whatever.
     
     init()
     {
-        counter = UInt16.max;
+        id = UInt32.max;
+        componentIndex = UInt8.max;
+        reuseCounter = UInt16.max;
+        metadata = UInt8.max;
+    }
+}
+
+// Path to the memory location of a node, or component.
+internal struct NodePath
+{
+    internal var instanceIndex: UInt32; // The index of the instance, inside the buffer.
+    internal var archetypeIndex: UInt16; // Which archetype this instance belongs to.
+    internal var componentIndex: UInt16; // The index of the component, if we're pointing to one.
+    
+    init()
+    {
+        // Invalid indices always have their values maxed out.
         archetypeIndex = UInt16.max;
         instanceIndex = UInt32.max;
+        componentIndex = UInt16.max;
     }
     
     func IsValid() -> Bool
     {
-        if(counter == UInt16.max || archetypeIndex == UInt16.max || instanceIndex == UInt32.max)
+        if(componentIndex == UInt16.max || archetypeIndex == UInt16.max || instanceIndex == UInt32.max)
         {
             return false;
         }
         
         return true;
+    }
+}
+
+// Tree structure of all the possible permutations of component types. Used to attempt to minimise the amount of archetype fragmentation by nodes that mutate a lot.
+// Given a soup of types (including duplicate types), by trawling through this structure, one can determine a preferred sort order for these types.
+class NodeComponentOrderTree
+{
+    class NodeComponentOrderBranch
+    {
+        var Types = Array<HashableType<Component>>();
+        var Branches = Array<NodeComponentOrderBranch>();
+    }
+    
+    let Root = NodeComponentOrderBranch();
+    
+    // Returns the ideal order for the given components, or stores a new ideal order if the given component block is unknown.
+    func GetOrderedArrayFromUnorderedComponentArray(_ unorderedComponentArray: Array<HashableType<Component>>) -> Array<HashableType<Component>>
+    {
+        var localUnorderedComponentArray = unorderedComponentArray;
+        var currentBranch: NodeComponentOrderBranch? = Root;
+        
+        var returnArray = Array<HashableType<Component>>();
+        
+        if(unorderedComponentArray.count > 0)
+        {
+            while (currentBranch != nil)
+            {
+                var found = false;
+                for elementIndex in 0...currentBranch!.Types.count
+                {
+                    for testElementIndex in 0...localUnorderedComponentArray.count
+                    {
+                        let testElement = localUnorderedComponentArray[testElementIndex];
+                        if( currentBranch!.Types[elementIndex] == testElement )
+                        {
+                            returnArray.append(currentBranch!.Types[elementIndex]);
+                            localUnorderedComponentArray.remove(at: testElementIndex);
+                            
+                            if(localUnorderedComponentArray.count > 0)
+                            {
+                                currentBranch = currentBranch!.Branches[elementIndex];
+                            }
+                            else
+                            {
+                                currentBranch = nil;
+                            }
+                            
+                            found = true;
+                            break;
+                        }
+                    }
+                    
+                    if(found)
+                    {
+                        break;
+                    }
+                }
+                
+                // None of the elements in the branch matched the unordered array, dump out the rest of the values for now...
+                if(!found)
+                {
+                    for element in localUnorderedComponentArray
+                    {
+                        let newBranch = NodeComponentOrderBranch();
+                        returnArray.append(element);
+                        currentBranch!.Types.append(element);
+                        currentBranch!.Branches.append(newBranch);
+                        currentBranch = newBranch;
+                    }
+                    
+                    currentBranch = nil;
+                }
+            }
+        }
+        
+        return returnArray;
     }
 }
 
@@ -53,443 +146,19 @@ internal struct NodeArchetype
     internal var Nodes = try! Buffer<Node>();
     //internal var Components = ContiguousDictionary<HashableType<Component>,Buffer<Component>>();
 }
-/*internal class NodeArchetype: GObject
-{
-    internal var ComponentTypes = Dictionary<HashableType<Component>, Int>();
-    internal var ComponentTypeArray = Array<HashableType<Component>>();
-    internal var ArchetypeTags = Dictionary<HashableType<Component>, String>();
-    internal var Depth: Int = 0;
-    internal var Tag: String = "NULL";
-    
-
-    
-    @discardableResult
-    public static func ConstructArchetype(nodeForArchetype: Node, constructAt: Ptr<NodeArchetype>) -> NodeArchetype
-    {
-        
-    }
-    
-}*/
 
 // NEW IDEA: contiguous buffers still, but this time only organised by 'tag'. There can be a tag for depth, material texture, whatever.
 internal class NodePool
 {
-    internal func GetInstance<T>(handle: Hnd<T>) -> T?
+    internal func GetNode(id: NodeID) -> Node?
+    {
+        return nil;
+    }
+    
+    internal func GetNode(id: NodePath) -> Node?
     {
         return nil;
     }
     
 
 }
-
-// TODO: use the indices to pack a bitfield pointing directly to the data?
-// TODO: Rewrite this abomination in C, in Swift it's just horrendous and probably slow.
-/*internal class NodePool
-{
-    private static let poolSizes: Int = 16;
-    static let sharedInstance: NodePool = Director.sharedInstance.nodePool;
-    
-    // NodeIndex acts as an internal index to locate nodes and their components in the batches.
-    private var
-    nodeIndex: UInt8 = 0;
-    private var
-    reuseCache = Array<NodeIndex>();
-    
-    private var
-    lookupTable = Dictionary<UInt8, NodeTable>();
-    
-    // PassBatches are batches per-pass of objects to render, like opaque, transparent, blah.
-    private var
-    passBatches = Dictionary<String,PassBatch>();
-    
-    // Scratch buffers:
-    // At the end of each frame, Nodes are moved to their most appropriate batches.
-    
-    // Component scratch buffers are where newly created components go.
-    private var
-    componentScratchBuffer: Dictionary<HashableType<Component>,RawBuffer>;
-    
-    // Node scratch buffers are where newly created nodes go.
-    private let
-    nodeScratchBuffer: RefBuffer<Node>;
-    
-    // Nodes whose depth or subarchetype types have changed get marked here.
-    private var
-    nodeDirtyBucket: Array<Node>;
-    
-    internal init()
-    {
-    }
-    
-    // Creates a node.
-    internal func CreateNode(transformType: Transform.Type) -> Node?
-    {
-        let nodeIndex = self.GetNewNodeIndex();
-        let ptr: Ptr<Node>;
-        
-        do
-        {
-            ptr = try Cast(nodeScratchBuffer.MakeSpace(nodeScratchBuffer.Count));
-        }
-        catch
-        {
-            return nil;
-        }
-        
-        let newNode: Node? = GObject.Construct(ptr)!;
-        if(newNode == nil) { return nil; }
-        
-        lookupTable[nodeIndex.index] = NodeTable(index: nodeIndex, node: newNode!, components: Array<Component>());
-        self.UpdateNode(node: newNode!, table: lookupTable[nodeIndex.index]!);
-        
-        self.AddComponent(componentType: transformType, node: nodeIndex);
-        
-        return newNode;
-    }
-    
-    // Updates a node with data from the specified table.
-    internal func UpdateNode(node: Node, table: NodeTable)
-    {
-        node.nodeIndex = table.index;
-        node.components = table.components;
-    }
-    
-    // Adds a component to a node.
-    @discardableResult
-    internal func AddComponent(componentType: Component.Type, node: NodeIndex) -> Component?
-    {
-        var table: NodeTable? = lookupTable[node.index];
-        if(table == nil || table!.index.counter != node.counter) { return nil; }
-        
-        let componentIndex: ComponentIndex = ComponentIndex(table!.components.count);
-        
-        let ptr: Ptr<VoidPtr>;
-        
-        do
-        {
-            let buffer: ContiguousMutableBuffer? = componentScratchBuffer[componentType];
-            
-            if(buffer == nil)
-            {
-                componentScratchBuffer[componentType] = try AllocContiguousBuffer(type: componentType);
-            }
-            
-            ptr = try buffer!.MakeSpace(buffer!.Count);
-        }
-        catch
-        {
-            return nil;
-        }
-        
-        let newComponent: Component? = GObject.Construct(type: componentType,ptr: ptr) as! Component?;
-        if(newComponent == nil) { return nil;}
-        
-        newComponent!.componentIndex = componentIndex;
-        self.UpdateComponent(component: newComponent!, table: table!);
-        
-        table!.components.append(newComponent!);
-        
-        table!.RefreshComponentTypes();
-        
-        lookupTable[node.index] = table!;
-        
-        self.UpdateNode(node: table!.node, table: table!);
-        
-        return newComponent;
-    }
-    
-    // Updates a component with data from the specified table.
-    internal func UpdateComponent(component: Component, table: NodeTable)
-    {
-        component.nodeIndex = table.node.nodeIndex;
-        component.node = table.node;
-    }
-    
-    // Gets a node from the lookup table.
-    internal func GetNode(_ index: NodeIndex) -> Node?
-    {
-        let item: NodeTable? = lookupTable[index.index];
-        
-        if( item?.index.counter == index.counter)
-        {
-            return item?.node;
-        }
-    }
-
-    // Removes a node from the lookup table.
-    internal func RemoveNode(_ index: NodeIndex)
-    {
-        let item: NodeTable? = lookupTable[index.index];
-        var reuseIndex = index;
-        
-        if( item?.index.counter == index.counter)
-        {
-            lookupTable.removeValue(forKey: index.index);
-        }
-        
-        reuseIndex.counter += 1;
-        reuseCache.append(reuseIndex);
-    }
-    
-    // Trawls through the scratch buffers and places nodes and their components in the correct archetype. 
-    internal func UpdateNodePool()
-    {
-        // Our update scratch space.
-        var updateScratchSpace = Dictionary<UInt8, NodeTable>();
-        
-        // First, trawl through the node scratch space...
-        for i in 0..<nodeScratchBuffer.Count
-        {
-            // We'll use both the existing lookupTable and this scratch space to determine what lives where.
-            let node: Node = try! nodeScratchBuffer.ItemAt(i);
-            updateScratchSpace[node.nodeIndex.index] = NodeTable(index: node.nodeIndex, node: node);
-        }
-                        
-        // Then, trawl through the component scratch space, and add nodes.
-        for compType in componentScratchBuffer.keys
-        {
-            let compBuff = componentScratchBuffer[compType]! as! ContiguousMutableBufferT<Component>
-            for i in 0..<compBuff.Count
-            {
-                let component: Component = try! compBuff.ItemAt(i)!;
-                var updateTable: NodeTable? = updateScratchSpace[component.nodeIndex.index];
-                let parentNode: Node = component.Node;
-                
-                if(updateTable == nil)
-                {
-                    updateTable = NodeTable(index: parentNode.nodeIndex, node: parentNode);
-                }
-                
-                updateTable!.components.append(component);
-                
-                updateScratchSpace[parentNode.nodeIndex.index] = updateTable!;
-            }
-        }
-        
-        // At this point, we should have a list of what nodes and their components need to be updated.
-        // We should have also have an idea of where they live.
-        
-        for nodetable in updateScratchSpace.values
-        {
-            let passIndex = nodetable.node.GetPassIndex();
-            var node = nodetable.node;
-            let subBatchIndex = nodetable.node.GetSubArchetypeBatchIndex();
-            var masterTable = lookupTable[nodetable.index.index]!;
-            
-            if(passBatches[passIndex] == nil)
-            {
-                passBatches[passIndex] = PassBatch(Index: passIndex);
-            }
-            
-            let depthIndex = passBatches[passIndex]!.GetIndexForDepth(depth: nodetable.node.Depth);
-            
-            if(passBatches[passIndex]!.DepthBatches[depthIndex].ArchetypeBatch[masterTable.componentTypes] == nil)
-            {
-                let archeType = NodeArchetype.CreateArchetype(nodeTable: masterTable);
-                passBatches[passIndex]!.DepthBatches[depthIndex].ArchetypeBatch[nodetable.componentTypes] = archeType;
-            }
-        if(passBatches[passIndex]!.DepthBatches[depthIndex].ArchetypeBatch[masterTable.componentTypes]?.SubArchetypeBatch[subBatchIndex] == nil)
-            {
-                let subArchetypeBatch = SubArchetypeBatch(batchID: subBatchIndex);
-            passBatches[passIndex]!.DepthBatches[depthIndex].ArchetypeBatch[masterTable.componentTypes]?.SubArchetypeBatch[subBatchIndex] = subArchetypeBatch;
-            }
-            
-            let index: Int = try! (passBatches[passIndex]!.DepthBatches[depthIndex].ArchetypeBatch[masterTable.componentTypes]?.SubArchetypeBatch[subBatchIndex]!.NodeBuffer.Add(node))!;
-            
-            node.HasBeenCopied();
-            try! passBatches[passIndex]!.DepthBatches[depthIndex].ArchetypeBatch[masterTable.componentTypes]!.SubArchetypeBatch[subBatchIndex]!.NodeBuffer.ItemAt(index)!.IsCopied();
-            
-            if(!masterTable.nodeParentBuffer.IsNull())
-            {
-                // There's an existing owning buffer which owns this node.
-                masterTable.nodeParentBuffer.RunFunc
-                {
-                    try! $0.NodeBuffer.Remove(masterTable.nodeParentBufferIndex);
-                }
-            }
-            else
-            {
-                // The node lives in the scratch buffer.
-            }
-            
-            /*for component in masterTable.components
-            {
-                // A horrendous brute force solution.
-                // TODO: In contiguousmutablebuffer, we can probably do some pointer magic to ameliorate this?
-                var contains: Bool = false;
-
-                for theComponent in updateScratchSpace[node.nodeIndex.index]!.components
-                {
-                    if( theComponent == component)
-                    {
-                        contains = true;
-                    }
-                }
-                
-                if(!contains)
-                {
-                    passBatches[passIndex]!.DepthBatches[depthIndex].ArchetypeBatch[masterTable.componentTypes]!.SubArchetypeBatch[subBatchIndex]!.BatchMembers[component.self].;
-                    masterTable.nodeParentBuffer.RunFunc {$0.BatchMembers}
-                }
-            }*/
-            
-            nodeScratchBuffer.Clear();
-            componentScratchBuffer.removeAll();
-            
-        }
-    }
-    
-    internal func MarkDirty(node: Node)
-    {
-        nodeDirtyBucket.append(node);
-    }
-    
-    private func AllocContiguousBuffer(type: GObject.Type) throws -> RawBuffer
-    {
-        return try RawBuffer(withInitialCapacity: NodePool.poolSizes, withType: type);
-    }
-    
-    // Returns a unique object index for a new object.
-    private func GetNewNodeIndex() -> NodeIndex
-    {
-        if( reuseCache.count > 0 )
-        {
-            let index = reuseCache.last!;
-            reuseCache.removeLast();
-            return index;
-        }
-        else
-        {
-            if(nodeIndex < UInt8.max)
-            {
-                let index = NodeIndex(index: nodeIndex, counter: UInt8.zero);
-                nodeIndex += 1;
-                return index;
-            }
-            else
-            {
-                // Uh... you have WAY too many objects.
-                fatalError();
-                return NodeIndex();
-            }
-        }
-    }
-
-    // Sort batches by BatchId (material type, texture, etc).
-    struct SubArchetypeBatch
-    {
-        public var NodeBuffer = try! ContiguousMutableBufferT<Node>(withInitialCapacity: 16);
-        public var BatchId: String;
-        public var BatchMembers = Dictionary<HashableType<GObject>, ContiguousMutableBuffer>();
-        
-        public init(batchID: String)
-        {
-            self.BatchId = batchID;
-        }
-        
-        public func GetComponentForNodeExists(nodeBatchIndex: Int, componentIndex: ComponentIndex) -> Bool
-        {
-            return false;
-        }
-    }
-    
-    // Sort batches by archetypes of nodes with exactly the same components.
-    struct NodeArchetype
-    {
-        public var SubArchetypeBatch: Dictionary<String,SubArchetypeBatch>;
-        public var ComponentBatchTypes: Dictionary<HashableType<Component>, Int>;
-        public var ComponentBatchTypeArray: Array<HashableType<Component>>;
-        
-        // Create an archetype for the specified nodetable.
-        public static func CreateArchetype(nodeTable: NodeTable) -> NodeArchetype
-        {
-            var allTypes = Dictionary<HashableType<Component>, Int>();
-            
-            for componentType in nodeTable.componentTypes
-            {
-                if(allTypes[componentType] == nil)
-                {
-                    allTypes[componentType] = 1;
-                }
-                else
-                {
-                    allTypes[componentType]! += 1;
-                }
-                
-                var type = ClassMetadata(type: componentType.base);
-                
-                var hasSuper = true;
-                while(hasSuper)
-                {
-                    let theSuper = type.superClassMetadata();
-                    if(theSuper != nil)
-                    {
-                        type = theSuper!.asClassMetadata()!;
-                        let fType = HashableType<Component>(unsafeBitCast(type.pointer, to: Component.Type.self));
-
-                        if(allTypes[fType] == nil)
-                        {
-                            allTypes[fType] = 1;
-                        }
-                        else
-                        {
-                            allTypes[fType]! += 1;
-                        }
-                    }
-                    else
-                    {
-                        hasSuper = false;
-                    }
-                }
-
-            }
-            
-            return NodeArchetype(SubArchetypeBatch: Dictionary<String,SubArchetypeBatch>(), ComponentBatchTypes: allTypes, ComponentBatchTypeArray: nodeTable.componentTypes);
-        }
-
-    }
-    
-    // Sort batches by depth
-    struct DepthBatch
-    {
-        public let Depth: Int;
-        public var ArchetypeBatch: Dictionary<Array<HashableType<Component>>,NodeArchetype>;
-    }
-    
-    // PassBatches are batches per-pass of objects to render, like opaque, transparent, blah.
-    struct PassBatch
-    {
-        public let Index: String;
-        public var DepthBatches = Array<DepthBatch>();
-        
-        // Returns the correct index for the supplied depth, creating it if required.
-        public func GetIndexForDepth(depth: Int) -> Int
-        {
-            
-        }
-    }
-    
-    struct NodeTable
-    {
-        // If this is null, node is childed to scratch buffers.
-        var nodeParentBuffer = Ptr<SubArchetypeBatch>.Null();
-        var nodeParentBufferIndex: Int = 0;
-        var index: NodeIndex;
-        var node: Node;
-        var components = Array<Component>();
-        var componentTypes = Array<HashableType<Component>>();
-
-        public mutating func RefreshComponentTypes()
-        {
-            componentTypes.removeAll(keepingCapacity: true);
-            
-            for component: Component in components
-            {
-                componentTypes.append(HashableType<Component>(type(of: component)));
-            }
-        }
-    }
-    
-    
-    
-}*/

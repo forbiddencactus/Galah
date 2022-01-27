@@ -19,8 +19,8 @@ import GalahNative.Types;
 typealias ComponentIndex = UInt8;
 open class Component: GObject
 {
-    internal var
-    nodeIndex = NodeIndex();
+    //internal var
+    //ånodeIndex = NodeIndex();
     
     internal var
     componentIndex: ComponentIndex = 0;
