@@ -15,49 +15,6 @@
 // NodePool is the class in charge of organising node batches to iterate over.
 // Inspired by all the awesome work on ECS systems out there.
 
-// Unique id for a node. Packed into a convenient word sized package!
-internal struct NodeID
-{
-    internal let id: UInt32;
-    internal let reuseCounter: UInt16; // The number of times this index has been reused.
-    internal let componentIndex: UInt8; // The index of the component we're pointing to, if we're pointing to one. Otherwise, 0.
-    internal let metadata: UInt8; // ??? 8 bits of empty space for whatever.
-    
-    init()
-    {
-        id = UInt32.max;
-        componentIndex = UInt8.max;
-        reuseCounter = UInt16.max;
-        metadata = UInt8.max;
-    }
-}
-
-// Path to the memory location of a node, or component.
-internal struct NodePath
-{
-    internal var instanceIndex: UInt32; // The index of the instance, inside the buffer.
-    internal var archetypeIndex: UInt16; // Which archetype this instance belongs to.
-    internal var componentIndex: UInt16; // The index of the component, if we're pointing to one.
-    
-    init()
-    {
-        // Invalid indices always have their values maxed out.
-        archetypeIndex = UInt16.max;
-        instanceIndex = UInt32.max;
-        componentIndex = UInt16.max;
-    }
-    
-    func IsValid() -> Bool
-    {
-        if(componentIndex == UInt16.max || archetypeIndex == UInt16.max || instanceIndex == UInt32.max)
-        {
-            return false;
-        }
-        
-        return true;
-    }
-}
-
 // Tree structure of all the possible permutations of component types. Used to attempt to minimise the amount of archetype fragmentation by nodes that mutate a lot.
 // Given a soup of types (including duplicate types), by trawling through this structure, one can determine a preferred sort order for these types.
 class NodeComponentOrderTree

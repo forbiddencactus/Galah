@@ -26,7 +26,7 @@ fileprivate struct Bucket
     }
 }
 
-/*public struct ContiguousDictionary<Key: Hashable, Value>
+public struct ContiguousDictionary<Key: Hashable, Value>
 {
     // Split the buffers to achieve better cache efficiency.
     private var _keyBuffer: Buffer<Key>;
@@ -43,7 +43,10 @@ fileprivate struct Bucket
         _valueBuffer = try! Buffer<Value>(withInitialCapacity: withIntialCapacity);
         _bucketArray = Array<Bucket>(repeating:Bucket(), count: Int(_keyBuffer.Capacity));
         
-        _keyBuffer.AutoGrowEvent.Subscribe(self, self.KeyBufferDidResize);
+        // Unsafe trickery to go around Swift's annoying safety rules. 
+        let ptrSelf: UnsafeMutablePointer<ContiguousDictionary<Key,Value>> = Cast(&self);
+        let theCallback: (inout Buffer<Key>) ->() = { ptrSelf.pointee.KeyBufferDidResize(&$0);};
+        ptrSelf.pointee._keyBuffer.BufferResizedEvent.Subscribe(&self, theCallback);
     }
     
     public mutating func AddKey(_ key: inout Key, _ value: inout Value)
@@ -52,7 +55,7 @@ fileprivate struct Bucket
         if(keyIndex == -1)
         {
             let keyIndex: Int = try!_keyBuffer.Add(&key);
-            try! _valueBuffer.Add(&value);
+            try! _ = _valueBuffer.Add(&value);
             
             let bucketIndex: Int = GetBucketIndex(key);
             
@@ -80,24 +83,21 @@ fileprivate struct Bucket
     }
     
     // TODO: See how fast this is.
-    public mutating func GetIndexForKey(_ key: Key) -> Int
+    public func GetIndexForKey(_ key: Key) -> Int
     {
         let bucketIndex: Int = GetBucketIndex(key);
 
         for index in _bucketArray[bucketIndex].indices
         {
             // Using pointers should avoid retain and copy hits.
-            let potentialKey: Ptr<Key> = Cast(try! _keyBuffer.PtrAt(index));
+            let potentialKey = try! _keyBuffer.ElementAt(index);
             var found: Bool = false;
 
-            potentialKey.RunFunc
+            if (potentialKey == key)
             {
-                if($0 == key)
-                {
-                    found = true;
-                }
+                found = true;
             }
-            
+
             if(found) { return index; }
         }
         
@@ -118,9 +118,9 @@ fileprivate struct Bucket
         }
     }
     
-    private mutating func KeyBufferDidResize(_ buffer: RawBuffer)
+    private mutating func KeyBufferDidResize(_ buffer: inout Buffer<Key>)
     {
         self.RefreshBuckets();
     }
 }
-*/
+

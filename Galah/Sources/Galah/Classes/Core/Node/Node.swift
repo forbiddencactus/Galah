@@ -14,7 +14,50 @@
 //--------------------------------------------------------------------------//
 // Nodes are the base object type that can be placed in scenes.
 
-public final class Node: GObject
+// Unique id for a node. Packed into a convenient word sized package!
+internal struct NodeID
+{
+    internal let id: UInt32;
+    internal let reuseCounter: UInt16; // The number of times this index has been reused.
+    internal let componentIndex: UInt8; // The index of the component we're pointing to, if we're pointing to one. Otherwise, 0.
+    internal let metadata: UInt8; // ??? 8 bits of empty space for whatever.
+    
+    init()
+    {
+        id = UInt32.max;
+        componentIndex = UInt8.max;
+        reuseCounter = UInt16.max;
+        metadata = UInt8.max;
+    }
+}
+
+// Path to the memory location of a node, or component.
+internal struct NodePath
+{
+    internal var instanceIndex: UInt32; // The index of the instance, inside the buffer.
+    internal var archetypeIndex: UInt16; // Which archetype this instance belongs to.
+    internal var componentIndex: UInt16; // The index of the component, if we're pointing to one.
+    
+    init()
+    {
+        // Invalid indices always have their values maxed out.
+        archetypeIndex = UInt16.max;
+        instanceIndex = UInt32.max;
+        componentIndex = UInt16.max;
+    }
+    
+    func IsValid() -> Bool
+    {
+        if(componentIndex == UInt16.max || archetypeIndex == UInt16.max || instanceIndex == UInt32.max)
+        {
+            return false;
+        }
+        
+        return true;
+    }
+}
+
+public struct Node
 {
     public var
     name: String = "Node";
@@ -22,8 +65,6 @@ public final class Node: GObject
     //internal var
     //nodeIndex = NodeIndex();
     
-    internal var
-    components = Array<Component>();
     
     /*public var Transform: Transform
     {
@@ -69,19 +110,19 @@ public final class Node: GObject
     //}
     
     
-    private func SetNewDepth(newDepth: Int)
+    private mutating func SetNewDepth(newDepth: Int)
     {
         _depth = newDepth;
         // NodePool.sharedInstance.MarkDirty(node: self);
     }
         
-    private func SetEnabled(isEnabled: Bool)
+    private mutating func SetEnabled(isEnabled: Bool)
     {
         _enabled = isEnabled;
         
-        for component in components
+        /*for component in components
         {
             component.OnEnable(willEnable: isEnabled);
-        }
+        }*/
     }
 }

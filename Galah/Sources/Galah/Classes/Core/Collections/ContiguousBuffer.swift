@@ -62,18 +62,35 @@ struct BufferCore
 internal protocol GBufferListenerProtocol
 {
     // Callback for when a buffer resizes, should you choose to set it up.
-    func OnBufferResized();
+    mutating func OnBufferResized();
     
     // Callback for when a buffer's elements move, should you choose to set it up.
-    func OnBufferElementsMoved();
+    mutating func OnBufferElementsMoved();
 }
 
-internal protocol GBufferProtocol: GBufferListenerProtocol, Boxable
+internal protocol GBufferProtocol: GBufferListenerProtocol, Boxable, Sequence
 {
     // The type the buffer will work with. Not always the type of the object contained!
     associatedtype WorkingBufferType;
     
     var Base: BufferCore { get set }
+}
+
+struct GBufferIterator<Buffer, WorkingBufferType>: IteratorProtocol where Buffer : GBufferProtocol
+{
+    let buffer: Buffer;
+    var count = 0;
+    mutating func next() -> WorkingBufferType?
+    {
+        if( count < buffer.Count)
+        {
+            count += 1;
+            return try! buffer.ElementAt(count - 1) as! WorkingBufferType;
+        }
+        
+        return nil;
+        
+    }
 }
 
 internal extension GBufferProtocol
@@ -208,6 +225,11 @@ internal extension GBufferProtocol
             buffer_free(&Base.Buffer);
         }
     }
+    
+    func makeIterator() -> GBufferIterator<Self,WorkingBufferType>
+    {
+        return GBufferIterator<Self,WorkingBufferType>(buffer: self);
+    }
 }
 
 struct Buffer<T>: GBufferProtocol
@@ -241,15 +263,15 @@ struct Buffer<T>: GBufferProtocol
     }
     
     // Callback for when a buffer resizes, should you choose to set it up.
-    func OnBufferResized()
+    mutating func OnBufferResized()
     {
-        
+        BufferResizedEvent.Broadcast(&self);
     }
     
     // Callback for when a buffer's elements move, should you choose to set it up.
-    func OnBufferElementsMoved()
+    mutating func OnBufferElementsMoved()
     {
-        
+        BufferElementsMovedEvent.Broadcast(&self);
     }
     
     // Boxable.
@@ -294,8 +316,7 @@ struct Buffer<T>: GBufferProtocol
 
 
 // Mutable by default.
-// TODO: need to implement copy on write for this, as well as for the Events, like Swift arrays. 
-public struct RawBuffer: GBufferProtocol
+struct RawBuffer: GBufferProtocol
 {
     typealias TheBoxable = RawBuffer;
     typealias WorkingBufferType = UnsafeMutableRawPointer?;
@@ -304,6 +325,8 @@ public struct RawBuffer: GBufferProtocol
     var Base: BufferCore { get { return Core; } set { Core = newValue; } }
     var BoxContainer: Box<RawBuffer>? = nil;
 
+    var BufferResizedEvent = PtrEvent<RawBuffer>();
+    var BufferElementsMovedEvent = PtrEvent<RawBuffer>();
     
     // Inits this buffer.
     init(withInitialCapacity: Int, withType: Any.Type) throws
@@ -324,15 +347,15 @@ public struct RawBuffer: GBufferProtocol
     }
     
     // Callback for when a buffer resizes, should you choose to set it up.
-    func OnBufferResized()
+    mutating func OnBufferResized()
     {
-        
+        BufferResizedEvent.Broadcast(&self);
     }
     
     // Callback for when a buffer's elements move, should you choose to set it up.
-    func OnBufferElementsMoved()
+    mutating func OnBufferElementsMoved()
     {
-        
+        BufferElementsMovedEvent.Broadcast(&self);
     }
     
     // Boxable.
@@ -378,13 +401,13 @@ public struct RawBuffer: GBufferProtocol
 
 private func ExternBufferResized(_ target: UnsafeMutableRawPointer?)
 {
-    let swiftBuff: GBufferListenerProtocol = Cast(target);
+    var swiftBuff: GBufferListenerProtocol = Cast(target);
     swiftBuff.OnBufferResized();
 }
 
 private func ExternBufferElementsMoved(_ target: UnsafeMutableRawPointer?)
 {
-    let swiftBuff: GBufferListenerProtocol = Cast(target);
+    var swiftBuff: GBufferListenerProtocol = Cast(target);
     swiftBuff.OnBufferElementsMoved();
 }
 

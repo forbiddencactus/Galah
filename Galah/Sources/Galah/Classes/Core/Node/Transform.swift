@@ -16,6 +16,8 @@
 
 public class Transform: Component
 {
+    public typealias ComponentType = Transform;
+    
     internal var _parent: Transform? = nil;
     public var Parent: Transform?
     {

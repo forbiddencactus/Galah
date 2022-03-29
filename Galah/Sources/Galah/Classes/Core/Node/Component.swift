@@ -16,27 +16,24 @@
 
 import GalahNative.Types;
 
-typealias ComponentIndex = UInt8;
-open class Component: GObject
+internal struct ComponentHeader<T> where T: Component
 {
-    //internal var
-    //ånodeIndex = NodeIndex();
-    
-    internal var
-    componentIndex: ComponentIndex = 0;
-    
-    internal var
-    node: Node? = nil;
-    
-    public var Node: Node
+    let nodeID: NodeID;
+    var component: T;
+}
+
+public protocol Component
+{
+}
+
+extension Component
+{
+    // Returns the node ID for the node this component belongs to. 
+    internal func GetNodeID() -> NodeID
     {
-        get
-        {
-            return node!;
-        }
+        let componentPtr: UnsafeMutableRawPointer = unsafeBitCast(self, to: UnsafeMutableRawPointer.self);
+        let componentOffset: Int = MemoryLayout.offset(of: \ComponentHeader<Self>.component)!;
+        let headerPtr: UnsafePointer<ComponentHeader<Self>> = Cast( (componentPtr - componentOffset) );
+        return headerPtr.pointee.nodeID;
     }
-    
-    // Called the moment the component is active in the game.
-    public func OnBegin() {}
-    public func OnEnable(willEnable: Bool) {}
 }

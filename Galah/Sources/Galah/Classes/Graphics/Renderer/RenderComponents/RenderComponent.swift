@@ -14,7 +14,7 @@
 //--------------------------------------------------------------------------//
 // Base component class for all things to do with rendering.
 
-open class RenderComponent: Component
+public protocol RenderComponent: Component
 {
-    public func DepthWillChange(oldDepth: Int, newDepth: Int) {}
+    func DepthWillChange(oldDepth: Int, newDepth: Int) 
 }
