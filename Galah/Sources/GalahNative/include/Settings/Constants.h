@@ -26,4 +26,10 @@
 #define GALAH_DEBUG 1
 #endif
 
+#define GALAH_FORCE_SAFEMODE 0
+
+#if GALAH_FORCE_SAFEMODE || GALAH_DEBUG
+#define GALAH_SAFEMODE 1
+#endif
+
 #endif
