@@ -79,7 +79,7 @@ internal protocol GBufferProtocol: GBufferListenerProtocol, Boxable, Sequence
 struct GBufferIterator<Buffer, WorkingBufferType>: IteratorProtocol where Buffer : GBufferProtocol
 {
     let buffer: Buffer;
-    var count = 0;
+    var count: UInt = 0;
     mutating func next() -> WorkingBufferType?
     {
         if( count < buffer.Count)
@@ -96,7 +96,7 @@ struct GBufferIterator<Buffer, WorkingBufferType>: IteratorProtocol where Buffer
 internal extension GBufferProtocol
 {
     // The number of elements in the buffer.
-    var Count: Int { get { return Int(Base.BufferData.count); } };
+    var Count: UInt { get { return UInt(Base.BufferData.count); } };
     
     // The capacity of the buffer.
     var Capacity: UInt { get { return UInt(Base.BufferData.capacity); } };
@@ -108,7 +108,7 @@ internal extension GBufferProtocol
     var ElementType: Any.Type { get { return Base.type; } }
     
     // Returns the object for the position at index.
-    func ElementAt(_ index: Int) throws -> WorkingBufferType
+    func ElementAt(_ index: UInt) throws -> WorkingBufferType
     {
         if (index < Count)
         {
@@ -121,7 +121,7 @@ internal extension GBufferProtocol
     
     
     // Copies the object into the end of the buffer.
-    mutating func Add(_ obj: inout WorkingBufferType) throws -> Int
+    mutating func Add(_ obj: inout WorkingBufferType) throws -> UInt
     {
         GuaranteeUnique();
         
@@ -159,8 +159,23 @@ internal extension GBufferProtocol
         UpdateBox();
     }
     
+    mutating func Replace(_ index: Int, _ obj: inout WorkingBufferType) throws
+    {
+        if (index >= Count)
+        {
+            throw ContiguousMutableBufferError.OutOfRange;
+        }
+        
+        GuaranteeUnique();
+        let ptr = buffer_get(&Base.Buffer, GUInt(index))
+
+        galah_copyValue(dest: ptr!, source: &obj, type: ElementType);
+        
+        UpdateBox();
+    }
+    
     // Removes the specified element from the buffer, and moves the leftover elements so there's no gaps.
-    mutating func Remove(_ index: Int) throws
+    mutating func Remove(_ index: UInt) throws
     {
         if (index < Count)
         {

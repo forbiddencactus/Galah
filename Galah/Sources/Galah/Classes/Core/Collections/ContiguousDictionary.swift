@@ -18,11 +18,11 @@ import GalahNative.Settings;
 
 fileprivate struct Bucket
 {
-    fileprivate var indices: Array<Int>;
+    fileprivate var indices: Array<UInt>;
     
     fileprivate init()
     {
-        indices = Array<Int>();
+        indices = Array<UInt>();
     }
 }
 
@@ -37,6 +37,19 @@ public struct ContiguousDictionary<Key: Hashable, Value>
     public var Capacity: UInt { get { return UInt(_keyBuffer.Capacity); } };
     public var Mutable: Bool { get { return _keyBuffer.Mutable; } };
     
+    subscript(key: Key) -> Value?
+    {
+        get
+        {
+            return GetValue(key);
+        }
+        set(newValue)
+        {
+            let ptr: UnsafeMutablePointer<Value> = unsafeBitCast(newValue, to: UnsafeMutablePointer<Value>.self);
+            AddKey(key, &ptr.pointee);
+        }
+    }
+    
     public init(withIntialCapacity: Int = Int(GSETTINGS_CONSTANTS_DEFAULTBUFFERCAPACITY))
     {
         _keyBuffer = try! Buffer<Key>(withInitialCapacity: withIntialCapacity);
@@ -49,25 +62,52 @@ public struct ContiguousDictionary<Key: Hashable, Value>
         ptrSelf.pointee._keyBuffer.BufferResizedEvent.Subscribe(&self, theCallback);
     }
     
-    public mutating func AddKey(_ key: inout Key, _ value: inout Value)
+    // Adds a new key with its associated key value pair. If the key already exists, it sets the new value.
+    public mutating func AddKey(_ key: Key, _ value: inout Value)
     {
         let keyIndex = self.GetIndexForKey(key)
         if(keyIndex == -1)
         {
-            let keyIndex: Int = try!_keyBuffer.Add(&key);
+            let keyIndex: UInt = try!_keyBuffer.Add(&unsafeBitCast(key, to: UnsafeMutablePointer<Key>.self).pointee);
             try! _ = _valueBuffer.Add(&value);
             
-            let bucketIndex: Int = GetBucketIndex(key);
+            let bucketIndex: UInt = GetBucketIndex(key);
             
-            _bucketArray[bucketIndex].indices.append(keyIndex);
+            _bucketArray[Int(bucketIndex)].indices.append(keyIndex);
         }
+        else
+        {
+            try! _valueBuffer.Replace(keyIndex, &value);
+        }
+    }
+    
+    public func GetKey(_ index: UInt) -> Key?
+    {
+        if (index < _keyBuffer.Count)
+        {
+            return try! _keyBuffer.ElementAt(index);
+        }
+        
+        return nil;
+    }
+    
+    public func GetValue(_ key: Key) -> Value?
+    {
+        let index = GetIndexForKey(key);
+        
+        if (index != -1)
+        {
+            return try! _valueBuffer.ElementAt(UInt(index));
+        }
+        
+        return nil;
     }
     
     public mutating func RemoveKey(_ key: Key)
     {
         let index = GetIndexForKey(key);
-        try! _keyBuffer.Remove(index);
-        try! _valueBuffer.Remove(index);
+        try! _keyBuffer.Remove(UInt(index));
+        try! _valueBuffer.Remove(UInt(index));
         
         self.RefreshBuckets();
     }
@@ -77,19 +117,18 @@ public struct ContiguousDictionary<Key: Hashable, Value>
         return GetIndexForKey(key) != -1;
     }
     
-    private func GetBucketIndex(_ key: Key) -> Int
+    private func GetBucketIndex(_ key: Key) -> UInt
     {
-        return abs(key.hashValue % Int(_keyBuffer.Capacity))
+        return UInt(abs(key.hashValue % Int(_keyBuffer.Capacity)));
     }
     
     // TODO: See how fast this is.
     public func GetIndexForKey(_ key: Key) -> Int
     {
-        let bucketIndex: Int = GetBucketIndex(key);
+        let bucketIndex: UInt = GetBucketIndex(key);
 
-        for index in _bucketArray[bucketIndex].indices
+        for index in _bucketArray[Int(bucketIndex)].indices
         {
-            // Using pointers should avoid retain and copy hits.
             let potentialKey = try! _keyBuffer.ElementAt(index);
             var found: Bool = false;
 
@@ -98,7 +137,7 @@ public struct ContiguousDictionary<Key: Hashable, Value>
                 found = true;
             }
 
-            if(found) { return index; }
+            if(found) { return Int(index); }
         }
         
         return -1;
@@ -109,11 +148,11 @@ public struct ContiguousDictionary<Key: Hashable, Value>
     {
         _bucketArray = Array<Bucket>(repeating:Bucket(), count: Int(_keyBuffer.Capacity));
 
-        var count: Int = 0;
+        var count: UInt = 0;
         for key in _keyBuffer
         {
-            let bucketIndex: Int = GetBucketIndex(key);
-            _bucketArray[bucketIndex].indices.append(count);
+            let bucketIndex: UInt = GetBucketIndex(key);
+            _bucketArray[Int(bucketIndex)].indices.append(count);
             count += 1;
         }
     }

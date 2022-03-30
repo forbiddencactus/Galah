@@ -61,7 +61,8 @@ struct HashableType<T> : Hashable
     self.base = base
   }
     
-  func hash(into hasher: inout Hasher) {
+  func hash(into hasher: inout Hasher)
+  {
     hasher.combine(ObjectIdentifier(base))
   }
 }

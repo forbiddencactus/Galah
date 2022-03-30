@@ -14,16 +14,14 @@
 //--------------------------------------------------------------------------//
 // Transforms contain information about the Node's position in the Scene.
 
-public class Transform: Component
-{
-    public typealias ComponentType = Transform;
-    
-    internal var _parent: Transform? = nil;
+public struct Transform: Component
+{    
+    //internal var _parent: Transform? = nil;
     public var Parent: Transform?
     {
         get
         {
-            return _parent;
+            return nil;
         }
         
         set(newParent)

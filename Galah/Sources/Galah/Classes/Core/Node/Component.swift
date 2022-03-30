@@ -31,6 +31,10 @@ internal struct ComponentHeader<T> where T: Component
 
 public protocol Component
 {
+    // Standard construction and destruction stuff... 
+    //func OnActivate()
+    //func OnBegin()
+    //func OnEnd()
 }
 
 extension Component
@@ -49,4 +53,9 @@ extension Component
         #endif
         return headerPtr.pointee;
     }
+    
+    // Default implementations...
+    /*func OnActivate(){}
+    func OnBegin(){}
+    func OnEnd(){}*/
 }
