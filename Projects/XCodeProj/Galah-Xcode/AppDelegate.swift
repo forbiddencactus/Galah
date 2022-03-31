@@ -8,42 +8,10 @@
 import Cocoa
 import Galah;
 
-public class Deinit
-{
-    init()
-    {
-        print("It begins. ");
-    }
-    
-    deinit
-    {
-        // This shouldn't run.
-        print("It deinit!");
-    }
-}
-
-public class Deinit2: MObject
-{
-    let test = "Hihi";
-    var firstClass = Test();
-    
-    deinit
-    {
-        print("It hath deinit.");
-    }
-}
-
-public struct Test
-{
-    let test = "Hihi";
-    let theDeinit = Deinit();
-}
-
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
     
     @IBOutlet var window: NSWindow!
-    private let test: Deinit2? = nil;
     
     func applicationDidFinishLaunching(_ aNotification: Notification)
     {

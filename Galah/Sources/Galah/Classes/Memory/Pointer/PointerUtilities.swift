@@ -140,18 +140,6 @@ public func GetRefFromPointer<T>(_ pointer: UnsafeMutableRawPointer) ->T?
     return Cast(pointer);
 }
 
-// Gets an unretained ref to a pointer of type T.
-public func GetRefFromPointer<T>(_ pointer: Ptr<T>) ->T?
-{
-    return Cast(pointer.raw);
-}
-
-// Gets an unretained ref to a pointer of type T.
-public func GetRefFromPointer<T>(_ pointer: Ptr<VoidPtr>) ->T?
-{
-    return Cast(pointer.raw);
-}
-
 // Casts the object into T
 public func Cast<T>(_ input: inout Any?) -> T
 {

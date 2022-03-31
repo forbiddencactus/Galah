@@ -33,7 +33,7 @@ open class GObject
     @discardableResult
     internal static func Construct<T>(_ ptr: Ptr<T>) -> T? where T: GObject
     {
-        return unsafeBitCast(GObject.Construct(type: T.self, ptr: ptr.GetVoidPtr()), to: T.self);
+        return unsafeBitCast(GObject.Construct(type: T.self, ptr: Cast(ptr)), to: T.self);
     }
     
     internal static func Construct(type: GObject.Type) -> GObject?
@@ -44,7 +44,7 @@ open class GObject
     
     // Construct into the specified pointer. This object's retain count will be increased by 1.
     @discardableResult
-    internal static func Construct(type: GObject.Type, ptr: Ptr<VoidPtr>) -> GObject?
+    internal static func Construct(type: GObject.Type, ptr: VoidPtr) -> GObject?
     {
         // I couldn't figure out how to get placement new working without a copy like the one that's happening here.
         // galah_placementNew lays out the instance just fine, but I haven't figured out how to run the initialiser for it. :P

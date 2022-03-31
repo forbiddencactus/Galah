@@ -16,18 +16,18 @@
 
 import GalahNative;
 
-open class MObject
+internal class MObject
 {
     // Construct the specified MObject into the specified pointer. This object's retain count will be increased by 1.
     @discardableResult
-    public static func Construct<T>(_ ptr: Ptr<T>) -> T? where T: MObject
+    internal static func Construct<T>(_ ptr: Ptr<T>) -> T? where T: MObject
     {
-        return unsafeBitCast(MObject.Construct(type: T.self, ptr: ptr.GetVoidPtr()), to: T.self);
+        return unsafeBitCast(MObject.Construct(type: T.self, ptr: Cast(ptr)), to: T.self);
     }
     
     // Construct into the specified pointer. This object's retain count will be increased by 1.
     @discardableResult
-    public static func Construct(type: MObject.Type, ptr: Ptr<VoidPtr>) -> MObject?
+    internal static func Construct(type: MObject.Type, ptr: Ptr<VoidPtr>) -> MObject?
     {
         // I couldn't figure out how to get placement new working without a copy like the one that's happening here.
         // galah_placementNew lays out the instance just fine, but I haven't figured out how to run the initialiser for it. :P
@@ -53,7 +53,7 @@ open class MObject
     }
         
     // BIG NOTE: Unfortunately I couldn't (yet) figure out a way to run init() using our custom allocation stuff.
-    public required init()
+    internal required init()
     {
     }
     

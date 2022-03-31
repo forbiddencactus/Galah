@@ -27,16 +27,16 @@ import GalahNative.SwiftRuntime;
 
 internal func galah_placementNew<T>(_ ptr: Ptr<T>) throws -> T where T: AnyObject
 {
-    return try galah_placementNew(type: T.self, ptr: ptr.GetVoidPtr()) as! T;
+    return try galah_placementNew(type: T.self, ptr: Cast(ptr)) as! T;
 }
 
-internal func galah_placementNew(type: Any.Type, ptr: Ptr<VoidPtr>) throws -> AnyObject
+internal func galah_placementNew(type: Any.Type, ptr: VoidPtr) throws -> AnyObject
 {
     var md = ClassMetadata(type: type.self);
     let info = md.toTypeInfo();
     let metadata = unsafeBitCast(type.self, to: UnsafeRawPointer.self);
 
-    let value: UnsafeMutableRawPointer = ptr.raw!;
+    let value: UnsafeMutableRawPointer = ptr;
 
     value.storeBytes(of: metadata, as: UnsafeRawPointer.self);
     try setProperties(typeInfo: info, pointer: UnsafeMutableRawPointer(mutating: value));

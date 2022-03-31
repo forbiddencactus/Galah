@@ -42,19 +42,6 @@ public struct Node
         set(isEnabled) { self.SetEnabled(isEnabled: isEnabled)}
     }
     
-    // Gets the pass this node belongs to.
-    public func GetPassIndex() -> String
-    {
-        // Todo: fill out
-        return "Default";
-    }
-    
-    // Gets the subarchetype batch for this node.
-    public func GetSubArchetypeBatchIndex() -> String
-    {
-        return "Default";
-    }
-    
     //public func AddComponent<T>() -> T where T: Component
     //{
         //let component: T = T();

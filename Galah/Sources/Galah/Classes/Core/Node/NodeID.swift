@@ -51,33 +51,3 @@ internal struct NodeID: Hashable
         hasher.combine(id);
     }
 }
-
-// Path to the memory location of a node, or component.
-internal struct NodePath
-{
-    internal let instanceIndex: UInt16; // The index of the instance, inside the buffer.
-    internal let archetypeIndex: UInt16; // Which archetype this instance belongs to.
-    
-    init()
-    {
-        // Invalid indices always have their values maxed out.
-        archetypeIndex = UInt16.max;
-        instanceIndex = UInt16.max;
-    }
-    
-    init(instanceIndex: UInt16, archetypeIndex: UInt16)
-    {
-        self.instanceIndex = instanceIndex;
-        self.archetypeIndex = archetypeIndex;
-    }
-    
-    func IsValid() -> Bool
-    {
-        if( archetypeIndex == UInt16.max || instanceIndex == UInt16.max )
-        {
-            return false;
-        }
-        
-        return true;
-    }
-}

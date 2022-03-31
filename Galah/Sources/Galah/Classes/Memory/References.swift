@@ -16,7 +16,7 @@
 
 import GalahNative.SwiftRuntime;
 
-public struct Ref<T> where T: GObject
+internal struct Ref<T> where T: GObject
 {
     @usableFromInline
     internal unowned(unsafe) var _ref: T?
@@ -26,12 +26,6 @@ public struct Ref<T> where T: GObject
     
     @usableFromInline @_transparent
     internal init(_ ptr: UnsafeMutableRawPointer) { _ref = Cast(ptr); }
-    
-    @usableFromInline @_transparent
-    internal init(_ ptr: Ptr<VoidPtr>) { _ref = Cast(ptr.raw); }
-    
-    @usableFromInline @_transparent
-    internal init(_ ptr: Ptr<T>) { _ref = Cast(ptr.raw); }
     
     @inlinable @inline(__always)
     internal unowned(unsafe) var ref: T?
