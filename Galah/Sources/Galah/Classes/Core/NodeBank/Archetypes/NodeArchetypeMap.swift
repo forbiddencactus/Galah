@@ -14,9 +14,27 @@
 //--------------------------------------------------------------------------//
 // The Archetype map is used to find archetypes based on the component types or tags it contains. 
 
+internal struct ArchetypeTagKeyValuePair: Hashable
+{
+    let key: NodeArchetypeTag;
+    let value: String;
+    
+    init(key: NodeArchetypeTag, value: String)
+    {
+        self.key = key;
+        self.value = value;
+    }
+    
+    func hash(into hasher: inout Hasher)
+    {
+        hasher.combine(key);
+        hasher.combine(value);
+    }
+}
+
 internal struct NodeArchetypeMap
 {
-    var archetypeTypes = Dictionary<HashableType<Component>,Array<UInt>>();
-    var archetypeTags = Dictionary<(NodeArchetypeTag, String), Array<UInt>>();
+    var archetypeTypes = Dictionary<HashableType<Component>,Array<NodeArchetypeID>>();
+    var archetypeTags = Dictionary<ArchetypeTagKeyValuePair, Array<NodeArchetypeID>>();
 
 }

@@ -32,12 +32,12 @@ internal struct ComponentHeader<T> where T: Component
 public protocol Component
 {
     // Standard construction and destruction stuff... 
-    //func OnActivate()
-    //func OnBegin()
-    //func OnEnd()
+    func OnActivate()
+    func OnBegin()
+    func OnEnd()
 }
 
-extension Component
+public extension Component
 {
     // Returns the component header for the node this component belongs to.
     internal func GetComponentHeader() -> ComponentHeader<Self>
@@ -55,7 +55,7 @@ extension Component
     }
     
     // Default implementations...
-    /*func OnActivate(){}
+    func OnActivate(){}
     func OnBegin(){}
-    func OnEnd(){}*/
+    func OnEnd(){}
 }

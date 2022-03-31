@@ -21,8 +21,7 @@ internal class NodeBank
     var idBank = NodeIDBank();
     var ptrBank = NodePtrBank();
     
-    // Key is the archetype index. 
-    var nodeArchetypes = ContiguousDictionary<UInt,NodeArchetype>();
+    var nodeArchetypes = ContiguousDictionary<NodeArchetypeID,NodeArchetype>();
     
     //////////////////
     // Node creation
@@ -39,13 +38,6 @@ internal class NodeBank
     {
         return nil;
     }
-    
-    internal func GetNode(id: NodePath) -> Node?
-    {
-        return nil;
-    }
-    
-
 }
 
 

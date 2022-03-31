@@ -16,39 +16,39 @@
 
 // Each node has a set of tags, determined by its components.
 // Sort mode determines how to use its tags to create node archetypes.
-public enum NodeArchetypeTagSortMode
+public enum NodeArchetypeTagSortMode: UInt
 {
     // Always sort all nodes so that nodes in an archetype ALWAYS contain the same tags.
-    MatchArchetypeToTags,
+    case MatchArchetypeToTags
     
     // Ignores archetype tags. Nodes are only sorted into archetypes by their components.
-    IgnoreArchetypeTags,
+    case IgnoreArchetypeTags
     
     // Ignores archetype tags for node sorting aside from those specified in the tag include list.
-    OnlyUseTagsInTagIncludeList,
+    case OnlyUseTagsInTagIncludeList
     
     // Uses archetype tags for sorting aside from those specified in the tag ignore list.
-    OnlyIgnoreTagsInIgnoreList,
+    case OnlyIgnoreTagsInIgnoreList
     
     // Use the ignore and include tag lists for node sorting into archetypes. If there's a conflict, the ignore list wins out.
-    UseTagsInTagIncludeListAndIgnoreTagsInIgnoreList,
+    case UseTagsInTagIncludeListAndIgnoreTagsInIgnoreList
 }
 
 // The various types of node archetype tags that can be set...
-public enum NodeArchetypeTag
+public enum NodeArchetypeTag: UInt
 {
     // Node tags...
     
-    NodeDepth,
+    case NodeDepth
     
     // Render tags...
     
     // Render Pass tags...
-    RenderPassOpaque,
-    RenderPassTransparent,
+    case RenderPassOpaque
+    case RenderPassTransparent
     
     // Materials...
-    MaterialName,
-    MaterialTextures,
-    MaterialResources,
+    case MaterialName
+    case MaterialTextures
+    case MaterialResources
 }
