@@ -17,24 +17,34 @@
 import GalahNative.Types;
 import GalahNative.Settings;
 
-fileprivate typealias HeaderCheckType = (UInt8, UInt8, UInt8, UInt8);
-fileprivate let headerCheckTuple: HeaderCheckType  = ( 10, 50, 100, 159 );
-
-internal struct ComponentHeader<T> where T: Component
-{
-    let nodeID: NodeID;
-    var component: T;
-    #if GALAH_SAFEMODE
-    var headerKey: HeaderCheckType = headerCheckTuple;
-    #endif
-}
-
 public protocol Component
 {
-    // Standard construction and destruction stuff... 
+    required init() // Required by all structs that inherit from the Component protocol. 
+    
+    /* ****************
+    Activation & Deactivation...
+    **************** */
+    
+    // Runs when the component is first attached to a node...
     func OnActivate()
+    
+    // Runs after OnActivate(), usually when the component will begin play.
     func OnBegin()
-    func OnEnd()
+    
+    // Runs when the component is being detached from a node...
+    func OnDeactivate()
+    
+    /* ****************
+    Archetype notifications...
+    **************** */
+    
+    // Runs when the component's position in memory is about to change...
+    func OnComponentPtrWillChange()
+    
+    // Runs when the component's position in memory changed...
+    func OnComponentPtrDidChange()
+    
+    
 }
 
 public extension Component
@@ -52,6 +62,19 @@ public extension Component
         }
         #endif
         return headerPtr.pointee;
+    }
+    
+    // Calls the 'OnActivate' method and does a few safety checks first...
+    internal func ActivateComponent()
+    {
+        #if GALAH_SAFEMODE
+        if (self is AnyObject)
+        {
+            assertionFailure("Node components should only be structs!");
+        }
+        #endif
+        
+        self.OnActivate();
     }
     
     // Default implementations...

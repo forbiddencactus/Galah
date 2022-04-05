@@ -29,6 +29,11 @@ internal struct NodePtrBank
         }
     }
     
+    func GetNodeExists(nodeID: NodeID) -> Bool
+    {
+        return ptrBank.GetKeyExists(nodeID);
+    }
+    
     mutating func AddNode(nodeID: NodeID, nodePtr: Ptr<Node>)
     {
         let index = ptrBank.GetIndexForKey(nodeID);

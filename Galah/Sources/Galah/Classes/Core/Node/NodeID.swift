@@ -15,7 +15,7 @@
 // Node IDs, paths, and such things.
 
 // Unique id for a node. Packed into a convenient word sized package!
-internal struct NodeID: Hashable
+public struct NodeID: Hashable
 {
     internal let id: UInt32;
     internal let reuseCounter: UInt16; // The number of times this index has been reused.

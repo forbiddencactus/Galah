@@ -1,4 +1,4 @@
-//---- Galah Engine---------------------------------------------------------//
+//---- Galah Engine --------------------------------------------------------//
 //
 // This source file is part of the Galah open source game engine.
 //
@@ -12,7 +12,16 @@
 //
 // galah-engine.org | https://github.com/forbiddencactus/Galah
 //--------------------------------------------------------------------------//
-// Typealias for swift pointers for less typing.
+// ComponentHeader wraps components in the NodeBank to store runtime data. 
 
-internal typealias Ptr<T> = UnsafeMutablePointer<T>;
-internal typealias VoidPtr = UnsafeMutableRawPointer;
+fileprivate typealias HeaderCheckType = (UInt8, UInt8, UInt8, UInt8);
+fileprivate let headerCheckTuple: HeaderCheckType  = ( 10, 50, 100, 159 );
+
+internal struct ComponentHeader<T> where T: Component
+{
+    let nodeID: NodeID;
+    var component: T;
+    #if GALAH_SAFEMODE
+    var headerKey: HeaderCheckType = headerCheckTuple;
+    #endif
+}
