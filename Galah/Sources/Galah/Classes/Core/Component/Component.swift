@@ -19,7 +19,7 @@ import GalahNative.Settings;
 
 public protocol Component
 {
-    required init() // Required by all structs that inherit from the Component protocol. 
+    init() // Required by all structs that inherit from the Component protocol.
     
     /* ****************
     Activation & Deactivation...
@@ -52,9 +52,9 @@ public extension Component
     // Returns the component header for the node this component belongs to.
     internal func GetComponentHeader() -> ComponentHeader<Self>
     {
-        let componentPtr: UnsafeMutableRawPointer = unsafeBitCast(self, to: UnsafeMutableRawPointer.self);
-        let componentOffset: Int = MemoryLayout.offset(of: \ComponentHeader<Self>.component)!;
-        let headerPtr: UnsafePointer<ComponentHeader<Self>> = Cast( (componentPtr - componentOffset) );
+        let headerPtr: Ptr<ComponentHeader<Self>> = unsafeBitCast(self, to: Ptr<ComponentHeader<Self>>.self);
+        //let nodeIDOffset: Int = MemoryLayout.offset(of: \ComponentHeader<Self>.nodeID)!;
+        //let headerPtr: UnsafePointer<NodeID> = Cast( (componentPtr + nodeIDOffset) );
         #if GALAH_SAFEMODE
         if(headerPtr.pointee.headerKey != headerCheckTuple)
         {
@@ -78,7 +78,10 @@ public extension Component
     }
     
     // Default implementations...
+    func init(){}
     func OnActivate(){}
     func OnBegin(){}
-    func OnEnd(){}
+    func OnDeactivate(){}
+    func OnComponentPtrWillChange(){}
+    func OnComponentPtrDidChange(){}
 }

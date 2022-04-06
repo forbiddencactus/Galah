@@ -15,7 +15,12 @@
 // Transforms contain information about the Node's position in the Scene.
 
 public struct Transform: Component
-{    
+{
+    
+    public init()
+    {
+        
+    }
     //internal var _parent: Transform? = nil;
     public var Parent: Transform?
     {

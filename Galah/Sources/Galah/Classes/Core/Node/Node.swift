@@ -17,16 +17,13 @@
 public struct Node
 {
     public var
-    name: String = "Node";
+    Name: String = "Node";
     
-    //internal var
-    //nodeIndex = NodeIndex();
-    
-    
-    /*public var Transform: Transform
+    internal var _nodeID: NodeID;
+    public var NodeID: NodeID
     {
-        get { return _transform; }
-    }*/
+        get { return _nodeID; }
+    }
     
     internal var _depth: Int = 0;
     public var Depth: Int
@@ -52,6 +49,21 @@ public struct Node
         
         //return component;
     //}
+    
+    // Initialises a node with the specified nodeID, list of pointers to its components, and name. 
+    internal init(nodeID: NodeID, components: Array<Ptr<Component>>, name: String? = nil)
+    {
+        assert(nodeID.IsValid(), "You must initialise a node with a valid nodeID.");
+        if(name == nil)
+        {
+            name = "Node " + String(nodeID.id);
+        }
+        else
+        {
+            self.Name = name;
+        }
+        
+    }
     
     
     private mutating func SetNewDepth(newDepth: Int)

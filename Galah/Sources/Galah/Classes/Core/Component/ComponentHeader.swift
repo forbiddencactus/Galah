@@ -19,8 +19,8 @@ fileprivate let headerCheckTuple: HeaderCheckType  = ( 10, 50, 100, 159 );
 
 internal struct ComponentHeader<T> where T: Component
 {
-    let nodeID: NodeID;
     var component: T;
+    let nodeID: NodeID;
     #if GALAH_SAFEMODE
     var headerKey: HeaderCheckType = headerCheckTuple;
     #endif

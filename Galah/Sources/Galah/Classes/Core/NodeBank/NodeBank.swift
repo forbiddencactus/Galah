@@ -22,6 +22,8 @@ public class NodeBank
     internal var ptrBank = NodePtrBank();
     
     internal var nodeArchetypes = ContiguousDictionary<NodeArchetypeID,NodeArchetype>();
+    internal var transientNodes = Array<Node>();
+    internal var transientComponents = ContiguousDictionary<HashableType<Component>,Buffer<Component>>();
     
     /* ****************
     Node creation...
@@ -48,7 +50,7 @@ public class NodeBank
     {
         if( ptrBank.GetNodeExists(nodeID: id))
         {
-            return ptrBank[id];
+            return ptrBank[id].pointee;
         }
         
         return nil;

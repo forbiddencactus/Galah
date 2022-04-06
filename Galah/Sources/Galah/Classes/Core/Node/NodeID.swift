@@ -46,7 +46,17 @@ public struct NodeID: Hashable
         self.metadata = 0;
     }
     
-    func hash(into hasher: inout Hasher)
+    public func IsValid()
+    {
+        if(id != UInt32.max)
+        {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    public func hash(into hasher: inout Hasher)
     {
         hasher.combine(id);
     }
