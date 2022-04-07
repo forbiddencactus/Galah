@@ -16,7 +16,7 @@
 
 internal struct NodeArchetypeMap
 {
-    var archetypeTypes = Dictionary<HashableType<Component>,Array<NodeArchetypeID>>();
+    var archetypeTypes = Dictionary<ComponentType,Array<NodeArchetypeID>>();
     var archetypeTags = Dictionary<ArchetypeTagKeyValuePair, Array<NodeArchetypeID>>();
 
 }

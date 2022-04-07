@@ -43,35 +43,55 @@ extension Dictionary
   }
 }
 
-
-// Swiped from: https://stackoverflow.com/questions/42459484/make-a-swift-dictionary-where-the-key-is-type
-// This particular chunk of code is licenced according to stack overflow's terms, CC-BY-SA 4.0.
-// Hashable wrapper for a metatype value.
-
-struct HashableType<T> : Hashable
+protocol HashableType : Hashable
 {
+}
 
-  static func == (lhs: HashableType, rhs: HashableType) -> Bool {
-    return lhs.base == rhs.base
-  }
-
-  let base: T.Type
-
-  init(_ base: T.Type) {
-    self.base = base
-  }
+struct HashableTypeOf<T> : HashableType
+{
+    static func == (lhs: HashableTypeOf, rhs: HashableTypeOf) -> Bool
+    {
+        return lhs.type == rhs.type
+    }
     
-  func hash(into hasher: inout Hasher)
-  {
-    hasher.combine(ObjectIdentifier(base))
-  }
+    let type: T.Type
+    
+    init(_ type: T.Type)
+    {
+        self.type = type;
+    }
+    
+    func hash(into hasher: inout Hasher)
+    {
+        hasher.combine(ObjectIdentifier(type));
+    }
+}
+
+struct HashedType : HashableType
+{
+    static func == (lhs: HashedType, rhs: HashedType) -> Bool
+    {
+        return lhs.type == rhs.type;
+    }
+
+    let type: Any.Type
+
+    init(_ type: Any.Type)
+    {
+        self.type = type;
+    }
+    
+    func hash(into hasher: inout Hasher)
+    {
+        hasher.combine(ObjectIdentifier(type));
+    }
 }
 
 extension Dictionary
 {
-  subscript<T>(key: T.Type) -> Value? where Key == HashableType<T>
+  subscript<T>(key: T.Type) -> Value? where Key == HashedType
   {
-    get { return self[HashableType(key)] }
-    set { self[HashableType(key)] = newValue }
+    get { return self[HashedType(key)] }
+    set { self[HashedType(key)] = newValue }
   }
 }

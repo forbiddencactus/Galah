@@ -18,10 +18,10 @@ typealias NodeArchetypeID = UInt;
 internal struct NodeArchetype
 {
     // The component types that live in this archetype.
-    internal var ComponentTypes = Dictionary<HashableType<Component>, Int>();
-    internal var ComponentTypeArray = Array<HashableType<Component>>();
+    internal var ComponentTypes = Dictionary<ComponentType, Int>();
+    internal var ComponentTypeArray = Array<ComponentType>();
     internal var ArchetypeTags = Dictionary<NodeArchetypeTag, Array<String>>();
     
     internal var Nodes = try! Buffer<Node>();
-    internal var Components = ContiguousDictionary<HashableType<Component>,Buffer<Component>>();
+    internal var Components = ContiguousDictionary<ComponentType,Buffer<Component>>();
 }

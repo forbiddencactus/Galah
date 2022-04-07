@@ -22,7 +22,6 @@ public class Director
     
     
     
-    internal let nodePool: NodeBank = NodeBank();
-    internal static var frameIndex: GUShort = 0;
-
+    internal var nodeBank: NodeBank = NodeBank();
+    internal var componentTypeBank: ComponentTypeBank = ComponentTypeBank();
 }

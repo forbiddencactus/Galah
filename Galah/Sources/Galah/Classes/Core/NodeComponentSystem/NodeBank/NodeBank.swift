@@ -16,21 +16,21 @@
 // Inspired by all the awesome work on ECS systems out there.
 
 // NEW IDEA: contiguous buffers still, but this time only organised by 'tag'. There can be a tag for depth, material texture, whatever.
-internal class NodeBank
+internal struct NodeBank
 {
     internal var idBank = NodeIDBank();
     internal var ptrBank = NodePtrBank();
     
     internal var nodeArchetypes = ContiguousDictionary<NodeArchetypeID,NodeArchetype>();
     internal var transientNodes = Array<Node>();
-    internal var transientComponents = ContiguousDictionary<HashableType<Component>,Buffer<Component>>();
+    internal var transientComponents = ContiguousDictionary<ComponentType,Buffer<Component>>();
     
     /* ****************
     Node creation...
     **************** */
     
     // Creates a node with the specified empty components.
-    internal func CreateNode(components: Array<Component.Type>) -> Node
+    internal mutating func CreateNode(components: Array<Component.Type>) -> Node
     {
         // TODO:
         let components = Array<Component>();
@@ -38,7 +38,7 @@ internal class NodeBank
     }
     
     // Creates a node with the input components.
-    internal func CreateNode(components: Array<Component>) -> Node
+    internal mutating func CreateNode(components: Array<Component>) -> Node
     {
         // TODO:
         let array = Array<Ptr<Component>>();

@@ -16,7 +16,7 @@
 
 import GalahNative.Thread;
 
-public final class Thread: GObject
+internal struct Thread
 {
     private var internalThread: GThread = GThread();
     
@@ -30,10 +30,12 @@ public final class Thread: GObject
         }
     }*/
     
-    public func AddJob(job: @escaping (Any) ->(), jobArg: Any) -> Bool
+    public mutating func AddJob(job: @escaping (Any) ->(), jobArg: Any) -> Bool
     {
         return glh_thread_addjob(&internalThread, unsafeBitCast(job, to: glh_thread_function?.self), unsafeBitCast(jobArg, to: VoidPtr.self));
     }
+    
+
     /*
     deinit()
     {
