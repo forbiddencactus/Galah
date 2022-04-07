@@ -22,27 +22,37 @@
 void* glh_thread_rootthread(void* arg)
 {
     GThread* thread = (GThread*)arg;
+    glh_atomic_set_uint(thread->threadIndex, pthread_self());
     
     while(!thread->shouldExit)
     {
-        if(!thread->hasJob)
+        glh_atomic_set_bool(thread->isRunning, true);
+        GVolatileUInt readIndex = glh_atomic_fetch_uint(thread->jobBuffer.readIndex);
+        GVolatileUInt writeIndex = glh_atomic_fetch_uint(thread->jobBuffer.writeIndex);
+        
+        if( thread->jobBuffer.job[readIndex] != NULL)
         {
-            pause();
+            thread->jobBuffer.job[readIndex](thread->jobBuffer.jobArg[readIndex]);
+            
+            thread->jobBuffer.job[readIndex] = NULL;
+            thread->jobBuffer.jobArg[readIndex] = NULL;
+            glh_atomic_set_uint(thread->jobBuffer.readIndex, readIndex + 1);
         }
         else
         {
-            if(thread->job != NULL && thread->jobArg != NULL)
+            if(readIndex == writeIndex)
             {
-                thread->job(thread->jobArg);
+                glh_atomic_set_bool(thread->isRunning, false);
+                pause();
             }
-            
-            thread->job = NULL;
-            thread->jobArg = NULL;
-            
-            glh_atomic_set_bool(thread->hasJob, false);
+            else
+            {
+                log_warning("Thread %d found null job at position %d in circular buffer.", thread->threadIndex, readIndex);
+            }
         }
     }
-        
+    glh_atomic_set_bool(thread->isRunning, false);
+
     // Thank you for flying with glh_thread. :)
     pthread_exit(NULL);
     return;
@@ -52,10 +62,18 @@ void* glh_thread_rootthread(void* arg)
 void glh_thread_clear(GThread* thread)
 {
     thread->nativethreadptr = NULL;
-    thread->hasJob = false;
-    thread->job = NULL;
     thread->shouldExit = false;
-    thread->jobArg = NULL;
+    thread->isRunning = false;
+    thread->threadIndex = 0;
+    
+    for(int i = 0; i < GALAH_THREAD_JOBBUFFER_SIZE; i++)
+    {
+        thread->jobBuffer.job[i] = NULL;
+        thread->jobBuffer.jobArg[i] = NULL;
+    }
+    
+    thread->jobBuffer.readIndex = 0;
+    thread->jobBuffer.writeIndex = 0;
 }
 
 // Initialises the GThread pointed to by *thread. Thread will autosleep when it has no work.
@@ -68,28 +86,36 @@ int glh_thread_create(GThread* thread)
 }
 
 // Sets the job to the specified thread and wakes the thread.
-bool glh_thread_setjob(GThread* thread, glh_thread_function job, void* jobArg)
+bool glh_thread_addjob(GThread* thread, glh_thread_function job, void* jobArg)
 {
     if(thread->nativethreadptr != NULL && !thread->shouldExit)
     {
+        GVolatileUInt writeIndex = glh_atomic_fetch_uint(thread->jobBuffer.writeIndex);
         
-       if(glh_compare_and_swap_bool(thread->hasJob, false, true))
-       {
-            thread->job = job;
-            thread->jobArg = jobArg;
+        if(thread->jobBuffer.job[writeIndex] == NULL)
+        {
+            thread->jobBuffer.job[writeIndex] = job;
+            thread->jobBuffer.jobArg[writeIndex] = jobArg;
+            
+            glh_atomic_set_uint(thread->jobBuffer.writeIndex, writeIndex + 1);
             
             // Wakey wakey.
-            // TODO: A job stack so we don't have to be waiting or sleeping the threads.
-            pthread_kill(thread->nativethreadptr, SIGCONT);
-            
+            // TODO: Ensure there's no chance the thread can be left sleeping for some reason.
+            if(!glh_atomic_fetch_bool(thread->isRunning))
+            {
+                pthread_kill(thread->nativethreadptr, SIGCONT);
+            }
             return true;
-       }
+        }
     }
-    
     return false;
 }
 
-
+// Gets the thread id of the thread this function is called from.
+GUInt glh_thread_getid()
+{
+    return pthread_self();
+}
 
 // Kills the thread.
 void glh_thread_killthread(GThread* thread)

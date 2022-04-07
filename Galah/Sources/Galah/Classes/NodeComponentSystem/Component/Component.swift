@@ -78,7 +78,7 @@ public extension Component
     }
     
     // Default implementations...
-    func init(){}
+    init() { self.init(); }
     func OnActivate(){}
     func OnBegin(){}
     func OnDeactivate(){}

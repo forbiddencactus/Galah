@@ -46,7 +46,7 @@ public struct NodeID: Hashable
         self.metadata = 0;
     }
     
-    public func IsValid()
+    public func IsValid() -> Bool
     {
         if(id != UInt32.max)
         {

@@ -1,5 +1,10 @@
 module GalahNative
 {
+    module Console
+    {
+        umbrella "Console"
+        export *
+    }
     module Memory
     {
         umbrella "Memory"

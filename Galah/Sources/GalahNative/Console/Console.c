@@ -12,21 +12,14 @@
 //
 // galah-engine.org | https://github.com/forbiddencactus/Galah
 //--------------------------------------------------------------------------//
-// The standard, main header for stuff to use.
+// Console stuff.
 
-#ifndef GalahNative_h
-#define GalahNative_h
-
-// Standard C includes...
-#include <stdio.h>
-#include "stdbool.h"
-#include <stdlib.h>
-#include <string.h>
-
-// Galah Types...
-#include "GalahTypes.h"
-#include "Settings/Constants.h"
 #include "Console/Console.h"
+#include "GalahNative.h"
 
 
-#endif
+void log_warning(const char *format, ...)
+{
+    // TODO: this is wrong. 
+    printf(format);
+}

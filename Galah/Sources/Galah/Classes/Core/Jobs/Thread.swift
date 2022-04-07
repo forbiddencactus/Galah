@@ -20,7 +20,7 @@ public final class Thread: GObject
 {
     private var internalThread: GThread = GThread();
     
-    public var HasJob: Bool { get { return internalThread.hasJob; }}
+    //public var HasJob: Bool { get { return internalThread.hasJob; }}
     
     /*public override func OnConstruct()
     {
@@ -30,9 +30,9 @@ public final class Thread: GObject
         }
     }*/
     
-    public func SetJob(job: @escaping (Any) ->(), jobArg: Any) -> Bool
+    public func AddJob(job: @escaping (Any) ->(), jobArg: Any) -> Bool
     {
-        return glh_thread_setjob(&internalThread, unsafeBitCast(job, to: glh_thread_function?.self), unsafeBitCast(jobArg, to: UnsafeMutableRawPointer.self));
+        return glh_thread_addjob(&internalThread, unsafeBitCast(job, to: glh_thread_function?.self), unsafeBitCast(jobArg, to: VoidPtr.self));
     }
     /*
     deinit()

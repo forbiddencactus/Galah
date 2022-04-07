@@ -16,7 +16,7 @@
 // Inspired by all the awesome work on ECS systems out there.
 
 // NEW IDEA: contiguous buffers still, but this time only organised by 'tag'. There can be a tag for depth, material texture, whatever.
-public class NodeBank
+internal class NodeBank
 {
     internal var idBank = NodeIDBank();
     internal var ptrBank = NodePtrBank();
@@ -32,13 +32,19 @@ public class NodeBank
     // Creates a node with the specified empty components.
     internal func CreateNode(components: Array<Component.Type>) -> Node
     {
-        return Node();
+        // TODO:
+        let components = Array<Component>();
+        return CreateNode(components: components)
     }
     
     // Creates a node with the input components.
     internal func CreateNode(components: Array<Component>) -> Node
     {
-        return Node();
+        // TODO:
+        let array = Array<Ptr<Component>>();
+        let node = Node(nodeID: idBank.Pop(), components: array);
+        
+        return node;
     }
     
     /* ****************
@@ -46,7 +52,7 @@ public class NodeBank
     **************** */
     
     // Returns the node pointed to by NodeID. 
-    public func GetNode(id: NodeID) -> Node?
+    internal func GetNode(id: NodeID) -> Node?
     {
         if( ptrBank.GetNodeExists(nodeID: id))
         {

@@ -32,4 +32,7 @@
 #define GALAH_SAFEMODE 1
 #endif
 
+// Thread
+#define GALAH_THREAD_JOBBUFFER_SIZE 8
+
 #endif

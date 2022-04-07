@@ -56,13 +56,14 @@ public struct Node
         assert(nodeID.IsValid(), "You must initialise a node with a valid nodeID.");
         if(name == nil)
         {
-            name = "Node " + String(nodeID.id);
+            Name = "Node " + String(nodeID.id);
         }
         else
         {
-            self.Name = name;
+            Name = name!;
         }
         
+        _nodeID = nodeID;
     }
     
     

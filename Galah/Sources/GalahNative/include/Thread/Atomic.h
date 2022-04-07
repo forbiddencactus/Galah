@@ -43,4 +43,10 @@ void glh_atomic_set_uint64(GVolatileUInt64* obj, GVolatileUInt64 set);
 // Atomically returns the value of obj.
 GVolatileUInt64 glh_atomic_fetch_uint64(GVolatileUInt64* obj);
 
+// Sets the value of the int obj to the value of set.
+void glh_atomic_set_uint(GVolatileUInt* obj, GVolatileUInt set);
+
+// Atomically returns the value of obj.
+GVolatileUInt glh_atomic_fetch_uint(GVolatileUInt* obj);
+
 #endif

@@ -76,3 +76,17 @@ GVolatileUInt64 glh_atomic_fetch_uint64(GVolatileUInt64* obj)
     __atomic_load(obj, &retVal, __ATOMIC_SEQ_CST);
     return retVal;
 }
+
+// Sets the value of the int obj to the value of set.
+void glh_atomic_set_uint(GVolatileUInt* obj, GVolatileUInt set)
+{
+    __atomic_store(obj, &set, __ATOMIC_SEQ_CST);
+}
+
+// Atomically returns the value of obj.
+GVolatileUInt glh_atomic_fetch_uint(GVolatileUInt* obj)
+{
+    GUInt retVal;
+    __atomic_load(obj, &retVal, __ATOMIC_SEQ_CST);
+    return retVal;
+}
