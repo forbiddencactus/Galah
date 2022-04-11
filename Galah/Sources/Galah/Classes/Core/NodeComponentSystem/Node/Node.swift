@@ -19,14 +19,16 @@ public struct Node
     public var
     Name: String = "Node";
     
+    internal var _components: Array<Ptr<Component>>;
+    
     internal var _nodeID: NodeID;
     public var NodeID: NodeID
     {
         get { return _nodeID; }
     }
     
-    internal var _depth: Int = 0;
-    public var Depth: Int
+    internal var _depth: UInt = 0;
+    public var Depth: UInt
     {
         get { return _depth; }
         set(newDepth) { self.SetNewDepth(newDepth: newDepth); }
@@ -50,8 +52,21 @@ public struct Node
         //return component;
     //}
     
+    public func GetArchetypeTags() -> Array<ArchetypeTagKeyValuePair>
+    {
+        var returnArray = Array<ArchetypeTagKeyValuePair>();
+        returnArray.append(ArchetypeTagKeyValuePair(key: NodeArchetypeTag.NodeDepth, value: String(_depth)));
+        
+        for componentPtr in _components
+        {
+            returnArray.append(contentsOf: componentPtr.pointee.GetArchetypeTags());
+        }
+        
+        return returnArray;
+    }
+    
     // Initialises a node with the specified nodeID, list of pointers to its components, and name. 
-    internal init(nodeID: NodeID, components: Array<Ptr<Component>>, name: String? = nil)
+    internal init(nodeID: NodeID, components: Array<Ptr<Component>>, name: String? = nil, depth: UInt = 0)
     {
         assert(nodeID.IsValid(), "You must initialise a node with a valid nodeID.");
         if(name == nil)
@@ -64,10 +79,13 @@ public struct Node
         }
         
         _nodeID = nodeID;
+        _components = components;
+        _depth = depth;
     }
     
     
-    private mutating func SetNewDepth(newDepth: Int)
+    
+    private mutating func SetNewDepth(newDepth: UInt)
     {
         _depth = newDepth;
         // NodePool.sharedInstance.MarkDirty(node: self);

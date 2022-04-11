@@ -20,31 +20,81 @@ internal struct NodeBank
 {
     internal var idBank = NodeIDBank();
     internal var ptrBank = NodePtrBank();
-    
-    internal var nodeArchetypes = ContiguousDictionary<NodeArchetypeID,NodeArchetype>();
-    internal var transientNodes = Array<Node>();
-    internal var transientComponents = ContiguousDictionary<ComponentType,Buffer<Component>>();
+    internal var archetypeMap = NodeArchetypeMap();
+    internal var archetypeStore = NodeArchetypeStore();
     
     /* ****************
     Node creation...
     **************** */
     
     // Creates a node with the specified empty components.
-    internal mutating func CreateNode(components: Array<Component.Type>) -> Node
+    internal mutating func CreateNode(components: inout Array<ComponentType>, depth: UInt = 0) -> Node
     {
-        // TODO:
-        let components = Array<Component>();
-        return CreateNode(components: components)
+        components.sort();
+        var instantiatedComponents = Array<Component>();
+        
+        for component in components
+        {
+            instantiatedComponents.append(component.type.init());
+        }
+        
+        return CreateNode(components: &instantiatedComponents)
     }
     
     // Creates a node with the input components.
-    internal mutating func CreateNode(components: Array<Component>) -> Node
+    internal mutating func CreateNode(components: inout Array<Component>, depth: UInt = 0) -> Node
     {
-        // TODO:
-        let array = Array<Ptr<Component>>();
-        let node = Node(nodeID: idBank.Pop(), components: array);
+        let newNodeID = idBank.Pop();
+        var componentTypeIndices = Array<ComponentTypeIndexKVPair>();
+        var componentTypes = Array<ComponentType>();
         
-        return node;
+        for index in 0..<components.count
+        {
+            let component = components[index];
+            let theType = type(of: component);
+            
+            let componentType = ComponentType(theType);
+            let kvPair = ComponentTypeIndexKVPair(componentType: componentType, index: index);
+            componentTypeIndices.append(kvPair);
+            componentTypes.append(componentType);
+        }
+        componentTypes.sort();
+        componentTypeIndices.sort();
+                
+        var componentPtrArray = Array<Ptr<Component>>();
+        
+        for kvPair in componentTypeIndices
+        {
+            componentPtrArray.append(&components[kvPair.index]);
+        }
+        
+        var node = Node(nodeID: newNodeID, components: componentPtrArray, depth: depth);
+        let nodeArchetypeTags = node.GetArchetypeTags();
+        
+        var potentialArchetypes = Array<NodeArchetypeID>();
+        var archetypeID: NodeArchetypeID? = archetypeMap.GetArchetypeForNodeComposition(nodeComponentTypes: componentTypes, nodeArchetypeTags: nodeArchetypeTags, potentialArchetypes: &potentialArchetypes);
+        let archetype: Ptr<NodeArchetype>;
+        
+        if(archetypeID != nil)
+        {
+            archetype = archetypeStore.GetArchetype(archetypeID: archetypeID!);
+        }
+        else
+        {
+            if(potentialArchetypes.count > 0)
+            {
+                assertionFailure("TODO: Do this!");
+                archetype = archetypeStore.GetArchetype(archetypeID: potentialArchetypes[0]);
+            }
+            else
+            {
+                archetypeID = archetypeStore.CreateArchetype();
+                archetypeMap.AddArchetype(archetypeID: archetypeID!, nodeComponentTypes: componentTypes, nodeArchetypeTags: nodeArchetypeTags);
+                archetype = archetypeStore.GetArchetype(archetypeID: archetypeID!);
+            }
+        }
+        
+        return archetype.pointee.AddNode(node: &node, components: &componentPtrArray);        
     }
     
     /* ****************
@@ -64,3 +114,18 @@ internal struct NodeBank
 }
 
 
+fileprivate struct ComponentTypeIndexKVPair: Comparable
+{
+    let componentType: ComponentType;
+    let index: Int;
+
+    static func < (lhs: ComponentTypeIndexKVPair, rhs: ComponentTypeIndexKVPair) -> Bool
+    {
+        return lhs.componentType < rhs.componentType;
+    }
+    
+    static func == (lhs: ComponentTypeIndexKVPair, rhs: ComponentTypeIndexKVPair) -> Bool
+    {
+        return lhs.componentType == rhs.componentType;
+    }
+}

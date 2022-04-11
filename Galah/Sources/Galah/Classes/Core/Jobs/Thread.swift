@@ -18,28 +18,17 @@ import GalahNative.Thread;
 
 internal struct Thread
 {
-    private var internalThread: GThread = GThread();
+    private var internalThread: GThread;
     
-    //public var HasJob: Bool { get { return internalThread.hasJob; }}
-    
-    /*public override func OnConstruct()
+    init()
     {
-        if(glh_thread_create(&internalThread) != 0)
-        {
-            // error here, todo.
-        }
-    }*/
-    
-    public mutating func AddJob(job: @escaping (Any) ->(), jobArg: Any) -> Bool
-    {
-        return glh_thread_addjob(&internalThread, unsafeBitCast(job, to: glh_thread_function?.self), unsafeBitCast(jobArg, to: VoidPtr.self));
+        internalThread = GThread();
+        glh_thread_create(&internalThread);
     }
     
-
-    /*
-    deinit()
+    internal mutating func AddJob(job: inout Job) -> Bool
     {
-        glh_thread_killthread(&internalThread);
+        return glh_thread_addjob(&internalThread, &job.job);
     }
- */
+    
 }

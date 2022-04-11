@@ -119,6 +119,17 @@ internal extension GBufferProtocol
         throw ContiguousMutableBufferError.OutOfRange;
     }
     
+    func PtrAt(_ index: UInt) throws -> Ptr<WorkingBufferType>
+    {
+        if (index < Count)
+        {
+            var buf = Base.Buffer; // work around Swift's silly restrictions.
+            return Cast(buffer_get(&buf, GUInt(index)));
+        }
+           
+        throw ContiguousMutableBufferError.OutOfRange;
+    }
+    
     
     // Copies the object into the end of the buffer.
     mutating func Add(_ obj: inout WorkingBufferType) throws -> UInt
@@ -133,6 +144,24 @@ internal extension GBufferProtocol
         }
 
         galah_copyValue(dest: ptr!, source: &obj, type: ElementType);
+        
+        UpdateBox();
+        return Count - 1;
+    }
+    
+    // Copies the contents of the pointer into the end of the buffer.
+    mutating func Add(_ objPtr: VoidPtr) throws -> UInt
+    {
+        GuaranteeUnique();
+        
+        let ptr = buffer_makespace(&Base.Buffer, GUInt(Count));
+        
+        if(ptr == nil)
+        {
+            throw ContiguousMutableBufferError.AllocError;
+        }
+
+        galah_copyValue(dest: ptr!, source: objPtr, type: ElementType);
         
         UpdateBox();
         return Count - 1;
@@ -343,7 +372,7 @@ struct RawBuffer: GBufferProtocol
     var BufferResizedEvent = PtrEvent<RawBuffer>();
     var BufferElementsMovedEvent = PtrEvent<RawBuffer>();
     
-    // Inits this buffer.
+    // Inits this buffer with the specified capacity.
     init(withInitialCapacity: Int, withType: Any.Type) throws
     {
         Core = try BufferCore(withInitialCapacity: withInitialCapacity, withType: withType);

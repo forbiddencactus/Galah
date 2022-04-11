@@ -13,3 +13,17 @@
 // galah-engine.org | https://github.com/forbiddencactus/Galah
 //--------------------------------------------------------------------------//
 // Jobs can be scheduled to run on separate threads through the JobPool.
+
+import GalahNative.Thread;
+
+typealias JobFunction = glh_thread_function;
+
+public struct Job
+{
+    var job: GJob;
+    
+    init(function: @escaping JobFunction, jobArg: Any)
+    {
+        job = GJob(job: function, jobArg: unsafeBitCast(jobArg, to: VoidPtr.self), isComplete: false);
+    }
+}

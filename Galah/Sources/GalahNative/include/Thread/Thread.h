@@ -22,8 +22,14 @@ typedef void (*glh_thread_function)(void*);
 
 typedef struct
 {
-    glh_thread_function job[GALAH_THREAD_JOBBUFFER_SIZE]; // Shared by both.
-    void* jobArg[GALAH_THREAD_JOBBUFFER_SIZE]; // Shared by both.
+    glh_thread_function job;
+    void* jobArg;
+    GVolatileBool isComplete;
+} GJob;
+
+typedef struct
+{
+    GJob* job[GALAH_THREAD_JOBBUFFER_SIZE]; // Shared by both.
     GVolatileUInt writeIndex; // Owned by main thread.
     GVolatileUInt readIndex; // Owned by thread.
 
@@ -47,7 +53,7 @@ typedef struct
 int glh_thread_create(GThread* thread);
 
 // Sets the job to the specified thread and wakes the thread.
-bool glh_thread_addjob(GThread* thread, glh_thread_function job, void* jobArg);
+bool glh_thread_addjob(GThread* thread, GJob* job);
 
 // Gets the thread id of the thread this function is called from. 
 GUInt glh_thread_getid();

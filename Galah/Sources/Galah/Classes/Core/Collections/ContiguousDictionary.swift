@@ -26,7 +26,7 @@ fileprivate struct Bucket
     }
 }
 
-public struct ContiguousDictionary<Key: Hashable, Value>
+internal struct ContiguousDictionary<Key: Hashable, Value>
 {
     // Split the buffers to achieve better cache efficiency.
     private var _keyBuffer: Buffer<Key>;
@@ -98,6 +98,18 @@ public struct ContiguousDictionary<Key: Hashable, Value>
         if (index != -1)
         {
             return try! _valueBuffer.ElementAt(UInt(index));
+        }
+        
+        return nil;
+    }
+    
+    public func GetValuePtr(_ key: Key) -> Ptr<Value>?
+    {
+        let index = GetIndexForKey(key);
+        
+        if (index != -1)
+        {
+            return try! _valueBuffer.PtrAt(UInt(index));
         }
         
         return nil;

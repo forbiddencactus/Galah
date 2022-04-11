@@ -35,6 +35,11 @@ public protocol Component
     func OnDeactivate()
     
     /* ****************
+    Component Archetypes...
+    **************** */
+    func GetArchetypeTags() -> Array<ArchetypeTagKeyValuePair>
+    
+    /* ****************
     Archetype notifications...
     **************** */
     
@@ -64,6 +69,11 @@ public extension Component
         return headerPtr.pointee;
     }
     
+    internal func CreateComponentHeader(nodeID: NodeID) -> PComponentHeader
+    {
+        return ComponentHeader<Self>(nodeID: nodeID, component: self);
+    }
+    
     // Calls the 'OnActivate' method and does a few safety checks first...
     internal func ActivateComponent()
     {
@@ -84,4 +94,5 @@ public extension Component
     func OnDeactivate(){}
     func OnComponentPtrWillChange(){}
     func OnComponentPtrDidChange(){}
+    func GetArchetypeTags() -> Array<ArchetypeTagKeyValuePair> { return Array<ArchetypeTagKeyValuePair>(); }
 }

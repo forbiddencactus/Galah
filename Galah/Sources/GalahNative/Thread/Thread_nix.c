@@ -32,10 +32,10 @@ void* glh_thread_rootthread(void* arg)
         
         if( thread->jobBuffer.job[readIndex] != NULL)
         {
-            thread->jobBuffer.job[readIndex](thread->jobBuffer.jobArg[readIndex]);
+            thread->jobBuffer.job[readIndex]->job(thread->jobBuffer.job[readIndex]->jobArg);
             
+            thread->jobBuffer.job[readIndex]->isComplete = true;
             thread->jobBuffer.job[readIndex] = NULL;
-            thread->jobBuffer.jobArg[readIndex] = NULL;
             glh_atomic_set_uint(thread->jobBuffer.readIndex, readIndex + 1);
         }
         else
@@ -69,7 +69,6 @@ void glh_thread_clear(GThread* thread)
     for(int i = 0; i < GALAH_THREAD_JOBBUFFER_SIZE; i++)
     {
         thread->jobBuffer.job[i] = NULL;
-        thread->jobBuffer.jobArg[i] = NULL;
     }
     
     thread->jobBuffer.readIndex = 0;
@@ -86,7 +85,7 @@ int glh_thread_create(GThread* thread)
 }
 
 // Sets the job to the specified thread and wakes the thread.
-bool glh_thread_addjob(GThread* thread, glh_thread_function job, void* jobArg)
+bool glh_thread_addjob(GThread* thread, GJob* job)
 {
     if(thread->nativethreadptr != NULL && !thread->shouldExit)
     {
@@ -95,16 +94,15 @@ bool glh_thread_addjob(GThread* thread, glh_thread_function job, void* jobArg)
         if(thread->jobBuffer.job[writeIndex] == NULL)
         {
             thread->jobBuffer.job[writeIndex] = job;
-            thread->jobBuffer.jobArg[writeIndex] = jobArg;
             
             glh_atomic_set_uint(thread->jobBuffer.writeIndex, writeIndex + 1);
             
             // Wakey wakey.
-            // TODO: Ensure there's no chance the thread can be left sleeping for some reason.
-            if(!glh_atomic_fetch_bool(thread->isRunning))
-            {
+            // TODO: Check there's no chance the thread can be left sleeping for some reason?
+            //if(!glh_atomic_fetch_bool(thread->isRunning))
+            //{
                 pthread_kill(thread->nativethreadptr, SIGCONT);
-            }
+            //}
             return true;
         }
     }

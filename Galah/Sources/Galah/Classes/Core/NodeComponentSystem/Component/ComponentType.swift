@@ -20,7 +20,6 @@ struct ComponentType : HashableType, Comparable
 {
     let type: Component.Type;
     let typeID: ComponentTypeID;
-    let derp: Any = Transform();
 
     init(_ type: Component.Type)
     {
