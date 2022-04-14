@@ -57,7 +57,7 @@ internal struct ContiguousDictionary<Key: Hashable, Value>
         _bucketArray = Array<Bucket>(repeating:Bucket(), count: Int(_keyBuffer.Capacity));
         
         // Unsafe trickery to go around Swift's annoying safety rules. 
-        let ptrSelf: UnsafeMutablePointer<ContiguousDictionary<Key,Value>> = Cast(&self);
+        let ptrSelf: UnsafeMutablePointer<ContiguousDictionary<Key,Value>> = Cast(glh_pointer_get(&self));
         let theCallback: (inout Buffer<Key>) ->() = { ptrSelf.pointee.KeyBufferDidResize(&$0);};
         ptrSelf.pointee._keyBuffer.BufferResizedEvent.Subscribe(&self, theCallback);
     }

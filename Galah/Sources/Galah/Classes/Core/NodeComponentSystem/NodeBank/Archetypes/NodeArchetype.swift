@@ -32,9 +32,10 @@ internal struct NodeArchetype
     {
         self.archetypeID = archetypeID;
         
-        let selfPtr: VoidPtr = glh_pointer_get(&self);
+        let selfPtr: Ptr<NodeArchetype> = Cast(glh_pointer_get(&self));
+        
         Nodes.BufferElementsMovedEvent.Subscribe(selfPtr, NodeBufferElementsMoved);
-        Nodes.BufferResizedEvent.Subscribe(selfPtr, NodeBufferResized);
+        Nodes.BufferResizedEvent.Subscribe(selfPtr, NodeBufferElementsMoved);
     }
     
     // Adds a node and its components to the archetype, and updates the node.
@@ -91,13 +92,14 @@ internal struct NodeArchetype
         return try! NodeDatas.PtrAt(UInt(index));
     }
     
-    
     // Callbacks
     func NodeBufferElementsMoved(buffer: inout Buffer<Node>)
     {
         for index in 0..<Nodes.Count
         {
-            let nodeID = try! Nodes.PtrAt(index).pointee._nodeID;
+
+            let nodePtr = try! Nodes.PtrAt(UInt(index));
+            let nodeID = nodePtr.pointee._nodeID;
             let nodeLocation = NodeLocation(archetype: archetypeID, index: UInt32(index));
             Director.sharedInstance.nodeBank.ptrBank.UpdatePath(nodeID: nodeID, nodeLocation: nodeLocation);
         }
@@ -107,7 +109,8 @@ internal struct NodeArchetype
     {
         for index in 0..<Nodes.Count
         {
-            let nodeID = try! Nodes.PtrAt(index).pointee._nodeID;
+            let nodePtr = try! Nodes.PtrAt(UInt(index));
+            let nodeID = nodePtr.pointee._nodeID;
             let nodeLocation = NodeLocation(archetype: archetypeID, index: UInt32(index));
             Director.sharedInstance.nodeBank.ptrBank.UpdatePath(nodeID: nodeID, nodeLocation: nodeLocation);
         }
@@ -117,15 +120,21 @@ internal struct NodeArchetype
     {
         for index in 0..<buffer.Count
         {
-            let componentPtr: Ptr<Component> = try! buffer.PtrAt(index);
+            let componentPtr: Ptr<Component> = try! buffer.PtrAt(UInt(index));
             let componentHeaderPtr: Ptr<PComponentHeader> = Cast(componentPtr);
             let nodeID = componentHeaderPtr.pointee.GetNodeID();
-            NodeHelpers.GetNodeData(nodeID).pointee.ReplaceComponent(index: nodeID.componentIndex, ptr: componentPtr);
+            NodeHelpers.GetNodeData(nodeID).pointee.Components[Int(nodeID.componentIndex)] = componentPtr;
         }
     }
     
     func ComponentBufferResized(buffer: inout Buffer<Component>)
     {
-        
+        for index in 0..<buffer.Count
+        {
+            let componentPtr: Ptr<Component> = try! buffer.PtrAt(UInt(index));
+            let componentHeaderPtr: Ptr<PComponentHeader> = Cast(componentPtr);
+            let nodeID = componentHeaderPtr.pointee.GetNodeID();
+            NodeHelpers.GetNodeData(nodeID).pointee.Components[Int(nodeID.componentIndex)] = componentPtr;
+        }
     }
 }

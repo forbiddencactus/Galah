@@ -19,13 +19,6 @@ internal struct NodeData
     var Name: String = "Node";
     var Components = Array<Ptr<Component>>();
     var Depth: UInt = 0;
-    
-    // Workaround for weird bug in swift...
-    @inline(never)
-    mutating func ReplaceComponent(index: UInt8, ptr: Ptr<Component>)
-    {
-        Components[Int(index)] = ptr;
-    }
 }
 
 public struct Node
