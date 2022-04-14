@@ -14,42 +14,118 @@
 //--------------------------------------------------------------------------//
 // Node Archetypes are the way to group nodes and their components into contiguous batches.
 
+import GalahNative.Memory;
+
 internal struct NodeArchetype
 {
-    internal let archetypeID: NodeArchetypeID;
+    private var archetypeID: NodeArchetypeID;
     
     // The component types that live in this archetype.
     internal var ComponentTypeArray = Array<ComponentType>();
     internal var ArchetypeTags = Array<ArchetypeTagKeyValuePair>();
     
     internal var Nodes = try! Buffer<Node>();
+    internal var NodeDatas = try! Buffer<NodeData>();
     internal var Components = ContiguousDictionary<ComponentType,Buffer<Component>>();
     
-    // Adds a node and its components to the archetype, and updates the node. 
-    internal mutating func AddNode(node: inout Node, components: inout Array<Ptr<Component>>) -> Node
+    internal init(archetypeID: NodeArchetypeID)
     {
+        self.archetypeID = archetypeID;
+        
+        let selfPtr: VoidPtr = glh_pointer_get(&self);
+        Nodes.BufferElementsMovedEvent.Subscribe(selfPtr, NodeBufferElementsMoved);
+        Nodes.BufferResizedEvent.Subscribe(selfPtr, NodeBufferResized);
+    }
+    
+    // Adds a node and its components to the archetype, and updates the node.
+    internal mutating func AddNode(nodeID: NodeID, components: Array<Component>) -> NodeLocation
+    {
+        var node = Node(nodeID: nodeID);
         let nodeIndex = try! Nodes.Add(&node);
-        let nodePtr: Ptr<Node> = try! Nodes.PtrAt(nodeIndex);
-        
-        nodePtr.pointee._components.removeAll();
-        
-        for componentPtr in components
+        var theNodeData = NodeData();
+        let dataIndex = try! NodeDatas.Add(&theNodeData);
+        assert(dataIndex == nodeIndex, "NodeIndex and Data index should be the same!")
+        let dataPtr: Ptr<NodeData> = try! NodeDatas.PtrAt(dataIndex);
+                
+        for component in components
         {
-            let theType: ComponentType = ComponentType(type(of: componentPtr.pointee));
-            var componentHeader = componentPtr.pointee.CreateComponentHeader(nodeID: node._nodeID);
-
-            if(Components[theType] == nil)
-            {
-                let headerType = type(of: componentHeader);
-                Components[theType] = try! Buffer<Component>(withType: headerType);
-            }
-            
-            let componentIndex = try! Components[theType]!.Add(componentHeader.GetPtr());
-            let componentPtr: Ptr<Component> = try! Components[theType]!.PtrAt(componentIndex);
-            
-            nodePtr.pointee._components.append(componentPtr);
+            let componentIndex = UInt8(dataPtr.pointee.Components.count);
+            if(componentIndex >= UInt8.max) { fatalError("Your Node has too many components!"); }
+            let componentNodeID = NodeID(nodeID: nodeID, componentIndex: componentIndex);
+            let componentPtr = self.AddComponent(nodeID: componentNodeID, component: component);
+            dataPtr.pointee.Components.append(componentPtr);
         }
         
-        return nodePtr.pointee;
+        return NodeLocation(archetype: archetypeID, index: UInt32(nodeIndex));
+    }
+    
+    // Adds the specified component to the specified nodeID.
+    internal mutating func AddComponent(nodeID: NodeID, component: Component) -> Ptr<Component>
+    {
+        let theType: ComponentType = ComponentType(type(of: component));
+        var componentHeader = component.CreateComponentHeader(nodeID: nodeID);
+
+        if(Components[theType] == nil)
+        {
+            let headerType = type(of: componentHeader);
+            var componentBuffer = try! Buffer<Component>(withType: headerType);
+            Components[theType] = componentBuffer;
+            
+            componentBuffer.BufferElementsMovedEvent.Subscribe(glh_pointer_get(&self), ComponentBufferElementsMoved);
+            componentBuffer.BufferResizedEvent.Subscribe(glh_pointer_get(&self), ComponentBufferResized);
+        }
+        
+        let componentIndex = try! Components[theType]!.Add(componentHeader.GetPtr());
+        return try! Components[theType]!.PtrAt(componentIndex);
+    }
+    
+    // Returns a pointer to the node at the specified index in the archetype.
+    internal func GetNode(index: UInt32) -> Ptr<Node>
+    {
+        return try! Nodes.PtrAt(UInt(index));
+    }
+    
+    // Returns a pointer to the node data at the specified index in the archetype.
+    internal func GetNodeData(index: UInt32) -> Ptr<NodeData>
+    {
+        return try! NodeDatas.PtrAt(UInt(index));
+    }
+    
+    
+    // Callbacks
+    func NodeBufferElementsMoved(buffer: inout Buffer<Node>)
+    {
+        for index in 0..<Nodes.Count
+        {
+            let nodeID = try! Nodes.PtrAt(index).pointee._nodeID;
+            let nodeLocation = NodeLocation(archetype: archetypeID, index: UInt32(index));
+            Director.sharedInstance.nodeBank.ptrBank.UpdatePath(nodeID: nodeID, nodeLocation: nodeLocation);
+        }
+    }
+    
+    func NodeBufferResized(buffer: inout Buffer<Node>)
+    {
+        for index in 0..<Nodes.Count
+        {
+            let nodeID = try! Nodes.PtrAt(index).pointee._nodeID;
+            let nodeLocation = NodeLocation(archetype: archetypeID, index: UInt32(index));
+            Director.sharedInstance.nodeBank.ptrBank.UpdatePath(nodeID: nodeID, nodeLocation: nodeLocation);
+        }
+    }
+    
+    func ComponentBufferElementsMoved(buffer: inout Buffer<Component>)
+    {
+        for index in 0..<buffer.Count
+        {
+            let componentPtr: Ptr<Component> = try! buffer.PtrAt(index);
+            let componentHeaderPtr: Ptr<PComponentHeader> = Cast(componentPtr);
+            let nodeID = componentHeaderPtr.pointee.GetNodeID();
+            NodeHelpers.GetNodeData(nodeID).pointee.ReplaceComponent(index: nodeID.componentIndex, ptr: componentPtr);
+        }
+    }
+    
+    func ComponentBufferResized(buffer: inout Buffer<Component>)
+    {
+        
     }
 }

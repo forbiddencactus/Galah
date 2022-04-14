@@ -15,10 +15,12 @@
 // Director is the root 'manager' singleton for the engine. 
 
 import GalahNative.Types;
+import GalahNative.Thread
 
 public class Director
 {
     public static let sharedInstance: Director = Director();
+    public let mainThreadID = glh_thread_getid();
     
     
     

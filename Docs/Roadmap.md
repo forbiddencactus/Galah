@@ -2,7 +2,7 @@
   
 ## Short term roadmap:
 
-- 
+- Transient nodes & components. At the moment node mutation triggers immediate archetype memory reshuffles, which is slow. 
 
 ## Long term roadmap:
 

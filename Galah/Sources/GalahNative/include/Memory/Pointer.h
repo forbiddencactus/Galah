@@ -19,31 +19,7 @@
 
 #include "GalahNative.h"
 
-// This is to avoid all the weird casting Swift does, probably expensive?
-typedef struct
-{
-    void* ptr;
-}   GPtr;
-
-// Returns a pointer added by amount*typesize. 
-GPtr ptr_add(GPtr ptr, GMemSize typesize, GUInt amount);
-
-// Returns a pointer subtracted by amount*typesize.
-GPtr ptr_sub(GPtr ptr, GMemSize typesize, GUInt amount);
-
-// Returns a pointer pointing to sourcePtr. 
-GPtr ptr_get_ptr_to_ptr(GPtr sourcePtr);
-
-// Used to (try to?) avoid pointless type casting, sets a GPtr from a void*.
-void ptr_set(GPtr* outptr, void* inptr);
-
-// Assigns the value of inassignptr into the location pointed to by ptr. 
-void ptr_assign(GPtr* ptr, void* inassignptr, GMemSize size);
-
-// Sets the value of inptr to NULL.
-void ptr_setnull(GPtr* inptr);
-
-// Gets whether a poiinter is NULL
-bool ptr_getnull(GPtr* inptr);
+// Returns a void pointer from a void pointer, useful to nab pointers from value types without Swift complaining. 
+void* glh_pointer_get(void* ptr);
 
 #endif

@@ -2,7 +2,7 @@
 //
 // This source file is part of the Galah open source game engine.
 //
-// Copyright © 2020, 2021, the Galah contributors.
+// Copyright © 2022, the Galah contributors.
 //
 // Licensed under the MIT Licence.
 //
@@ -55,9 +55,9 @@ public protocol Component
 public extension Component
 {
     // Returns the component header for the node this component belongs to.
-    internal func GetComponentHeader() -> ComponentHeader<Self>
+    internal mutating func GetComponentHeader() -> ComponentHeader<Self>
     {
-        let headerPtr: Ptr<ComponentHeader<Self>> = unsafeBitCast(self, to: Ptr<ComponentHeader<Self>>.self);
+        let headerPtr: Ptr<ComponentHeader<Self>> = Cast(glh_pointer_get(&self));
         //let nodeIDOffset: Int = MemoryLayout.offset(of: \ComponentHeader<Self>.nodeID)!;
         //let headerPtr: UnsafePointer<NodeID> = Cast( (componentPtr + nodeIDOffset) );
         #if GALAH_SAFEMODE

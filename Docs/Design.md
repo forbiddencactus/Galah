@@ -16,4 +16,5 @@ Note that in Galah, 'Entities' are referred to as 'Nodes'.
 - Systems
 - Pipelines and Pipeline Stages
 - Systems can be assigned to a pipeline. 
+- Pipelines can be run sequentially or simultaneously?
 

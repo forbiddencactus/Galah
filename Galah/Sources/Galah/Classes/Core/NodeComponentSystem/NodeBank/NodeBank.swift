@@ -53,6 +53,11 @@ internal struct NodeBank
             let component = components[index];
             let theType = type(of: component);
             
+            if(theType is AnyClass)
+            {
+                assertionFailure("Only value types can be used as components!");
+            }
+            
             let componentType = ComponentType(theType);
             let kvPair = ComponentTypeIndexKVPair(componentType: componentType, index: index);
             componentTypeIndices.append(kvPair);
@@ -61,15 +66,14 @@ internal struct NodeBank
         componentTypes.sort();
         componentTypeIndices.sort();
                 
-        var componentPtrArray = Array<Ptr<Component>>();
+        var componentArray = Array<Component>();
         
         for kvPair in componentTypeIndices
         {
-            componentPtrArray.append(&components[kvPair.index]);
+            componentArray.append(components[kvPair.index]);
         }
         
-        var node = Node(nodeID: newNodeID, components: componentPtrArray, depth: depth);
-        let nodeArchetypeTags = node.GetArchetypeTags();
+        let nodeArchetypeTags = NodeArchetypeHelpers.GetArchetypeTags(depth: depth, components: componentArray);
         
         var potentialArchetypes = Array<NodeArchetypeID>();
         var archetypeID: NodeArchetypeID? = archetypeMap.GetArchetypeForNodeComposition(nodeComponentTypes: componentTypes, nodeArchetypeTags: nodeArchetypeTags, potentialArchetypes: &potentialArchetypes);
@@ -94,7 +98,9 @@ internal struct NodeBank
             }
         }
         
-        return archetype.pointee.AddNode(node: &node, components: &componentPtrArray);        
+        let nodeLocation = archetype.pointee.AddNode(nodeID: newNodeID, components: componentArray);
+        ptrBank.AddNode(nodeID: newNodeID, nodeLocation: nodeLocation);
+        return NodeHelpers.GetNode(newNodeID).pointee;
     }
     
     /* ****************
@@ -102,14 +108,21 @@ internal struct NodeBank
     **************** */
     
     // Returns the node pointed to by NodeID. 
-    internal func GetNode(id: NodeID) -> Node?
-    {
-        if( ptrBank.GetNodeExists(nodeID: id))
-        {
-            return ptrBank[id].pointee;
-        }
+    //internal func GetNode(id: NodeID) -> Node?
+    //{
+        //if( ptrBank.GetNodeExists(nodeID: id))
+        //{
+            //return ptrBank[id].pointee;
+        //}
         
-        return nil;
+        //return nil;
+    //}
+    
+    
+    //Placeholder...
+    internal func MarkDirty(nodeID: NodeID)
+    {
+        
     }
 }
 

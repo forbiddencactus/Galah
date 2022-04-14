@@ -16,13 +16,14 @@
 
 import GalahNative.Settings;
 
-typealias NodeArchetypeID = UInt;
+typealias NodeArchetypeID = UInt32;
 internal struct NodeArchetypeStore
 {
     internal var archetypeIDCount: NodeArchetypeID = 0;
     internal var nodeArchetypes = ContiguousDictionary<NodeArchetypeID,NodeArchetype>();
     internal var transientNodes = Array<Node>();
     internal var transientComponents = ContiguousDictionary<ComponentType,Buffer<Component>>();
+    internal var transientNodeList = Array<NodeID>();
     
     func GetArchetype(archetypeID: NodeArchetypeID) -> Ptr<NodeArchetype>
     {

@@ -15,40 +15,48 @@
 // Node IDs, paths, and such things.
 
 // Unique id for a node. Packed into a convenient word sized package!
-public struct NodeID: Hashable
+internal struct NodeID: Hashable
 {
     internal let id: UInt32;
     internal let reuseCounter: UInt16; // The number of times this index has been reused.
-    internal let componentIndex: UInt8; // The index of the component we're pointing to, if we're pointing to one. Otherwise, 0.
-    internal let metadata: UInt8; // ??? 8 bits of empty space for whatever.
+    internal var metadata: NodeIDMetadata; // 8 bits of empty space for whatever.
+    internal let componentIndex: UInt8; // Component header nodeIDs have this data to uniquely identify components.
     
     init()
     {
         id = UInt32.max;
-        componentIndex = UInt8.max;
         reuseCounter = UInt16.max;
-        metadata = UInt8.max;
+        metadata = NodeIDMetadata();
+        componentIndex = UInt8.max;
     }
     
-    init(id: UInt32, reuseCounter: UInt16, componentIndex: UInt8, metadata: UInt8)
+    init(id: UInt32, reuseCounter: UInt16, componentIndex: UInt8, metadata: NodeIDMetadata)
     {
         self.id = id;
         self.reuseCounter = reuseCounter;
-        self.componentIndex = componentIndex;
         self.metadata = metadata;
+        self.componentIndex = componentIndex;
     }
     
     init(id: UInt32, reuseCounter: UInt16)
     {
         self.id = id;
         self.reuseCounter = reuseCounter;
+        self.metadata = NodeIDMetadata();
         self.componentIndex = 0;
-        self.metadata = 0;
+    }
+    
+    init(nodeID: NodeID, componentIndex: UInt8)
+    {
+        self.id = nodeID.id;
+        self.reuseCounter = nodeID.reuseCounter;
+        self.metadata = nodeID.metadata;
+        self.componentIndex = componentIndex;
     }
     
     public func IsValid() -> Bool
     {
-        if(id != UInt32.max)
+        if(id != UInt16.max)
         {
             return true;
         }
@@ -60,4 +68,18 @@ public struct NodeID: Hashable
     {
         hasher.combine(id);
     }
+}
+
+struct NodeIDMetadata: OptionSet
+{
+    let rawValue: UInt8
+    
+    static let Disabled = NodeIDMetadata(rawValue: 1 << 0);
+}
+
+// Same size as a pointer, but twice as useful!
+struct NodeLocation
+{
+    let archetype: NodeArchetypeID
+    let index: UInt32;
 }

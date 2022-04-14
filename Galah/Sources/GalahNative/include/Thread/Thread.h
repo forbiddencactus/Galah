@@ -19,6 +19,7 @@
 #include "GalahNative.h"
 
 typedef void (*glh_thread_function)(void*);
+typedef GUInt GThreadID;
 
 typedef struct
 {
@@ -56,7 +57,7 @@ int glh_thread_create(GThread* thread);
 bool glh_thread_addjob(GThread* thread, GJob* job);
 
 // Gets the thread id of the thread this function is called from. 
-GUInt glh_thread_getid();
+GThreadID glh_thread_getid();
 
 // Kills the thread.
 void glh_thread_killthread(GThread* thread);

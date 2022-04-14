@@ -2,7 +2,7 @@
 //
 // This source file is part of the Galah open source game engine.
 //
-// Copyright © 2020, 2021, the Galah contributors.
+// Copyright © 2022, the Galah contributors.
 //
 // Licensed under the MIT Licence.
 //
@@ -14,30 +14,34 @@
 //--------------------------------------------------------------------------//
 // Nodes are the base object type that can be placed in scenes.
 
+internal struct NodeData
+{
+    var Name: String = "Node";
+    var Components = Array<Ptr<Component>>();
+    var Depth: UInt = 0;
+    
+    // Workaround for weird bug in swift...
+    @inline(never)
+    mutating func ReplaceComponent(index: UInt8, ptr: Ptr<Component>)
+    {
+        Components[Int(index)] = ptr;
+    }
+}
+
 public struct Node
 {
-    public var
-    Name: String = "Node";
-    
-    internal var _components: Array<Ptr<Component>>;
-    
     internal var _nodeID: NodeID;
-    public var NodeID: NodeID
-    {
-        get { return _nodeID; }
-    }
     
-    internal var _depth: UInt = 0;
     public var Depth: UInt
     {
-        get { return _depth; }
+        get { return GetDepth(); }
         set(newDepth) { self.SetNewDepth(newDepth: newDepth); }
     }
     
-    internal var _enabled: Bool = true;
+    // Set thru NodeID metadata. 
     public var Enabled: Bool
     {
-        get { return _enabled; }
+        get { return !GetEnabled(); }
         set(isEnabled) { self.SetEnabled(isEnabled: isEnabled)}
     }
     
@@ -52,52 +56,51 @@ public struct Node
         //return component;
     //}
     
-    public func GetArchetypeTags() -> Array<ArchetypeTagKeyValuePair>
+
+    internal init()
     {
-        var returnArray = Array<ArchetypeTagKeyValuePair>();
-        returnArray.append(ArchetypeTagKeyValuePair(key: NodeArchetypeTag.NodeDepth, value: String(_depth)));
-        
-        for componentPtr in _components
-        {
-            returnArray.append(contentsOf: componentPtr.pointee.GetArchetypeTags());
-        }
-        
-        return returnArray;
+        _nodeID = NodeID();
     }
     
     // Initialises a node with the specified nodeID, list of pointers to its components, and name. 
-    internal init(nodeID: NodeID, components: Array<Ptr<Component>>, name: String? = nil, depth: UInt = 0)
+    internal init(nodeID: NodeID)
     {
         assert(nodeID.IsValid(), "You must initialise a node with a valid nodeID.");
-        if(name == nil)
-        {
-            Name = "Node " + String(nodeID.id);
-        }
-        else
-        {
-            Name = name!;
-        }
-        
         _nodeID = nodeID;
-        _components = components;
-        _depth = depth;
     }
     
     
+    private func GetDepth() -> UInt
+    {
+        return NodeHelpers.GetNodeData(_nodeID).pointee.Depth;
+    }
     
     private mutating func SetNewDepth(newDepth: UInt)
     {
-        _depth = newDepth;
-        // NodePool.sharedInstance.MarkDirty(node: self);
+        NodeHelpers.GetNodeData(_nodeID).pointee.Depth = newDepth;
+        Director.sharedInstance.nodeBank.MarkDirty(nodeID: _nodeID);
+    }
+    
+    private func GetEnabled() -> Bool
+    {
+        return !NodeHelpers.GetNode(_nodeID).pointee._nodeID.metadata.contains(.Disabled);
+    }
+    
+    private func SetEnabled(isEnabled: Bool)
+    {
+        NodeHelpers.GetNode(_nodeID).pointee.SetEnabledInternal(isEnabled: isEnabled);
     }
         
-    private mutating func SetEnabled(isEnabled: Bool)
+    private mutating func SetEnabledInternal(isEnabled: Bool)
     {
-        _enabled = isEnabled;
-        
-        /*for component in components
+        if(!isEnabled)
         {
-            component.OnEnable(willEnable: isEnabled);
-        }*/
+            _nodeID.metadata.insert(.Disabled);
+        }
+        else
+        {
+            _nodeID.metadata.remove(.Disabled);
+        }
     }
 }
+

@@ -37,6 +37,10 @@ internal struct NodeIDBank
             }
         }
         
+        if(returnCounter >= UInt32.max)
+        {
+            fatalError("You created " + String(UInt32.max) + " unique nodes! Ima crash now. :(");
+        }
         counter += 1;
         return NodeID(id: returnCounter, reuseCounter: 0);
     }

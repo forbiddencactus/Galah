@@ -110,7 +110,7 @@ bool glh_thread_addjob(GThread* thread, GJob* job)
 }
 
 // Gets the thread id of the thread this function is called from.
-GUInt glh_thread_getid()
+GThreadID glh_thread_getid()
 {
     return pthread_self();
 }
