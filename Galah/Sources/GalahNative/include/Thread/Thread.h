@@ -25,6 +25,7 @@ typedef struct
 {
     glh_thread_function job;
     void* jobArg;
+    void* threadData;
     GVolatileBool isComplete;
 } GJob;
 
@@ -58,6 +59,9 @@ bool glh_thread_addjob(GThread* thread, GJob* job);
 
 // Gets the thread id of the thread this function is called from. 
 GThreadID glh_thread_getid();
+
+// Returns the pointer at _Thread_local void* threadData, which gets initialised from the Job data. 
+void* glh_thread_getthreaddata();
 
 // Kills the thread.
 void glh_thread_killthread(GThread* thread);

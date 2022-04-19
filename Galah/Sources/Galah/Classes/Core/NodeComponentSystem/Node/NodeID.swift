@@ -68,6 +68,11 @@ internal struct NodeID: Hashable
     {
         hasher.combine(id);
     }
+    
+    static func == (lhs: NodeID, rhs: NodeID) -> Bool
+    {
+        return (lhs.id == rhs.id) && (lhs.reuseCounter == rhs.reuseCounter);
+    }
 }
 
 struct NodeIDMetadata: OptionSet
@@ -82,4 +87,16 @@ struct NodeLocation
 {
     let archetype: NodeArchetypeID
     let index: UInt32;
+    
+    init()
+    {
+        archetype = NodeArchetypeID.max;
+        index = UInt32.max;
+    }
+    
+    init(archetype: NodeArchetypeID, index: UInt32)
+    {
+        self.archetype = archetype;
+        self.index = index;
+    }
 }

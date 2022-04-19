@@ -30,4 +30,14 @@ struct NodeHelpers
     {
         return Director.sharedInstance.nodeBank.ptrBank.GetNodeData(nodeID: nodeID);
     }
+    
+    static func GetComponentData(_ nodeID: NodeID) -> Ptr<ComponentData>
+    {
+        return Director.sharedInstance.nodeBank.ptrBank.GetComponentData(nodeID: nodeID);
+    }
+    
+    static func GetNodeLocation(_ nodeID: NodeID) -> NodeLocation
+    {
+        return Director.sharedInstance.nodeBank.ptrBank.GetNodeLocation(nodeID: nodeID);
+    }
 }

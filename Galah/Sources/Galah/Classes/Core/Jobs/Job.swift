@@ -22,8 +22,8 @@ public struct Job
 {
     var job: GJob;
     
-    init(function: @escaping JobFunction, jobArg: Any)
+    init(function: @escaping JobFunction, jobArg: VoidPtr?, threadData: VoidPtr? = nil)
     {
-        job = GJob(job: function, jobArg: unsafeBitCast(jobArg, to: VoidPtr.self), isComplete: false);
+        job = GJob(job: function, jobArg: jobArg, threadData: threadData, isComplete: false);
     }
 }

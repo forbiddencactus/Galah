@@ -17,8 +17,15 @@
 internal struct NodeData
 {
     var Name: String = "Node";
-    var Components = Array<Ptr<Component>>();
     var Depth: UInt = 0;
+}
+
+internal struct ComponentData
+{
+    var Components = Array<Ptr<Component>>();
+    var ComponentArrayIndices = Array<UInt>();
+    var ComponentTypes = Array<ComponentType>();
+    var ComponentArchetype = Array<NodeArchetypeID>();
 }
 
 public struct Node

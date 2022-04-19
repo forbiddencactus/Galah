@@ -78,6 +78,32 @@ internal struct NodePtrBank
         return thereturn!;
     }
     
+    func GetNodeLocation(nodeID: NodeID) -> NodeLocation
+    {
+        if(GetNodeExists(nodeID: nodeID))
+        {
+            return locationBank[nodeID]!;
+        }
+        
+        assertionFailure("Node does not exist or nodeID reference is old!");
+        return NodeLocation();
+    }
+    
+    func GetComponentData(nodeID: NodeID) -> Ptr<ComponentData>
+    {
+        if(GetNodeExists(nodeID: nodeID))
+        {
+            let location = locationBank[nodeID]!;
+            
+            let archetype = Director.sharedInstance.nodeBank.archetypeStore.GetArchetype(archetypeID: location.archetype);
+            return archetype.pointee.GetComponentData(index: location.index);
+        }
+        
+        assertionFailure("Node does not exist or nodeID reference is old!");
+        let thereturn = Ptr<ComponentData>(nil);
+        return thereturn!;
+    }
+    
     mutating func UpdatePath(nodeID: NodeID, nodeLocation: NodeLocation)
     {
         let index = locationBank.GetIndexForKey(nodeID);

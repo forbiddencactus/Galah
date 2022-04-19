@@ -19,6 +19,8 @@
 #include <pthread.h>
 #include <unistd.h>
 
+_Thread_local void* threadData = NULL;
+
 void* glh_thread_rootthread(void* arg)
 {
     GThread* thread = (GThread*)arg;
@@ -32,6 +34,7 @@ void* glh_thread_rootthread(void* arg)
         
         if( thread->jobBuffer.job[readIndex] != NULL)
         {
+            threadData = thread->jobBuffer.job[readIndex]->threadData; // Set the thread data. 
             thread->jobBuffer.job[readIndex]->job(thread->jobBuffer.job[readIndex]->jobArg);
             
             thread->jobBuffer.job[readIndex]->isComplete = true;
@@ -113,6 +116,12 @@ bool glh_thread_addjob(GThread* thread, GJob* job)
 GThreadID glh_thread_getid()
 {
     return pthread_self();
+}
+
+// Returns the pointer at _Thread_local void* threadData, which gets initialised from the Job data.
+void* glh_thread_getthreaddata()
+{
+    return threadData;
 }
 
 // Kills the thread.
