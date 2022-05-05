@@ -12,29 +12,22 @@
 //
 // galah-engine.org | https://github.com/forbiddencactus/Galah
 //--------------------------------------------------------------------------//
-// Some constants.
+// Wrapper around functions related to hardware queries.
 
-#ifndef galah_nativetypes_constants
-#define galah_nativetypes_constants
+#if __APPLE__
+#include "Hardware/Hardware.h"
+#import <Foundation/Foundation.h>
 
-#ifndef GSETTINGS_CONSTANTS_DEFAULTBUFFERCAPACITY
-#define GSETTINGS_CONSTANTS_DEFAULTBUFFERCAPACITY 16
-#endif
+// Returns the number of available CPU cores.
+GUInt glh_hardware_getactiveprocessorcount()
+{
+    return (GUInt)[[NSProcessInfo processInfo] activeProcessorCount];
+}
 
-// Debug mode
-#if DEBUG
-#define GALAH_DEBUG 1
-#endif
+// Returns the advertised number of CPU cores.
+GUInt glh_hardware_getadvertisedprocessorcount()
+{
+    return (GUInt)[[NSProcessInfo processInfo] processorCount];
+}
 
-#define GALAH_FORCE_SAFEMODE 0
-
-#if GALAH_FORCE_SAFEMODE || GALAH_DEBUG
-#define GALAH_SAFEMODE 1
-#endif
-
-// Thread
-#define GALAH_THREAD_JOBBUFFER_SIZE 8
-#define GALAH_THREAD_THREADCOUNTPERPROCESSOR 32
-#define GALAH_THREADMANAGER_NEWJOBBUFFER_SIZE 32
-
-#endif
+#endif /* Hardware_h */

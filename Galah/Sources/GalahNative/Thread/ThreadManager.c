@@ -1,8 +1,8 @@
-//---- Galah Engine---------------------------------------------------------//
+//---- Galah Engine --------------------------------------------------------//
 //
 // This source file is part of the Galah open source game engine.
 //
-// Copyright © 2020, 2021, the Galah contributors.
+// Copyright © 2020 - 2022, the Galah contributors.
 //
 // Licensed under the MIT Licence.
 //
@@ -12,7 +12,6 @@
 //
 // galah-engine.org | https://github.com/forbiddencactus/Galah
 //--------------------------------------------------------------------------//
-// Typealias for swift pointers for less typing.
+// A circular buffer for our thread manager.
 
-public typealias Ptr<T> = UnsafeMutablePointer<T>;
-public typealias VoidPtr = UnsafeMutableRawPointer;
+#include "Thread/ThreadManager.h"

@@ -19,8 +19,14 @@ import GalahNative.Thread;
 internal struct Semaphore
 {
     private var count: GVolatileUInt = 0;
+    let max: UInt;
     
-    public mutating func Enter(max: Int)
+    init(_ max: UInt)
+    {
+        self.max = max;
+    }
+    
+    public mutating func Enter()
     {
         var swapSuccess = false;
         while(!swapSuccess)

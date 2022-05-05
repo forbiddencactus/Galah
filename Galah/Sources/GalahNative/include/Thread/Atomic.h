@@ -37,8 +37,14 @@ void glh_atomic_set_bool(GVolatileBool* obj, bool set);
 // Atomically returns the value of obj.
 bool glh_atomic_fetch_bool(GVolatileBool* obj);
                             
-// Sets the value of the int obj to the value of set.
+// Atomically sets the value of the int obj to the value of set.
+void glh_atomic_set_uint32(GVolatileUInt32* obj, GUInt32 set);
+
+// Atomically sets the value of the int obj to the value of set.
 void glh_atomic_set_uint64(GVolatileUInt64* obj, GVolatileUInt64 set);
+
+// Atomically returns the value of obj.
+GVolatileUInt32 glh_atomic_fetch_uint32(GVolatileUInt32* obj);
 
 // Atomically returns the value of obj.
 GVolatileUInt64 glh_atomic_fetch_uint64(GVolatileUInt64* obj);

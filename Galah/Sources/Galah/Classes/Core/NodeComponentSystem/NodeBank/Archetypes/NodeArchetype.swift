@@ -40,12 +40,14 @@ internal struct NodeArchetype
     }
     
     // Adds a node and its components to the archetype, and updates the node.
-    internal mutating func AddNode(nodeID: NodeID, components: Array<Component>) -> NodeLocation
+    internal mutating func AddNode(nodeID: NodeID, components: Array<Component>, nodeData: NodeData) -> NodeLocation
     {
         var node = Node(nodeID: nodeID);
         let nodeIndex = try! Nodes.Add(&node);
-        var theNodeData = NodeData();
+        var theNodeData = nodeData;
         let dataIndex = try! NodeDatas.Add(&theNodeData);
+        var theComponentData = ComponentData();
+        _ = try! ComponentDatas.Add(&theComponentData);
         assert(dataIndex == nodeIndex, "NodeIndex and Data index should be the same!")
                 
         for component in components
@@ -191,7 +193,7 @@ internal struct NodeArchetype
     {
         let componentType = ComponentType(componentBuffer.ElementType as! Component.Type);
         var prevNodeID: NodeID = NodeID();
-        var nodeCount: UInt = 0;
+        var occurenceCount: Int = 0;
         for index in 0..<componentBuffer.Count
         {
             let componentPtr: Ptr<Component> = try! componentBuffer.PtrAt(UInt(index));
@@ -201,15 +203,15 @@ internal struct NodeArchetype
             if(prevNodeID != nodeID)
             {
                 prevNodeID = nodeID;
-                nodeCount = 0;
+                occurenceCount = 0;
             }
             let componentDataPtr = NodeHelpers.GetComponentData(nodeID);
-            let firstIndexForType = UInt(componentDataPtr.pointee.ComponentTypes.firstIndex(of: componentType)!);
+            let indexForOccurence = componentDataPtr.pointee.ComponentTypes.IndexForElementOccurence(element: componentType, occurence: occurenceCount)!;
 
-            componentDataPtr.pointee.ComponentArrayIndices[Int(firstIndexForType + nodeCount)] = index;
-            componentDataPtr.pointee.Components[Int(firstIndexForType + nodeCount)] = componentPtr;
+            componentDataPtr.pointee.ComponentArrayIndices[indexForOccurence] = index;
+            componentDataPtr.pointee.Components[indexForOccurence] = componentPtr;
             
-            nodeCount += 1;
+            occurenceCount += 1;
         }
     }
 }

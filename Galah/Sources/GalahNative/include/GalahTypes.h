@@ -56,6 +56,9 @@ typedef GUInt32 GUInt;
 typedef volatile GInt GVolatileInt;
 typedef volatile GUInt GVolatileUInt;
 typedef volatile bool GVolatileBool;
+typedef volatile GInt32 GVolatileInt32;
+typedef volatile GInt64 GVolatileInt64;
+typedef volatile GUInt32 GVolatileUInt32;
 typedef volatile GUInt64 GVolatileUInt64;
 
 #endif

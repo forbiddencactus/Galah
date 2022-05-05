@@ -33,7 +33,7 @@ internal class Box<T> where T: Boxable
     init(_ val: T)
     {
         value = val;
-        semaphore = Semaphore();
+        semaphore = Semaphore(1);
     }
     
     deinit
@@ -44,7 +44,7 @@ internal class Box<T> where T: Boxable
     // Checks to see if this box is uniquely referenced. Thread safe.
     public func IsUnique() -> Bool
     {
-        semaphore.Enter(max: 1);
+        semaphore.Enter();
         var theSelf = self;
         let isUnique = isKnownUniquelyReferenced(&theSelf);
         semaphore.Exit();
@@ -77,7 +77,7 @@ internal class Box<T> where T: Boxable
 
 internal protocol DeallocListener
 {
-    func Dealloc();
+    mutating func Dealloc();
 }
 
 // A more simple box that just keeps a dumb copy of its parent. The idea here is to run code on final dealloc.
@@ -90,7 +90,7 @@ internal class DeallocBox<T> where T: DeallocListener
     init(_ val: T)
     {
         value = val;
-        semaphore = Semaphore();
+        semaphore = Semaphore(1);
     }
     
     deinit
@@ -101,7 +101,7 @@ internal class DeallocBox<T> where T: DeallocListener
     // Checks to see if this box is uniquely referenced. Thread safe.
     public func IsUnique(_ toCheck: inout T) -> Bool
     {
-        semaphore.Enter(max: 1);
+        semaphore.Enter();
         var theSelf = self;
         let isUnique = isKnownUniquelyReferenced(&theSelf);
         semaphore.Exit();

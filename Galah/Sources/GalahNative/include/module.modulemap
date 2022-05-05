@@ -40,4 +40,10 @@ module GalahNative
         umbrella "Thread"
         export *
     }
+    
+    module Hardware
+    {
+        umbrella "Hardware"
+        export *
+    }
 }

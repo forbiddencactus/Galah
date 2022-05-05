@@ -12,29 +12,17 @@
 //
 // galah-engine.org | https://github.com/forbiddencactus/Galah
 //--------------------------------------------------------------------------//
-// Some constants.
+// A circular buffer for our thread manager.
 
-#ifndef galah_nativetypes_constants
-#define galah_nativetypes_constants
+#ifndef ThreadManager_h
+#define ThreadManager_h
+#include "Thread/Thread.h"
 
-#ifndef GSETTINGS_CONSTANTS_DEFAULTBUFFERCAPACITY
-#define GSETTINGS_CONSTANTS_DEFAULTBUFFERCAPACITY 16
-#endif
-
-// Debug mode
-#if DEBUG
-#define GALAH_DEBUG 1
-#endif
-
-#define GALAH_FORCE_SAFEMODE 0
-
-#if GALAH_FORCE_SAFEMODE || GALAH_DEBUG
-#define GALAH_SAFEMODE 1
-#endif
-
-// Thread
-#define GALAH_THREAD_JOBBUFFER_SIZE 8
-#define GALAH_THREAD_THREADCOUNTPERPROCESSOR 32
-#define GALAH_THREADMANAGER_NEWJOBBUFFER_SIZE 32
+typedef struct
+{
+    GJob* job[GALAH_THREADMANAGER_NEWJOBBUFFER_SIZE]; // Shared by both.
+    GVolatileUInt writeIndex; // Owned by main thread.
+    GVolatileUInt readIndex; // Owned by thread.
+}GJobManagerBuffer;
 
 #endif

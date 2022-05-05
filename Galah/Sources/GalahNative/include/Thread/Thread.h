@@ -26,6 +26,7 @@ typedef struct
     glh_thread_function job;
     void* jobArg;
     void* threadData;
+    GUInt64 jobID;
     GVolatileBool isComplete;
 } GJob;
 
@@ -34,7 +35,6 @@ typedef struct
     GJob* job[GALAH_THREAD_JOBBUFFER_SIZE]; // Shared by both.
     GVolatileUInt writeIndex; // Owned by main thread.
     GVolatileUInt readIndex; // Owned by thread.
-
 }GJobBuffer;
 
 typedef struct
@@ -57,13 +57,16 @@ int glh_thread_create(GThread* thread);
 // Sets the job to the specified thread and wakes the thread.
 bool glh_thread_addjob(GThread* thread, GJob* job);
 
+// Returns true if the thread has space in its job buffer for a job.
+bool glh_thread_canaddjob(GThread* thread);
+
 // Gets the thread id of the thread this function is called from. 
 GThreadID glh_thread_getid();
 
 // Returns the pointer at _Thread_local void* threadData, which gets initialised from the Job data. 
 void* glh_thread_getthreaddata();
 
-// Kills the thread.
-void glh_thread_killthread(GThread* thread);
+// Kills the thread. If clearThread is true, it also wipes the thread struct clean.
+void glh_thread_killthread(GThread* thread, bool clearThread);
 
 #endif

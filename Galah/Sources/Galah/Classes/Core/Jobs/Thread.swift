@@ -16,19 +16,27 @@
 
 import GalahNative.Thread;
 
-internal struct Thread
+internal struct Thread: DeallocListener
 {
-    private var internalThread: GThread;
+    var internalThread: GThread;
+    private var deallocListener: DeallocBox<Thread>? = nil;
     
     init()
     {
         internalThread = GThread();
         glh_thread_create(&internalThread);
+        
+        deallocListener = DeallocBox(self);
     }
     
     internal mutating func AddJob(job: inout Job) -> Bool
     {
         return glh_thread_addjob(&internalThread, &job.job);
+    }
+    
+    mutating func Dealloc()
+    {
+        glh_thread_killthread(&internalThread, true);
     }
     
 }

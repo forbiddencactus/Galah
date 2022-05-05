@@ -2,7 +2,7 @@
 //
 // This source file is part of the Galah open source game engine.
 //
-// Copyright © 2020, 2021, the Galah contributors.
+// Copyright © 2020 - 2022, the Galah contributors.
 //
 // Licensed under the MIT Licence.
 //
@@ -12,21 +12,28 @@
 //
 // galah-engine.org | https://github.com/forbiddencactus/Galah
 //--------------------------------------------------------------------------//
-// Director is the root 'manager' singleton for the engine. 
+// A circular buffer allocated on the heap containing elements of a particular type.
 
 import GalahNative.Types;
-import GalahNative.Thread
 
-public class Director
+internal struct CircularBuffer<T>
 {
-    public static let sharedInstance: Director = Director();
-    public let mainThreadID = glh_thread_getid();
     
+    // Circular buffer.
+    let buffer: Ptr<T>;
+    var readIndex: GVolatileUInt = 0;
+    var writeIndex: GVolatileUInt = 0;
     
-    // Node management...
-    internal var nodeBank: NodeBank = NodeBank();
-    internal var componentTypeBank: ComponentTypeBank = ComponentTypeBank();
+    init(capacity: UInt)
+    {
+        buffer = Ptr<T>.allocate(capacity: Int(capacity));
+    }
     
-    // Jobs
-    internal var jobManager: JobManager = JobManager();
+    mutating func AddJob(_ job: Job)
+    {
+        
+    }
+    
+    //mutating func GetJob() -> Job?
+
 }
