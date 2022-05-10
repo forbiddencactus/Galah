@@ -16,19 +16,21 @@
 
 import GalahNative.Thread;
 
-public struct Job
+public struct JobHandle
 {
-    private static var idBank = LocklessIDBank();
+    let jobID: GJobID;
+    let frameNumber: UInt32;
+}
 
-    public typealias JobID = UInt64;
-    public typealias Function = glh_thread_function;
-    public typealias CompletionCallback = (JobID) -> ();
+internal struct Job
+{
+    typealias Function = glh_thread_function;
+    typealias CompletionCallback = glh_job_callback;
     
     var job: GJob;
         
-    public init(function: @escaping Job.Function, jobArg: VoidPtr?, threadData: VoidPtr? = nil)
+    internal init(job: GJob)
     {
-        let id = Job.idBank.Pop();
-        job = GJob(job: function, jobArg: jobArg, threadData: threadData, jobID: id, isComplete: false);
+        self.job = job;
     }
 }

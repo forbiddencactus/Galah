@@ -12,17 +12,24 @@
 //
 // galah-engine.org | https://github.com/forbiddencactus/Galah
 //--------------------------------------------------------------------------//
-// A circular buffer for our thread manager.
+// C side of our thread manager.
 
 #ifndef ThreadManager_h
 #define ThreadManager_h
 #include "Thread/Thread.h"
 
+
 typedef struct
 {
-    GJob* job[GALAH_THREADMANAGER_NEWJOBBUFFER_SIZE]; // Shared by both.
-    GVolatileUInt writeIndex; // Owned by main thread.
-    GVolatileUInt readIndex; // Owned by thread.
-}GJobManagerBuffer;
+    volatile GJob* jobBuffer;
+    GVolatileUInt16 capacity;
+    GVolatileUInt16 count;
+}GJobManagerJobList;
+
+// Inits and allocs the buffer for the job list. Returns true if successful.
+bool glh_threadmanager_initjoblist(GJobManagerJobList* jobList);
+
+// Copies the specified job into the job list and returns its job id.
+GJobID glh_threadmanager_initjob(GJobManagerJobList* jobList, const GJobData* jobData);
 
 #endif

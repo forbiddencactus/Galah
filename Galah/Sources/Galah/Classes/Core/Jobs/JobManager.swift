@@ -20,13 +20,15 @@ import GalahNative.Thread;
 
 public struct JobManager
 {
+    // Shared ownership.
+    var jobBuffer: GJobBuffer = GJobBuffer();
+    var newQueuedJobBuffer: GJobBuffer = GJobBuffer();
+    var jobList: GJobManagerJobList = GJobManagerJobList();
+
+    
     // Owned by Job Thread.
     var threadPool: ContiguousArray<Thread>;
-    var jobPool: ContiguousArray<Job>;
-    var jobsInFlight: ContiguousArray<Job>;
-    var completedJobs: ContiguousArray<Job>;
-    var newJobBuffer: GJobManagerBuffer = GJobManagerBuffer();
-    // End owned by Job Thread.
+    var queuedJobs: Array<Ptr<Job>> = Array<Ptr<Job>>();
     
     private var JobThreadShouldBeActive: GVolatileBool = true;
     
@@ -64,29 +66,26 @@ public struct JobManager
     }
     
     // Thread safe. Adds a job to the queue. This job will be added onto a thread's job queue and executed when the thread gets to it.
-    public mutating func AddJob(job: Job) -> Job.JobID
+    internal mutating func AddJob(job: Job) -> JobHandle
     {
-        return Job.JobID.max;
+        return JobHandle(jobID: 0, frameNumber: 0);
     }
     
     // Main Thread: Instantiates the JobManager.
     internal init()
     {
         threadPool = ContiguousArray<Thread>();
-        jobPool = ContiguousArray<Job>();
-        jobsInFlight = ContiguousArray<Job>();
-        completedJobs = ContiguousArray<Job>();
-
-
         
+        glh_thread_clearjobbuffer(&jobBuffer);
+        glh_thread_clearjobbuffer(&newQueuedJobBuffer);
+        glh_threadmanager_initjoblist(&jobList);
+
         let threadPoolSize = GetThreadPoolSize();
         threadPool.reserveCapacity(threadPoolSize);
-        jobsInFlight.reserveCapacity(threadPoolSize);
-        jobPool.reserveCapacity(threadPoolSize);
         
         for _ in 0..<threadPoolSize
         {
-            threadPool.append(Thread());
+            threadPool.append(Thread(jobBuffer: &jobBuffer));
         }        
     }
     
@@ -119,31 +118,21 @@ public struct JobManager
             threadPool.reserveCapacity(threadPoolSize);
             for _ in 0..<(threadPoolSize - threadPool.count)
             {
-                threadPool.append(Thread());
+                threadPool.append(Thread(jobBuffer: &jobBuffer));
             }
         }
         else if(threadPoolSize < threadPool.count)
         {
             for index in (threadPool.count - threadPoolSize)..<(threadPool.count - 1)
             {
-                var thread: Ptr<Thread> = unsafeBitCast(threadPool[index], to: Ptr<Thread>.self);
+                let thread: Ptr<Thread> = unsafeBitCast(threadPool[index], to: Ptr<Thread>.self);
                 if(thread.pointee.internalThread.isRunning)
                 {
                     // We need to rescue any enqueued jobs before we wipe the thread.
                     
-                    // Kill the thread without wiping it.
+                    // Kill the thread.
                     // This will stall this thread while it waits for its last job to complete.
-                    glh_thread_killthread(&thread.pointee.internalThread, false);
-                    
-                    // At this point the thread should be merged in. Any data left in the job buffers can be considered unprocessed.
-                    for index in 0..<Int(GALAH_THREAD_JOBBUFFER_SIZE)
-                    {
-                        let jobBuffer: Ptr<Ptr<GJob>> = unsafeBitCast(thread.pointee.internalThread.jobBuffer.job, to: Ptr<Ptr<GJob>>.self);
-                        let jobID = jobBuffer.advanced(by: index).pointee.pointee.jobID;
-                        
-                        assertionFailure(); // Todo finish. 
-                    }
-                    
+                    glh_thread_killthread(&thread.pointee.internalThread, true);
                 }
             }
         }

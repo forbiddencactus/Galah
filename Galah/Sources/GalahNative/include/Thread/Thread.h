@@ -18,31 +18,40 @@
 #define Thread_h
 #include "GalahNative.h"
 
-typedef void (*glh_thread_function)(void*);
 typedef GUInt GThreadID;
+typedef GUInt16 GJobID;
+typedef void (*glh_thread_function)(void*);
+typedef void (*glh_job_callback)(GJobID,void*);
 
 typedef struct
 {
     glh_thread_function job;
+    glh_job_callback jobFinishedCallback;
     void* jobArg;
+    void* jobCallbackArg;
     void* threadData;
-    GUInt64 jobID;
+} GJobData;
+
+typedef struct
+{
+    GJobData jobData;
+    GJobID jobID;
     GVolatileBool isComplete;
 } GJob;
 
 typedef struct
 {
-    GJob* job[GALAH_THREAD_JOBBUFFER_SIZE]; // Shared by both.
-    GVolatileUInt writeIndex; // Owned by main thread.
-    GVolatileUInt readIndex; // Owned by thread.
+    volatile GJob* job[GALAH_THREAD_JOBBUFFER_SIZE]; // Shared by both.
+    GVolatileUInt32 writeIndex; // Shared
+    GVolatileUInt32 readIndex; // Shared
 }GJobBuffer;
 
 typedef struct
 {
-    void* nativethreadptr; // Owned by main. 
-    GJobBuffer jobBuffer; // Shared.
+    void* nativethreadptr; // Owned by thread.
+    GJobBuffer* jobBuffer; // Shared.
     GVolatileBool isRunning; // Owned by thread.
-    GVolatileBool shouldExit; // Owned by main thread.
+    GVolatileBool shouldExit; // Shared.
     GVolatileUInt threadIndex; // Owned by thread. Set once during creation. 
 } GThread;
 
@@ -52,7 +61,19 @@ typedef struct
  */
  
 // Initialises the GThread pointed to by *thread. Thread will autosleep when it has no work. 
-int glh_thread_create(GThread* thread);
+int glh_thread_create(GThread* thread, GJobBuffer* jobBuffer);
+
+// Returns an empty jobdata struct. 
+GJobData glh_thread_getemptydata();
+
+// Clears the specified job data struct.
+void glh_thread_job_cleardata(GJobData* jobData);
+
+// Clears the supplied job buffer.
+void glh_thread_clearjobbuffer(GJobBuffer* jobBuffer);
+
+// Clears the specified job struct.
+void glh_thread_job_clear(GJob* job);
 
 // Sets the job to the specified thread and wakes the thread.
 bool glh_thread_addjob(GThread* thread, GJob* job);

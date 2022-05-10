@@ -12,14 +12,16 @@
 //
 // galah-engine.org | https://github.com/forbiddencactus/Galah
 //--------------------------------------------------------------------------//
-// Console stuff.
+// Debug stuff.
 
-#include "Console/Console.h"
+#ifndef Debug_h
+#define Debug_h
+
 #include "GalahNative.h"
 
 
-void log_warning(const char *format, ...)
-{
-    // TODO: this is wrong. 
-    printf(format);
-}
+void glh_debug_log_warning(const char *format, ...);
+
+void glh_debug_assert(bool expression);
+
+#endif 

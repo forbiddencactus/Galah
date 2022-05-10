@@ -1,8 +1,8 @@
 module GalahNative
 {
-    module Console
+    module Debug
     {
-        umbrella "Console"
+        umbrella "Debug"
         export *
     }
     module Memory

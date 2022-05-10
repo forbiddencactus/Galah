@@ -27,20 +27,45 @@
 #include "Thread/Atomic.h"
 #include <stdatomic.h>
 
+
+// Stores contents of val into ptr, and stores previous contents of ptr into ret.
+void glh_atomic_exchange_ptr(GVolatileVoidPtr** ptr, GVolatileVoidPtr** val, GVolatileVoidPtr** ret)
+{
+    __atomic_exchange(ptr,val,ret,__ATOMIC_SEQ_CST);
+}
+
 // Compare and swap.
-bool glh_compare_and_swap_uint(GVolatileUInt* ptr, GUInt old, GVolatileUInt new)
+bool glh_atomic_compare_and_swap_uint(GVolatileUInt* ptr, GUInt old, GVolatileUInt new)
 {
     return __atomic_compare_exchange(ptr, &old, &new, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
 }
 
-bool glh_compare_and_swap_uint64(GVolatileUInt64* ptr, GUInt64 old, GVolatileUInt64 new)
+bool glh_atomic_compare_and_swap_uint64(GVolatileUInt64* ptr, GUInt64 old, GVolatileUInt64 new)
 {
     return __atomic_compare_exchange(ptr, &old, &new, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
 }
 
-bool glh_compare_and_swap_bool(GVolatileBool* ptr, bool old, bool new)
+bool glh_atomic_compare_and_swap_bool(GVolatileBool* ptr, bool old, bool new)
 {
     return __atomic_compare_exchange(ptr, &old, &new, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
+}
+
+// Adds the add amount to the specified object. Returns the result.
+GUInt glh_atomic_add_uint(GVolatileUInt* obj, GUInt add)
+{
+    return __atomic_add_fetch(obj, add, __ATOMIC_SEQ_CST);
+}
+
+// Adds the add amount to the specified object. Returns the result.
+GUInt16 glh_atomic_add_uint16(GVolatileUInt16* obj, GUInt16 add)
+{
+    return __atomic_add_fetch(obj, add, __ATOMIC_SEQ_CST);
+}
+
+// Adds the add amount to the specified object. Returns the result.
+GUInt32 glh_atomic_add_uint32(GVolatileUInt32* obj, GUInt32 add)
+{
+    return __atomic_add_fetch(obj, add, __ATOMIC_SEQ_CST);
 }
 
 // Adds the add amount to the specified object. Returns the result.
@@ -64,6 +89,12 @@ bool glh_atomic_fetch_bool(GVolatileBool* obj)
 }
 
 // Sets the value of the int obj to the value of set.
+void glh_atomic_set_uint16(GVolatileUInt16* obj, GUInt16 set)
+{
+    __atomic_store(obj, &set, __ATOMIC_SEQ_CST);
+}
+
+// Sets the value of the int obj to the value of set.
 void glh_atomic_set_uint32(GVolatileUInt32* obj, GUInt32 set)
 {
     __atomic_store(obj, &set, __ATOMIC_SEQ_CST);
@@ -73,6 +104,21 @@ void glh_atomic_set_uint32(GVolatileUInt32* obj, GUInt32 set)
 void glh_atomic_set_uint64(GVolatileUInt64* obj, GUInt64 set)
 {
     __atomic_store(obj, &set, __ATOMIC_SEQ_CST);
+}
+
+// Atomically sets the value of the ptr to the value of set.
+void glh_atomic_set_ptr(GVolatileVoidPtr** obj, GVolatileVoidPtr* set)
+{
+    __atomic_store(obj, &set, __ATOMIC_SEQ_CST);
+
+}
+
+// Atomically returns the value of obj.
+GVolatileUInt16 glh_atomic_fetch_uint16(GVolatileUInt16* obj)
+{
+    GUInt16 retVal;
+    __atomic_load(obj, &retVal, __ATOMIC_SEQ_CST);
+    return retVal;
 }
 
 // Atomically returns the value of obj.
@@ -102,6 +148,14 @@ void glh_atomic_set_uint(GVolatileUInt* obj, GVolatileUInt set)
 GVolatileUInt glh_atomic_fetch_uint(GVolatileUInt* obj)
 {
     GUInt retVal;
+    __atomic_load(obj, &retVal, __ATOMIC_SEQ_CST);
+    return retVal;
+}
+
+// Atomically returns the value of obj.
+GVolatileVoidPtr* glh_atomic_fetch_ptr(GVolatileVoidPtr** obj)
+{
+    GVolatileVoidPtr* retVal;
     __atomic_load(obj, &retVal, __ATOMIC_SEQ_CST);
     return retVal;
 }

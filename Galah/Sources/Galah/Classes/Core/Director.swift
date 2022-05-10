@@ -22,6 +22,13 @@ public class Director
     public static let sharedInstance: Director = Director();
     public let mainThreadID = glh_thread_getid();
     
+    // Frame Count
+    private var _frameCount: GVolatileUInt32 = 0;
+    public var FrameCount: UInt32
+    {
+        get { return _frameCount; }
+    }
+    
     
     // Node management...
     internal var nodeBank: NodeBank = NodeBank();

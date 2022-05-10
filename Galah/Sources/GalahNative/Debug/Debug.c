@@ -14,9 +14,17 @@
 //--------------------------------------------------------------------------//
 // Console stuff.
 
-#ifndef Console_h
-#define Console_h
+#include "Debug/Debug.h"
+#include "GalahNative.h"
+#include <assert.h>
 
-void log_warning(const char *format, ...);
+void log_warning(const char *format, ...)
+{
+    // TODO: this is wrong. 
+    printf(format);
+}
 
-#endif 
+void glh_debug_assert(bool expression)
+{
+    assert(expression);
+}

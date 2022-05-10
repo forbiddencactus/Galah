@@ -26,7 +26,7 @@
 // Galah Types...
 #include "GalahTypes.h"
 #include "Settings/Constants.h"
-#include "Console/Console.h"
+#include "Debug/Debug.h"
 
 
 #endif

@@ -21,10 +21,10 @@ internal struct Thread: DeallocListener
     var internalThread: GThread;
     private var deallocListener: DeallocBox<Thread>? = nil;
     
-    init()
+    init(jobBuffer: Ptr<GJobBuffer>)
     {
         internalThread = GThread();
-        glh_thread_create(&internalThread);
+        glh_thread_create(&internalThread, jobBuffer);
         
         deallocListener = DeallocBox(self);
     }

@@ -31,11 +31,11 @@ internal struct Semaphore
         var swapSuccess = false;
         while(!swapSuccess)
         {
-            let oldCount = count;
-            let newCount = count + 1;
+            let oldCount = glh_atomic_fetch_uint(&count);
+            let newCount = oldCount + 1;
             if(newCount <= max)
             {
-                swapSuccess = glh_compare_and_swap_uint(&count, oldCount, newCount);
+                swapSuccess = glh_atomic_compare_and_swap_uint(&count, oldCount, newCount);
             }
         }
     }
@@ -45,14 +45,14 @@ internal struct Semaphore
         var swapSuccess = false;
         while(!swapSuccess)
         {
-            let oldCount = count;
-            let newCount = count - 1;
+            let oldCount = glh_atomic_fetch_uint(&count);
+            let newCount = oldCount - 1;
             if(newCount < 0)
             {
                 fatalError("Semaphore was exited more times than it was entered!");
             }
             
-            swapSuccess = glh_compare_and_swap_uint(&count, oldCount, newCount);
+            swapSuccess = glh_atomic_compare_and_swap_uint(&count, oldCount, newCount);
         }
     }
 }
