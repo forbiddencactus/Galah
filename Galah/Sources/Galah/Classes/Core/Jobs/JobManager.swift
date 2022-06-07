@@ -24,7 +24,7 @@ public struct JobManager
     var jobBuffer = GJobBuffer(); // Circular buffer. Job threads execute jobs from here. Job thread adds jobs to here to dispatch.
     var dispatchedJobsBuffer = GJobBuffer(); // Newly dispatched jobs get added here.
     var dispatchedJobsOverflow = Array<Ptr<GJob>>(); // Job thread copies from dispatched buffer to here, if no free space on job buffer.
-    fileprivate var dispatchedDependentJobs = Array<JobDependentJob>(); // Jobs that are waiting on other jobs to dispatch.
+    var dispatchedDependentJobs = Array<Ptr<GJob>>(); // Jobs that are waiting on other jobs to dispatch.
     
     // This contains a pointer to a lockless, thread safe buffer where jobs are allocated.
     var jobManager: GJobManager = GJobManager();
@@ -82,7 +82,7 @@ public struct JobManager
     internal func GetJobPtr(jobID: GJobID)
     {
         let selfPtr = unsafeBitCast(self, to: Ptr<JobManager>.self);
-        glh_threadmanager_getjob(&selfPtr.pointee.jobManager, jobID);
+        glh_jobmanager_getjob(&selfPtr.pointee.jobManager, jobID);
     }
     
     // Returns the number of jobs spawned this frame, useful to check if a jobID is valid.
@@ -99,7 +99,7 @@ public struct JobManager
         
         glh_job_clearjobbuffer(&jobBuffer);
         glh_job_clearjobbuffer(&dispatchedJobsBuffer);
-        glh_threadmanager_initjobmanager(&jobManager);
+        glh_jobmanager_initjobmanager(&jobManager);
 
         let threadPoolSize = GetThreadPoolSize();
         threadPool.reserveCapacity(threadPoolSize);
@@ -125,11 +125,18 @@ public struct JobManager
         }
     }
     
-    // Pops the jobs from the dispatch buffer onto the job buffer or the overflow array.
+    // Pops the jobs from the dispatch buffer onto the job buffer or the overflow array. Checks the jobs with dependencies.
     internal mutating func PopDispatchBufferJobs()
     {
-        var popJobs = true;
+        for i in (dispatchedDependentJobs.count - 1)...0
+        {
+            if(glh_jobmanager_jobdependenciescomplete(&jobManager, dispatchedDependentJobs[i].pointee.jobID))
+            {
+                dispatchedJobsOverflow.append(dispatchedDependentJobs.remove(at: i));
+            }
+        }
         
+        var popJobs = true;
         while(popJobs)
         {
             let readIndex = glh_job_jobbuffer_increasereadindex(&dispatchedJobsBuffer);
@@ -137,7 +144,14 @@ public struct JobManager
             
             if( jobToPop != nil)
             {
-                dispatchedJobsOverflow.append(jobToPop)
+                if(glh_jobmanager_jobdependenciescomplete(&jobManager, jobToPop.pointee.jobID))
+                {
+                    dispatchedJobsOverflow.append(jobToPop);
+                }
+                else
+                {
+                    dispatchedDependentJobs.append(jobToPop);
+                }
             }
             else
             {

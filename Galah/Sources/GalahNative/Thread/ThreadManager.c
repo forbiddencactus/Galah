@@ -19,23 +19,23 @@
 #include "Thread/Atomic.h"
 #include "Debug/Debug.h"
 
-void glh_threadmanager_clearjobbuffer(GJobManager* jobManager)
+void glh_jobmanager_clearjobbuffer(GJobManager* jobManager)
 {
     jobManager->capacity = 0;
     jobManager->count = 0;
     jobManager->jobBuffer = NULL;
 }
 
-void glh_threadmanager_emptyjobbuffer(GJobManager* jobManager)
+void glh_jobmanager_emptyjobbuffer(GJobManager* jobManager)
 {
     jobManager->count = 0;
     glh_memset((void*)jobManager->jobBuffer, 0, sizeof(GJob) * jobManager->capacity);
 }
 
-bool glh_threadmanager_initjobmanager(GJobManager* jobManager)
+bool glh_jobmanager_initjobmanager(GJobManager* jobManager)
 {
-    glh_threadmanager_clearjobbuffer(jobManager);
-    jobManager->capacity = GALAH_THREAD_JOBBUFFER_SIZE;
+    glh_jobmanager_clearjobbuffer(jobManager);
+    jobManager->capacity = GALAH_JOB_JOBBUFFER_SIZE;
     
     jobManager->jobBuffer = glh_malloc(sizeof(GJob) * jobManager->capacity);
     jobManager->jobDependencies = glh_malloc(sizeof(GJobDependencies) * jobManager->capacity);
@@ -46,11 +46,11 @@ bool glh_threadmanager_initjobmanager(GJobManager* jobManager)
         return true;
     }
     
-    glh_threadmanager_clearjobbuffer(jobManager);
+    glh_jobmanager_clearjobbuffer(jobManager);
     return false;
 }
 
-GJobID glh_threadmanager_initjob(GJobManager* jobManager, GTask job, GTask jobComplete, void* threadData)
+GJobID glh_jobmanager_initjob(GJobManager* jobManager, GTask job, GTask jobComplete, void* threadData)
 {
     GUInt16 listCount = glh_atomic_add_uint16(jobManager->count, 1, GAtomicSeqCst);
     GUInt16 listCapacity = glh_atomic_fetch_uint16(jobManager->capacity, GAtomicSeqCst);
@@ -93,7 +93,31 @@ GJobID glh_threadmanager_initjob(GJobManager* jobManager, GTask job, GTask jobCo
 }
 
 // Returns a pointer to the specified job from its job ID.
-GJob* glh_threadmanager_getjob(GJobManager* jobManager, GJobID jobID)
+GJob* glh_jobmanager_getjob(GJobManager* jobManager, GJobID jobID)
 {
     return (GJob*)(jobManager->jobBuffer + jobID);
+}
+
+// Returns true if the specified job's job dependencies have finished running.
+bool glh_jobmanager_jobdependenciescomplete(GJobManager* jobManager, GJobID jobID)
+{
+    if(jobManager->count >= jobID) { return false; }
+    
+    if(jobID == 0) { return true; } // Job 0 can never have any dependencies.
+    
+    for(int i = 0; i < GALAH_JOB_DEPENDENCY_CAPACITY; i++)
+    {
+        GJobID idToCheck = (jobManager->jobDependencies + jobID)->jobDependencies[i];
+        
+        if( !(jobManager->jobBuffer + jobID)->isComplete) 
+        {
+            return false;
+        }
+        
+        if(idToCheck == 0)
+        {
+            // Assume this means we can early out from this loop. Make sure if there's a job zero, that it's always the last.
+            return true;
+        }
+    }
 }

@@ -54,7 +54,7 @@ void glh_job_clear(GJob* job)
 // Clears the supplied job buffer.
 void glh_job_clearjobbuffer(GJobBuffer* jobBuffer)
 {
-    for(int i = 0; i < GALAH_THREAD_JOBBUFFER_SIZE; i++)
+    for(int i = 0; i < GALAH_JOB_JOBBUFFER_SIZE; i++)
     {
         jobBuffer->job[i] = NULL;
     }
@@ -67,28 +67,28 @@ void glh_job_clearjobbuffer(GJobBuffer* jobBuffer)
 GUInt16 glh_job_jobbuffer_getreadindex(GJobBuffer* jobBuffer)
 {
     GUInt16 rawReadIndex = glh_atomic_fetch_uint16(&jobBuffer->readIndex, GAtomicSeqCst);
-    return rawReadIndex % GALAH_THREAD_JOBBUFFER_SIZE;
+    return rawReadIndex % GALAH_JOB_JOBBUFFER_SIZE;
 }
 
 // Returns the write index for this job buffer.
 GUInt16 glh_job_jobbuffer_getwriteindex(GJobBuffer* jobBuffer)
 {
     GUInt16 rawWriteIndex = glh_atomic_fetch_uint16(&jobBuffer->writeIndex, GAtomicSeqCst);
-    return rawWriteIndex % GALAH_THREAD_JOBBUFFER_SIZE;
+    return rawWriteIndex % GALAH_JOB_JOBBUFFER_SIZE;
 }
 
 // Increase the read index for this job buffer. Returns the increased read index.
 GUInt16 glh_job_jobbuffer_increasereadindex(GJobBuffer* jobBuffer)
 {
     GUInt16 rawReadIndex = glh_atomic_add_uint16(&jobBuffer->readIndex, 1, GAtomicSeqCst);
-    return rawReadIndex % GALAH_THREAD_JOBBUFFER_SIZE;
+    return rawReadIndex % GALAH_JOB_JOBBUFFER_SIZE;
 }
 
 // Increase the write index for this job buffer. Returns the increased write index.
 GUInt16 glh_job_jobbuffer_increasewriteindex(GJobBuffer* jobBuffer)
 {
     GUInt16 rawWriteIndex = glh_atomic_add_uint16(&jobBuffer->writeIndex, 1, GAtomicSeqCst);
-    return rawWriteIndex % GALAH_THREAD_JOBBUFFER_SIZE;
+    return rawWriteIndex % GALAH_JOB_JOBBUFFER_SIZE;
 }
 
 // Adds the job to the specified job buffer. Returns true if successful.
@@ -117,7 +117,7 @@ GJob* glh_job_jobbuffer_popjob(GJobBuffer* jobBuffer, GUInt16 readIndex)
 bool glh_job_canaddjob(GJobBuffer* jobBuffer)
 {
     GVolatileUInt rawWriteIndex = glh_atomic_fetch_uint16(&jobBuffer->writeIndex, GAtomicSeqCst);
-    GUInt writeIndex = rawWriteIndex % GALAH_THREAD_JOBBUFFER_SIZE;
+    GUInt writeIndex = rawWriteIndex % GALAH_JOB_JOBBUFFER_SIZE;
 
     if(glh_atomic_fetch_ptr((GVolatileVoidPtr**)&jobBuffer->job[writeIndex], GAtomicSeqCst) == NULL)
     {

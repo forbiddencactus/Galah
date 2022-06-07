@@ -32,8 +32,9 @@
 #define GALAH_SAFEMODE 1
 #endif
 
-// Thread
-#define GALAH_THREAD_JOBBUFFER_SIZE 32
-#define GALAH_THREAD_THREADCOUNTPERPROCESSOR 2
+// Threads and jobs.
+#define GALAH_JOB_JOBBUFFER_SIZE 32
+#define GALAH_JOB_DEPENDENCY_CAPACITY 20 // Number of dependencies a job can have. 
+#define GALAH_THREAD_THREADCOUNTPERPROCESSOR 1
 
 #endif

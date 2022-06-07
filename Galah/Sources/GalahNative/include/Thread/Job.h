@@ -41,7 +41,7 @@ typedef struct
 
 typedef struct
 {
-    volatile GJob* job[GALAH_THREAD_JOBBUFFER_SIZE]; // Shared by both.
+    volatile GJob* job[GALAH_JOB_JOBBUFFER_SIZE]; // Shared by both.
     GVolatileUInt16 writeIndex; // Shared
     GVolatileUInt16 readIndex; // Shared
 }GJobBuffer;

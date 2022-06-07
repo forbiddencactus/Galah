@@ -12,7 +12,7 @@
 //
 // galah-engine.org | https://github.com/forbiddencactus/Galah
 //--------------------------------------------------------------------------//
-// C side of our thread manager.
+// C side of our job manager.
 
 #ifndef ThreadManager_h
 #define ThreadManager_h
@@ -20,7 +20,7 @@
 
 typedef struct
 {
-    GJobID jobDependencies[20];
+    GJobID jobDependencies[GALAH_JOB_DEPENDENCY_CAPACITY];
 } GJobDependencies;
 
 typedef struct
@@ -32,15 +32,18 @@ typedef struct
 }GJobManager;
 
 // Inits and allocs the buffer for the job list. Returns true if successful.
-bool glh_threadmanager_initjobmanager(GJobManager* jobManager);
+bool glh_jobmanager_initjobmanager(GJobManager* jobManager);
 
 // Empties the job list of jobs at the end of the frame.
-void glh_threadmanager_emptyjobbuffer(GJobManager* jobManager);
+void glh_jobmanager_emptyjobbuffer(GJobManager* jobManager);
 
 // Copies the specified job into the job list and returns its job id.
-GJobID glh_threadmanager_initjob(GJobManager* jobManager, GTask job, GTask jobComplete, void* threadData);
+GJobID glh_jobmanager_initjob(GJobManager* jobManager, GTask job, GTask jobComplete, void* threadData);
 
 // Returns a pointer to the specified job from its job ID.
-GJob* glh_threadmanager_getjob(GJobManager* jobManager, GJobID jobID);
+GJob* glh_jobmanager_getjob(GJobManager* jobManager, GJobID jobID);
+
+// Returns true if the specified job's job dependencies have finished running. 
+bool glh_jobmanager_jobdependenciescomplete(GJobManager* jobManager, GJobID jobID);
 
 #endif
