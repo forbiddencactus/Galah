@@ -16,27 +16,76 @@
 
 import GalahNative.Thread;
 
-internal struct Thread: DeallocListener
+internal struct JobThread: DeallocListener
 {
-    var internalThread: GThread;
-    private var deallocListener: DeallocBox<Thread>? = nil;
+    fileprivate static var jobThreadCount: GVolatileUInt8 = 0;
+    var internalThread: GJobThread;
+    private var deallocListener: DeallocBox<JobThread>? = nil;
     
     init(jobBuffer: Ptr<GJobBuffer>)
     {
-        internalThread = GThread();
-        glh_thread_create(&internalThread, jobBuffer);
+        internalThread = GJobThread();
+        glh_job_createjobthread(&internalThread, JobThreadFunc, jobBuffer);
         
         deallocListener = DeallocBox(self);
     }
     
-    internal mutating func AddJob(job: inout Job) -> Bool
+    mutating func Wake()
     {
-        return glh_thread_addjob(&internalThread, &job.job);
+        glh_thread_wake(&internalThread.gThread);
     }
     
     mutating func Dealloc()
     {
-        glh_thread_killthread(&internalThread, true);
+        glh_job_killjobthread(&internalThread, true);
     }
     
+}
+
+fileprivate func JobThreadFunc(arg: VoidPtr?)
+{
+    let thread = arg!.assumingMemoryBound(to: GJobThread.self);
+
+    let theJobThreadCount = glh_atomic_add_uint8(&JobThread.jobThreadCount,1,GAtomicSeqCst);
+    
+    glh_thread_rename("JobThread " + String(theJobThreadCount));
+    
+    while(!thread.pointee.shouldExit)
+    {
+        glh_thread_setrunning(true);
+        
+        if( glh_atomic_fetch_bool(&thread.pointee.shouldRun, GAtomicSeqCst))
+        {
+            let readIndex = glh_job_jobbuffer_increasereadindex(thread.pointee.jobBuffer);
+            
+            let jobToExecute: Ptr<GJob>! = glh_job_jobbuffer_popjob(thread.pointee.jobBuffer, readIndex);
+            if( jobToExecute != nil)
+            {
+                if(glh_atomic_fetch_bool(&jobToExecute.pointee.isComplete,GAtomicSeqCst) == false)
+                {
+                    glh_thread_setthreaddata(jobToExecute.pointee.threadData); // Set the thread data.
+                    jobToExecute.pointee.job.task(jobToExecute.pointee.job.taskDataExistentialContainer.0); // Run the job.
+                    glh_atomic_set_bool(&jobToExecute.pointee.isComplete, true,GAtomicSeqCst); // Job has run, mark job complete.
+                    jobToExecute.pointee.jobFinished.task(&jobToExecute.pointee.jobFinished.taskDataExistentialContainer); // Run callback.
+                }
+
+            }
+            else
+            {
+                let writeIndex = glh_job_jobbuffer_getwriteindex(thread.pointee.jobBuffer);
+                if(readIndex == writeIndex)
+                {
+                    glh_thread_setrunning(false);
+                    glh_thread_sleep();
+                }
+            }
+        }
+        else
+        {
+            glh_thread_setrunning(false);
+            glh_thread_sleep();
+        }
+    }
+    
+    return;
 }

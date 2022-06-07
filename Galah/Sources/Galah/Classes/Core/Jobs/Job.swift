@@ -12,7 +12,7 @@
 //
 // galah-engine.org | https://github.com/forbiddencactus/Galah
 //--------------------------------------------------------------------------//
-// Jobs can be scheduled to run on separate threads through the JobPool.
+// Jobs can be scheduled to run on separate threads through the JobManager.
 
 import GalahNative.Thread;
 
@@ -20,6 +20,20 @@ public struct JobHandle
 {
     let jobID: GJobID;
     let frameNumber: UInt32;
+    
+    public var IsValid: Bool
+    {
+        get
+        {
+            let frameCount = Director.sharedInstance.FrameCount;
+            let jobCount = Director.sharedInstance.jobManager.GetJobSpawnedCount();
+            if ( (frameNumber == frameCount) && (jobID < jobCount))
+            {
+                return true;
+            }
+            return false;
+        }
+    }
 }
 
 internal struct Job

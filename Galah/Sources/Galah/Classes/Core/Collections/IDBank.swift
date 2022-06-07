@@ -55,7 +55,7 @@ internal struct LocklessIDBank
     
     mutating func Pop() -> UInt64
     {
-        return glh_atomic_add_uint64(&counter,1);
+        return glh_atomic_add_uint64(&counter,1,GAtomicSeqCst);
     }
 }
 

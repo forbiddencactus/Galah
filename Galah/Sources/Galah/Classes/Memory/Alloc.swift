@@ -44,12 +44,13 @@ internal func galah_placementNew(type: Any.Type, ptr: VoidPtr) throws -> AnyObje
     return unsafeBitCast(value, to: AnyObject.self);
 }
 
-internal func galah_copyValue(dest: UnsafeMutableRawPointer, source: UnsafeMutableRawPointer, type: Any.Type)
+// Returns a tuple pointing to a type's value witness table & metadata.
+internal func galah_getValueWitnessTable(type: Any.Type) -> (Ptr<ValueWitnessTable>?,VoidPtr?)
 {
     let kind = Kind(type: type)
     
-    var metadataPtr: UnsafeRawPointer? = nil;
-    var valueWitnessPtr: UnsafeMutablePointer<ValueWitnessTable>? = nil;
+    var metadataPtr: VoidPtr? = nil;
+    var valueWitnessPtr: Ptr<ValueWitnessTable>? = nil;
     switch kind
     {
         case .struct:
@@ -78,10 +79,24 @@ internal func galah_copyValue(dest: UnsafeMutableRawPointer, source: UnsafeMutab
             valueWitnessPtr = meta.valueWitnessTable;
             break;
         default:
-            break; // Do nothing?
+            assertionFailure("Unknown type.");
     }
     
-    _ = valueWitnessPtr!.pointee.assignWithCopy(dest, source, metadataPtr!);
+    return (valueWitnessPtr, metadataPtr);
+}
+
+// Copies a value into the specified pointer, this means the ref counter will increase the ref count of any refs contained in the value.
+internal func galah_copyValue(dest: VoidPtr, source: VoidPtr, type: Any.Type)
+{
+    let valueWitness = galah_getValueWitnessTable(type: type);
+    _ = valueWitness.0!.pointee.assignWithCopy(dest, source, valueWitness.1!);
+}
+
+// Copies a value from the specified (unmanaged) pointer, this means the ref counter will decrease the ref count of any refs contained in the value.
+internal func galah_takeValue(dest: VoidPtr, source: VoidPtr, type: Any.Type)
+{
+    let valueWitness = galah_getValueWitnessTable(type: type);
+    _ = valueWitness.0!.pointee.assignWithCopy(dest, source, valueWitness.1!);
 }
 
 internal func galah_runDestructor(obj: AnyObject)

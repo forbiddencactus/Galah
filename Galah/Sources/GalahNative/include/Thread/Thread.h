@@ -12,74 +12,44 @@
 //
 // galah-engine.org | https://github.com/forbiddencactus/Galah
 //--------------------------------------------------------------------------//
-// Wrapper around low level pointer libraries, for use in our higher level threads/jobs.
+// Wrapper around low level thread libraries, for use in our higher level threads/jobs.
 
 #ifndef Thread_h
 #define Thread_h
 #include "GalahNative.h"
 
 typedef GUInt GThreadID;
-typedef GUInt16 GJobID;
 typedef void (*glh_thread_function)(void*);
-typedef void (*glh_job_callback)(GJobID,void*);
-
-typedef struct
-{
-    glh_thread_function job;
-    glh_job_callback jobFinishedCallback;
-    void* jobArg;
-    void* jobCallbackArg;
-    void* threadData;
-} GJobData;
-
-typedef struct
-{
-    GJobData jobData;
-    GJobID jobID;
-    GVolatileBool isComplete;
-} GJob;
-
-typedef struct
-{
-    volatile GJob* job[GALAH_THREAD_JOBBUFFER_SIZE]; // Shared by both.
-    GVolatileUInt32 writeIndex; // Shared
-    GVolatileUInt32 readIndex; // Shared
-}GJobBuffer;
 
 typedef struct
 {
     void* nativethreadptr; // Owned by thread.
-    GJobBuffer* jobBuffer; // Shared.
     GVolatileBool isRunning; // Owned by thread.
-    GVolatileBool shouldExit; // Shared.
-    GVolatileUInt threadIndex; // Owned by thread. Set once during creation. 
-} GThread;
+    GVolatileUInt threadIndex; // Owned by thread. Set once during creation.
+    glh_thread_function func;
+    void* arg;
+} GThread; 
 
-/*
- * NOTE: This stuff is fairly minimalistic and relies on ownership to maintain thread safety.
- * Threads should only be owned by their spawning thread.
- */
- 
-// Initialises the GThread pointed to by *thread. Thread will autosleep when it has no work. 
-int glh_thread_create(GThread* thread, GJobBuffer* jobBuffer);
+// Clear thread. 
+void glh_thread_clear(GThread* thread);
 
-// Returns an empty jobdata struct. 
-GJobData glh_thread_getemptydata();
+// Initialises the GThread pointed to by *thread. Thread will auto destroy when it returns.
+int glh_thread_createthread(GThread* thread, glh_thread_function func, void* arg);
 
-// Clears the specified job data struct.
-void glh_thread_job_cleardata(GJobData* jobData);
+// Sends a wake signal to the specified sleeping thread. Returns true if success.
+bool glh_thread_wake(GThread* thread);
 
-// Clears the supplied job buffer.
-void glh_thread_clearjobbuffer(GJobBuffer* jobBuffer);
+// Sets the isRunning boolean in the thread you run this to the specified value.
+void glh_thread_setrunning(bool isRunning);
 
-// Clears the specified job struct.
-void glh_thread_job_clear(GJob* job);
+// Sleeps the thread this function is executed on.
+void glh_thread_sleep();
 
-// Sets the job to the specified thread and wakes the thread.
-bool glh_thread_addjob(GThread* thread, GJob* job);
+// Renames the thread with the specified name.
+void glh_thread_rename(const char* threadName);
 
-// Returns true if the thread has space in its job buffer for a job.
-bool glh_thread_canaddjob(GThread* thread);
+// Sets the thread data pointer for the thread this is called on to the specified pointer.
+void glh_thread_setthreaddata(void* newThreadData);
 
 // Gets the thread id of the thread this function is called from. 
 GThreadID glh_thread_getid();
@@ -87,7 +57,5 @@ GThreadID glh_thread_getid();
 // Returns the pointer at _Thread_local void* threadData, which gets initialised from the Job data. 
 void* glh_thread_getthreaddata();
 
-// Kills the thread. If clearThread is true, it also wipes the thread struct clean.
-void glh_thread_killthread(GThread* thread, bool clearThread);
 
 #endif

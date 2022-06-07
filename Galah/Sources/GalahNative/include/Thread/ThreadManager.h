@@ -16,20 +16,31 @@
 
 #ifndef ThreadManager_h
 #define ThreadManager_h
-#include "Thread/Thread.h"
+#include "Thread/Job.h"
 
+typedef struct
+{
+    GJobID jobDependencies[20];
+} GJobDependencies;
 
 typedef struct
 {
     volatile GJob* jobBuffer;
+    volatile GJobDependencies* jobDependencies;
     GVolatileUInt16 capacity;
     GVolatileUInt16 count;
-}GJobManagerJobList;
+}GJobManager;
 
 // Inits and allocs the buffer for the job list. Returns true if successful.
-bool glh_threadmanager_initjoblist(GJobManagerJobList* jobList);
+bool glh_threadmanager_initjobmanager(GJobManager* jobManager);
+
+// Empties the job list of jobs at the end of the frame.
+void glh_threadmanager_emptyjobbuffer(GJobManager* jobManager);
 
 // Copies the specified job into the job list and returns its job id.
-GJobID glh_threadmanager_initjob(GJobManagerJobList* jobList, const GJobData* jobData);
+GJobID glh_threadmanager_initjob(GJobManager* jobManager, GTask job, GTask jobComplete, void* threadData);
+
+// Returns a pointer to the specified job from its job ID.
+GJob* glh_threadmanager_getjob(GJobManager* jobManager, GJobID jobID);
 
 #endif

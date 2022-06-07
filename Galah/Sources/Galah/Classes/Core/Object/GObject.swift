@@ -15,6 +15,7 @@
 // An object which is manually managed by the Galah engine. Base object for most Galah things.
 
 import GalahNative;
+import GalahNative.Thread;
 
 internal typealias GIndex = UInt64;
 
@@ -73,7 +74,7 @@ open class GObject
     // BIG NOTE: Unfortunately I couldn't (yet) figure out a way to run init() using our custom allocation stuff.
     public required init()
     {
-        objectIndex = glh_atomic_add_uint64(&GObject.objectIndexCount, 1);
+        objectIndex = glh_atomic_add_uint64(&GObject.objectIndexCount, 1, GAtomicSeqCst);
     }
     
     deinit

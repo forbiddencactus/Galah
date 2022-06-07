@@ -19,52 +19,81 @@
 #include "Thread/Atomic.h"
 #include "Debug/Debug.h"
 
-void glh_threadmanager_clearjoblist(GJobManagerJobList* jobList)
+void glh_threadmanager_clearjobbuffer(GJobManager* jobManager)
 {
-    jobList->capacity = 0;
-    jobList->count = 0;
-    jobList->jobBuffer = NULL;
+    jobManager->capacity = 0;
+    jobManager->count = 0;
+    jobManager->jobBuffer = NULL;
 }
 
-bool glh_threadmanager_initjoblist(GJobManagerJobList* jobList)
+void glh_threadmanager_emptyjobbuffer(GJobManager* jobManager)
 {
-    glh_threadmanager_clearjoblist(jobList);
-    jobList->capacity = GALAH_THREAD_JOBBUFFER_SIZE;
+    jobManager->count = 0;
+    glh_memset((void*)jobManager->jobBuffer, 0, sizeof(GJob) * jobManager->capacity);
+}
+
+bool glh_threadmanager_initjobmanager(GJobManager* jobManager)
+{
+    glh_threadmanager_clearjobbuffer(jobManager);
+    jobManager->capacity = GALAH_THREAD_JOBBUFFER_SIZE;
     
-    jobList->jobBuffer = glh_malloc(sizeof(GJob) * jobList->capacity);
+    jobManager->jobBuffer = glh_malloc(sizeof(GJob) * jobManager->capacity);
+    jobManager->jobDependencies = glh_malloc(sizeof(GJobDependencies) * jobManager->capacity);
+
     
-    if(jobList->jobBuffer != NULL)
+    if(jobManager->jobBuffer != NULL)
     {
         return true;
     }
     
-    glh_threadmanager_clearjoblist(jobList);
+    glh_threadmanager_clearjobbuffer(jobManager);
     return false;
 }
 
-GJobID glh_threadmanager_initjob(GJobManagerJobList* jobList, const GJobData* jobData)
+GJobID glh_threadmanager_initjob(GJobManager* jobManager, GTask job, GTask jobComplete, void* threadData)
 {
-    GUInt16 listCount = glh_atomic_add_uint16(jobList->count, 1);
-    GUInt16 listCapacity = glh_atomic_fetch_uint16(jobList->capacity);
+    GUInt16 listCount = glh_atomic_add_uint16(jobManager->count, 1, GAtomicSeqCst);
+    GUInt16 listCapacity = glh_atomic_fetch_uint16(jobManager->capacity, GAtomicSeqCst);
     
     // We need to block here if the existing job buffer has run out. 
     while(listCount >= listCapacity)
     {
-        listCapacity = glh_atomic_fetch_uint16(jobList->capacity);
+        listCapacity = glh_atomic_fetch_uint16(jobManager->capacity, GAtomicSeqCst);
         
         // It is this thread's job to grow the buffer. All other jobs stall.
         if(listCount == listCapacity)
         {
             GUInt16 newCapacity = listCapacity * 2;
-            volatile GJob* oldBuffer = jobList->jobBuffer;
+            volatile GJob* oldBuffer = jobManager->jobBuffer;
+            volatile GJobDependencies* oldJobDependencies = jobManager->jobDependencies;
             
             volatile GJob* newBuffer = glh_malloc(sizeof(GJob) * newCapacity);
+            GJobDependencies* newJobDependencies = glh_malloc(sizeof(GJobDependencies) * newCapacity);
 
             glh_debug_assert(newBuffer != NULL);
-            glh_memcpy((void*)newBuffer, (void*)oldBuffer, listCapacity);
-            glh_atomic_set_ptr((GVolatileVoidPtr**)&jobList->jobBuffer, (GVolatileVoidPtr*)newBuffer);
-            glh_atomic_set_uint16(jobList->capacity, newCapacity);
+            glh_memcpy((void*)newBuffer, (void*)oldBuffer, sizeof(GJob) * listCapacity);
+            glh_memcpy((void*)newJobDependencies, (void*)oldJobDependencies, sizeof(GJobDependencies) * listCapacity);
+
+            glh_free((void*)oldBuffer);
+            glh_atomic_set_ptr((GVolatileVoidPtr**)&jobManager->jobBuffer, (GVolatileVoidPtr*)newBuffer, GAtomicSeqCst);
+            glh_atomic_set_uint16(&jobManager->capacity, newCapacity, GAtomicSeqCst);
         }
     }
+    
+    GJob newJob;
+    glh_job_clear(&newJob);
+    newJob.jobID = listCount;
+    newJob.job = job;
+    newJob.jobFinished = jobComplete;
+    newJob.threadData = threadData;
+    
+    glh_memcpy((void*)jobManager->jobBuffer + newJob.jobID, &newJob, sizeof(GJob));
+    
+    return newJob.jobID;
 }
 
+// Returns a pointer to the specified job from its job ID.
+GJob* glh_threadmanager_getjob(GJobManager* jobManager, GJobID jobID)
+{
+    return (GJob*)(jobManager->jobBuffer + jobID);
+}
